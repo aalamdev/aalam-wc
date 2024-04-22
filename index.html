@@ -3,11 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <style>
+    :root {--primary-color: red;}
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + Lit + TS</title>
-    <script type="module" src="/src/wc-switch.ts"></script>
+    <script type="module" src="/src/toggle-switch.ts"></script>
   </head>
   <body>
-    <wc-switch></wc-switch>
+    <aalam-switch id="switch" style="offcolor:#456;oncolor:#908;dialcolor:black;height:50px;width:100px"></aalam-switch>
+    <script>
+        console.log("El ", document.getElementById('switch'));
+    </script>
   </body>
 </html>

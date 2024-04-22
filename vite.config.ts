@@ -11,7 +11,7 @@ export default defineConfig({
       rollupOptions: {
           input: {
             'index': path.resolve(__dirname, "src/index.ts"),
-            'wc-switch': path.resolve(__dirname, "src/wc-switch.ts")
+            'toggle-switch': path.resolve(__dirname, "src/toggle-switch.ts")
           },
           output: [{
             format: 'esm',

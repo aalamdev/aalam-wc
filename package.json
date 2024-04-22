@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc --outDir dist && vite build",
+    "test": "wtr --config web-test-runner.config.js tests/* --node-resolve",
+    "test:watch": "wtr --config web-test-runner.config.js tests/* --node-resolve --watch",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -13,6 +15,10 @@
     "lit": "^3.1.2"
   },
   "devDependencies": {
+    "@open-wc/testing": "^3.0.0-next.5",
+    "@web/dev-server-esbuild": "^1.0.2",
+    "@web/test-runner": "^0.18.1",
+    "@web/test-runner-playwright": "^0.11.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
   }
