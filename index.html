@@ -1,19 +1,98 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <style>
-    :root {--primary-color: red;}
-    </style>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
-    <script type="module" src="/src/toggle-switch.ts"></script>
-  </head>
-  <body>
-    <aalam-switch id="switch" style="offcolor:#456;oncolor:#908;dialcolor:black;height:50px;width:100px"></aalam-switch>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aalam Suggestion Box </title>
+    <script type="module" src="./src/suggestion-box/SuggestionBox.ts"></script>
+</head>
+<style>
+  aalam-sgn-box{
+    display: flex;
+    justify-content: center;
+   align-items: center;
+   min-height: 50vh;
+  }
+  .container{
+    display: flex;
+  }
+  input{
+    width: 250px;
+    border-radius: 10px;
+    border: 2px solid #f5ff66;
+    height: 30px;
+    outline: none;
+    font-size: 20px;
+  }
+  .container p{
+    margin-left: 20px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .active{
+    background-color: rgb(252, 252, 154);
+    color: rgb(71, 78, 83);
+  }
+  .sgn-empty{
+    height: 200px;
+    margin-top: 7px;
+    width: 250px;
+    border-radius: 5px;
+    background-color: rgb(176, 238, 174);
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    color: gray;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  
+</style>
+
+<body>
+    <aalam-sgn-box id="sgnbox" highlight="matched">
+       <div class="div" slot="sgn-input">
+          <input   type="text" placeholder="search..."  />
+       </div>
+       <div  slot="sgn-item-template">
+        <div class="container " >
+        <p  name="name">{name}</p>
+        <p>{description}</p>
+      </div>
+       </div>
+       <div class="sgn-empty" slot="sgn-empty">
+        This is empty...
+       </div>
+    </aalam-sgn-box>
+
+
     <script>
-        console.log("El ", document.getElementById('switch'));
+
+      let el = document.getElementById("sgnbox")
+      el.addEventListener("loadmore",()=>{
+        loadmoreEntries(el);
+      })
+     
+      let ele =document.getElementById("sgnbox");
+      ele.addEventListener("input", () =>{
+        handleInput(ele);
+      })
+
+      async function handleInput(el) {
+        this.show_empty=false;
+        let res=[{name:"Ajay" , description:"21"}, {name:"vijay", description:"22"}];
+        el.setSuggestion(res,true,true);
+      }
+        
+      async function loadmoreEntries(el) {
+        
+        let res = [{name:"No one replce", description:"23"},{name:"harsha", description:"22"},{name:"aaa", description:"hahdh"},{name:"kskks",description:"god"},{name:"trwy",description:"teudyg"},
+
+      ];
+        el.appendSuggestion(res,false,true);
+      }
     </script>
-  </body>
+</body>
 </html>
