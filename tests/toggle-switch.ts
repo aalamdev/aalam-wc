@@ -42,8 +42,10 @@ describe('aalam-switch', () => {
             cur_status = event.detail});
         dial.click();
         expect(el.status).to.equal("on");
+        expect(cur_status).to.equal("on");
         dial.click();
         expect(el.status).to.equal("off");
+        expect(cur_status).to.equal("off");
     })
 });
 
