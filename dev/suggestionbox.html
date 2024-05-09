@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aalam Suggestion Box </title>
+    <script type="module" src="./src/suggestion-box/Suggestion-Box.ts"></script>
+</head>
+<style>
+  aalam-sgn-box {
+  display: inline-block;
+  width: 300px;
+  border: 1px solid #dfe1e5;
+  border-radius: 24px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+aalam-sgn-box::part(sgn-container) {
+  position:absolute;
+  top:100%;
+  max-height:500px;
+  width: 103%;
+  overflow:auto;
+  left:0;right:0;
+  border:1px solid #ddd;
+  border-top: none;
+  margin-top:8px;
+  margin-left: -5px;
+  border-radius: 10px;
+}
+aalam-sgn-box::part(sgn-loadmore)::after {
+ content: "loadmore";
+}
+aalam-sgn-box::part(sgn-loadmore) .active{
+  background-color: #f8fa9e;
+}
+.active {
+    background-color: #cf0c0c; /* Change to the desired background color */
+}
+
+aalam-sgn-box::part(sgn-loadmore):hover{
+  background-color: #f8fa9e;
+}
+aalam-sgn-box .inputbox {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+aalam-sgn-box input { 
+  flex: 1;
+  border: none;
+  outline: none;
+  width: 300px;
+  font-size: 16px;
+}
+aalam-sgn-box .sgn-container {
+  position: relative;
+  margin-top: 8px;
+  display: flex;
+}
+aalam-sgn-box .sgn-empty {
+  display: none;
+  padding: 8px 12px;
+  color: #757575;
+}
+aalam-sgn-box .sgn-container div {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+aalam-sgn-box .sgn-container div:hover {
+  background-color: #098dcf;
+}
+.active{
+  background-color: #f8fa9e;
+  border-radius: 10px;
+}
+.container{
+  display: flex;
+}
+.container p{
+  padding-left: 5px;
+}
+</style>
+<body>
+    <aalam-sgn-box id="sgnbox" highlight="matched">
+       <div class="div" slot="sgn-input">
+          <input type="text" placeholder="search..."  />
+       </div>
+       <div  slot="sgn-item-template">
+        <div class="container " >
+        <p  name="name">{name}</p>
+        <p>{description}</p>
+      </div>
+       </div>
+       <div class="sgn-empty" slot="sgn-empty">
+        This is empty...
+       </div>
+    </aalam-sgn-box>
+    <aalam-sgn-box id="sgnbox1" highlight="matched">
+      <div class="div" slot="sgn-input">
+         <input   type="text" placeholder="search..."  />
+      </div>
+      <div  slot="sgn-item-template">
+       <div class="container " >
+       <p  name="name">{name}</p>
+       <p>{description}</p>
+     </div>
+      </div>
+      <div class="sgn-empty" slot="sgn-empty">
+       This is empty...
+      </div>
+   </aalam-sgn-box>
+    <script>
+      let el_key="name";
+      let el_list=[
+        {
+          name:"thiruvarur",
+          description:"My native",
+        },
+        {
+          name:"coimbatore",
+          description:"Working place",
+        },
+        {
+          name:"chennai",
+          description:"dream location",
+        }
+      ]
+      let el = document.getElementById("sgnbox1");
+      el.list = el_list;
+      el.listkey = el_key;
+
+      let ele =document.getElementById("sgnbox");
+      ele.addEventListener("loadmore",()=>{
+        loadmoreEntries(ele);
+      })
+      ele.addEventListener("input", () =>{
+        handleInput(ele);
+      })
+      async function handleInput(ele) {
+        this.show_empty=false;
+        let res=[{name:"Ajay" , description:"21"}, {name:"vijay", description:"22"}];
+        ele.setSuggestion(res,true,true);
+      }
+      async function loadmoreEntries(ele) {
+        let res = [{name:"No one replce", description:"23"},{name:"harsha", description:"22"},{name:"aaa", description:"hahdh"},{name:"kskks",description:"god"},{name:"trwy",description:"teudyg"}];
+        ele.appendSuggestion(res,false,true);
+      }
+    </script>
+</body>
+</html>
