@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <style>
+    :root {--primary-color: red;}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Slider Demo</title>
+    <script type="module" src="../src/slider.ts"></script>
+    <style>
+        .width-1-4 {width:25%;}
+        .width-1-2 {width:50%;}
+        .width-1-3 {width:calc(100%/3);}
+        .panel {display: flow-root;position: relative;box-sizing: border-box;}
+        img {max-width:100%;height:auto;border-box:border-box;}
+        .position-center {position:absolute;top:50%;left:50%;transform: translate(-50%,-50%);}
+        .grid {display:grid;grid-template-columns: auto auto;gap:15px;}
+        @media (max-width:960px) {.grid {grid-template-columns: auto;}}
+        .grid > div {border: 1px solid #ddd;padding:15px;}
+        div {box-sizing:border-box;}
+        div.slider-container {width:100%;padding:15px;border:1px solid #000;position:relative;}
+        div.slider-container.center-mark::after {
+            position:absolute;left:50%;content:" ";border:1px solid red;top:0;bottom:0;
+        }
+        .guide-item {margin-right:10px;}
+        .guide-item:last-child{margin-right:0;}
+        .guide-item[data-active-ix="0"] > rect {fill:#000;}
+        .guide-item[data-active-ix="1"] > rect, .guide-item[data-active-ix="-1"] > rect {fill:#888;}
+        .guide-item[data-active-ix="2"] > rect, .guide-item[data-active-ix="-2"] > rect {fill:#ccc;}
+    </style>
+  </head>
+  <body>
+    <script>
+        class SliderExampleComponent extends HTMLElement {
+            _cont_el;
+            _sl_el;
+            _loop_inp;
+            _chooser_inp;
+            _autoplay_inp;
+            _sets_inp;
+            _center_inp;
+            _nav_guide_inp;
+
+            constructor() {
+                super();
+                this.shodowRoot = this.attachShadow({mode: 'open'});
+                this.shadowRoot.addEventListener("slotchange", (e) => {this.slotChangedEvent(e)});
+            }
+            connectedCallback() {
+                const template_el = document.createElement("template")
+                template_el.innerHTML = SliderExampleComponent.template();
+                this.shadowRoot.appendChild(template_el.content);
+
+                this._chooser_inp = this.shadowRoot.querySelector("#__chooser");
+                this._chooser_inp.addEventListener("change", e => this.slideChosen(e));
+
+                this._loop_inp = this.shadowRoot.querySelector("#__loop");
+                this._loop_inp.addEventListener("change", (e) => this.loopChanged(e));
+
+                this._autoplay_inp = this.shadowRoot.querySelector("#__autoplay");
+                this._autoplay_inp.addEventListener("change", (e) => this.autoplayChanged(e));
+
+                this._sets_inp = this.shadowRoot.querySelector("#__sets");
+                this._sets_inp.addEventListener("change", (e) => this.setsChanged(e));
+
+                this._center_inp = this.shadowRoot.querySelector("#__center");
+                this._center_inp.addEventListener("change", (e) => this.centerChanged(e));
+
+                this._nav_guide_inp = this.shadowRoot.querySelector("#__nav_guide");
+                this._nav_guide_inp.addEventListener("change", (e) => this.navGuideChanged(e));
+            }
+            slotChangedEvent(e) {
+                if (e.target.name == "sl_cont") {
+                    this._cont_el =  e.target.assignedElements()[0];
+                    this._sl_el = this._cont_el.querySelector("aalam-slider");
+                    for (let i = 0, atts = this._sl_el.attributes, n = atts.length; i < n; i++){
+                        let att = atts[i];
+                        if (att.nodeName == 'loop')
+                            this._loop_inp.checked = true;
+                        else if (att.nodeName == 'center') {
+                            this._center_inp.checked = true;
+                            this._cont_el.classList.add("center-mark");
+                        } else if (att.nodeName == 'sets')
+                            this._sets_inp.checked = true;
+                        else if (att.nodeName == 'autoslide')
+                            this._autoplay_inp.checked = true;
+                        else if (att.nodeName == 'noguide')
+                            this._nav_guide_inp.checked = true;
+                    }
+                    this._sl_el.addEventListener("itemshown", (e) => this._itemShownEvent(e));
+                }
+            }
+            loopChanged(e) {
+                if (this._loop_inp.checked)
+                    this._sl_el.setAttribute("loop", "true");
+                else
+                    this._sl_el.removeAttribute("loop");
+            }
+            autoplayChanged(e) {
+                if (this._autoplay_inp.checked)
+                    this._sl_el.setAttribute('autoslide', 'dur:2000');
+                else
+                    this._sl_el.removeAttribute('autoslide');
+            }
+            setsChanged(e) {
+                if (this._sets_inp.checked)
+                    this._sl_el.setAttribute("sets", "true");
+                else
+                    this._sl_el.removeAttribute("sets");
+            }
+            centerChanged(e) {
+                if (this._center_inp.checked) {
+                    this._cont_el.classList.add("center-mark");
+                    this._sl_el.setAttribute("center", "true");
+                } else {
+                    this._cont_el.classList.remove("center-mark");
+                    this._sl_el.removeAttribute("center");
+                }
+            }
+            navGuideChanged(e) {
+                if (this._nav_guide_inp.checked)
+                    this._sl_el.setAttribute("noguide", "true");
+                else
+                    this._sl_el.removeAttribute("noguide");
+            }
+            slideChosen(e) {
+                this._sl_el.show(parseInt(this._chooser_inp.value, 10) - 1);
+            }
+            _itemShownEvent(e) {
+                this._chooser_inp.value = this._sl_el.anchorindex + 1;
+            }
+            static template() {
+                return `<div>
+<slot name="sl_cont"></slot>
+<div style="margin-top:30px;">
+    <label>Choose Slide number</label>
+    <select id="__chooser">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+    </select>
+</div>
+<div>
+    <input type="checkbox" id="__autoplay"> Auto Play
+</div>
+<div>
+    <input type="checkbox" id="__loop"> Loop items
+</div>
+<div>
+    <input type="checkbox" id="__sets"> Move in sets
+</div>
+<div>
+    <input type="checkbox" id="__center"> Align center
+</div>
+<div>
+    <input type="checkbox" id="__nav_guide"> Hide nav guide
+</div>
+                `;
+            }
+        }
+        customElements.define("slider-example", SliderExampleComponent);
+    </script>
+    <div style="" class='grid'>
+    <div>
+        <h2>1. Slider (1/3, 1/2, 1/4, 1/4, 1/4) - custom guide</h2>
+        <slider-example>
+        <div class="slider-container" slot="sl_cont">
+            <aalam-slider id="slider1" loop gap="xs:10px;m:30px">
+                <div class="width-1-3" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=First" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>1</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-2" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Second" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>2</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Third" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>3</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fourth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>4</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fifth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>5</h1></div>
+                    </div>
+                </div>
+                <svg width="10" height="10" xmlns="http://www.w3.org/2000/svg" class="guide-item" slot="nav-guide-item">
+                  <rect width="10" height="10" x="0" y="0" rx="10" ry="10" fill="none" stroke="currentColor"/>
+                </svg>
+            </aalam-slider>
+        </div>
+        </slider-example>
+    </div> <!--- /end slider1 -->
+    <div>
+        <h2>2. Slider (1/4, 1/3, 1/2, 1/3, 1/4)</h2>
+        <slider-example>
+        <div class="slider-container" slot="sl_cont">
+            <aalam-slider gap="xs:10px;m:30px">
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=First" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>1</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-3" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Second" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>2</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-2" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Third" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>3</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-3" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fourth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>4</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fifth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>5</h1></div>
+                    </div>
+                </div>
+            </aalam-slider>
+        </div>
+        </slider-example>
+    </div> <!-- /end slider2 -->
+    <div>
+        <h2>3. Slider (1/4, 1/4, 1/2, 1/4, 1/4)</h2>
+        <slider-example>
+        <div class="slider-container" slot="sl_cont">
+            <aalam-slider loop center gap="xs:10px;m:30px">
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=First" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>1</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Second" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>2</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-2" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Third" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>3</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fourth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>4</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fifth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>5</h1></div>
+                    </div>
+                </div>
+            </aalam-slider>
+        </div>
+        </slider-example>
+    </div> <!-- /end slider3 -->
+    <div>
+        <h2>4. Slider (1/4, 1/2, 1/2, 1/4, 1/2)</h2>
+        <slider-example>
+        <div class="slider-container" slot="sl_cont">
+            <aalam-slider center gap="xs:9px;m:18px">
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=First" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>1</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-2" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Second" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>2</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-2" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Third" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>3</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fourth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>4</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-2" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fifth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>5</h1></div>
+                    </div>
+                </div>
+            </aalam-slider>
+        </div>
+        </slider-example>
+    </div> <!-- /end slider 4 -->
+    <div>
+        <h2>5. Slider (1/4, 1/4, 1/4, 1/4, 1/4)</h2>
+        <slider-example>
+        <div class="slider-container" slot="sl_cont">
+            <aalam-slider sets loop id="slider5" gap="xs:8px;m:30px">
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=First" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>1</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Second" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>2</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Third" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>3</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fourth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>4</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-4" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fifth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>5</h1></div>
+                    </div>
+                </div>
+            </aalam-slider>
+        </div>
+        </slider-example>
+    </div> <!-- /end slider5 -->
+    <div>
+        <h2>6. Slider (1/2, 1/3, 1/2, 1/3, 1/2)</h2>
+        <slider-example>
+        <div class="slider-container" slot="sl_cont">
+            <aalam-slider sets id="slider6" gap="xs:3px;s:10px;l:30px">
+                <div class="width-1-2" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=First" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>1</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-3" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Second" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>2</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-2" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Third" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>3</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-3" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fourth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>4</h1></div>
+                    </div>
+                </div>
+                <div class="width-1-2" slot="slide-item">
+                    <div class="panel">
+                        <img src="https://placehold.co/600x400?text=Fifth" width="600" height="400" alt="">
+                        <div class="position-center panel"><h1>5</h1></div>
+                    </div>
+                </div>
+            </aalam-slider>
+        </div>
+        </slider-example>
+    </div> <!-- /end slider5 -->
+    </div> <!-- /end grid -->
+  </body>
+</html>

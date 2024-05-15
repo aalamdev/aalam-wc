@@ -48,4 +48,3 @@ describe('aalam-switch', () => {
         expect(cur_status).to.equal("off");
     })
 });
-

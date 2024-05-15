@@ -11,7 +11,7 @@
     "emitDecoratorMetadata": true,
     "useDefineForClassFields": false,
     "skipLibCheck": true,
-
+    "strictPropertyInitialization": false,
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
