@@ -772,9 +772,9 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
         if (this.loop || !this.showing) {
             let ix = !this.center?this._coords.lt_ix:this._getCenterItem(dir);
             if (dir == 'R') {
-                return this._show(this._getSetIndex(ix), dir);
+                this._show(this._getSetIndex(ix), dir);
             } else if (dir == 'L') {
-                return this._show(this._getSetIndex(
+                this._show(this._getSetIndex(
                     ix == last_ix?(!this.loop?last_ix:0):(ix + 1)), dir);
             }
         }
@@ -814,6 +814,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                 return this._show(this.anchorindex + 1, 'L');
             }
         }
+        return null;
     }
     public prev() {
         log("prev - anchor ", this.anchorindex)
@@ -847,6 +848,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
             } else if (this.anchorindex > 0)
                 return this._show(this.anchorindex - 1, 'R');
         }
+        return null;
     }
     private _animationEndEvent() {
         this._animated_queue.shift();
@@ -937,7 +939,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                 }
                 this._updateActive();
                 this._startTimer();
-                resolve();
+                resolve(0);
             })
         })
         });
