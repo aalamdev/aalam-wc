@@ -6,11 +6,8 @@ import { AalamSliderElement } from "../src/slider";
 let getItemsInView = (el:AalamSliderElement) => {
     let got:number[] = [];
     let pr = el.getBoundingClientRect();
-    //console.error("GetItems - processing - ", new Date().getTime()/1000);
-    //console.error("parent rect ", pr, ", num items ", el.slide_items.length);
     for (let i = 0; i < el.slide_items.length; i++) {
         let ir = el.slide_items[i].getBoundingClientRect();
-        //console.log("i ", i, ", ir left ", ir.left, ", pr.right ", pr.right, ", ir.right ", ir.right, ", pr left ", pr.left);
         if (ir.left < pr.right && ir.right > pr.left) {
             got.push(i);
         }
@@ -22,7 +19,6 @@ let isItemInCenter = (el, ix) => {
     let center_x = el._getCenterX();
     let ir = el.slide_items[ix].getBoundingClientRect();
     let gap = parseInt(window.getComputedStyle(el.slide_items[ix]).paddingLeft || '0px', 10)
-    //console.error("center_x ", center_x, ", ir.left ", ir.left, ", gap ", gap, ", client width ", el.slide_items[ix].clientWidth/2)
     return center_x == ir.left + gap/2 + el.slide_items[ix].clientWidth/2
 }
 
@@ -328,13 +324,13 @@ describe('aalam-slider', () => {
         })
 
         try {
-        mock_control['stopat'] = 2;
+        mock_control['stopat'] = 1;
         el.autoslide = "dur:2000;onhover:pause";
         await requestAnimationFrame(() => {});
         await new Promise((resolve) => {original_tmout(() => {resolve()}, 50)});
 
-        expect(mock_control['count']).to.equal(2);
-        expect([0,2,3,4]).to.have.deep.members(getItemsInView(el).sort());
+        expect(mock_control['count']).to.equal(1);
+        expect([1,2,3]).to.have.deep.members(getItemsInView(el).sort());
 
         /*TODO: Findout a way to test the onhover behaviour as well*/
         } finally {
@@ -415,11 +411,11 @@ describe('aalam-slider', () => {
         await sendMouse({type: 'move', position: [pr.right - 60, pr.bottom - 20]})
         await sendMouse({type: 'down'})
         await sendMouse({type: 'move', position: [0, (pr.bottom - pr.top)/2]})
+        expect([4]).to.have.deep.members(getItemsInView(el).sort());
         await sendMouse({type: 'up'})
 
         /*It moves the 4th item to the left extreme, and then puts it back at the right end*/
         /*We dont hvae a reliable way to wait on the touch end event. hence, we sleep*/
-        expect([4]).to.have.deep.members(getItemsInView(el).sort());
         await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
         expect([1, 2,3,4]).to.have.deep.members(getItemsInView(el).sort());
 
@@ -428,9 +424,23 @@ describe('aalam-slider', () => {
         await sendMouse({type: 'move', position: [pr.left + 20, pr.bottom - 20]})
         await sendMouse({type: 'down'})
         await sendMouse({type: 'move', position: [pr.right, (pr.bottom - pr.top)/2]})
+        expect([0]).to.have.deep.members(getItemsInView(el).sort());
         await sendMouse({type: 'up'})
 
+        await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
         expect([0,1,2]).to.have.deep.members(getItemsInView(el).sort());
+
+        el.loop = true;
+        await requestAnimationFrame(() => {});
+
+        expect([0,1,2]).to.have.deep.members(getItemsInView(el).sort());
+        await sendMouse({type: 'move', position: [pr.left + 20, pr.bottom - 20]})
+        await sendMouse({type: 'down'})
+        await sendMouse({type: 'move', position: [pr.left + 160 + el.slide_items[0].offsetWidth, (pr.bottom - pr.top)/2]})
+        //expect([4, 0, 1]).to.have.deep.members(getItemsInView(el).sort());
+        await sendMouse({type: 'up'})
+        await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
+        expect([4,0,1]).to.have.deep.members(getItemsInView(el).sort());
     })
 
     /*check events and data attributes*/
@@ -453,8 +463,6 @@ describe('aalam-slider', () => {
 
         await el.next();
         expect([1,2,3]).to.have.deep.members(getItemsInView(el).sort());
-        console.log("hiddenix ", hidden_ix);
-        console.log("shown_ix ", shown_ix);
         await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
         expect([0]).to.have.deep.members(hidden_ix);
         expect([1]).to.have.deep.members(shown_ix);

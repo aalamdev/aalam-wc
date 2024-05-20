@@ -535,17 +535,18 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
         if (ix >= 0)
             this.show(ix);
     }
-    private _touchMoveEvent(event:MouseEvent) {
+    private _touchMoveEvent(event:MouseEvent|TouchEvent) {
         if (!this._mouse_event_data) return
 
         let last_ix = this.slide_items.length - 1;
         let revamp_ix = null;
-        let direction = this._mouse_event_data.prev_x > event.clientX?
-            'L':((this._mouse_event_data.prev_x < event.clientX)?
+        let clientX = (event.touches?event.touches[0].clientX:event.clientX);
+        let direction = this._mouse_event_data.prev_x > clientX?
+            'L':((this._mouse_event_data.prev_x < clientX)?
                  'R':this._mouse_event_data.direction);
 
-        this.translatex = event.clientX - this._mouse_event_data.start_x;
-        this._mouse_event_data.prev_x = event.clientX;
+        this.translatex = clientX - this._mouse_event_data.start_x;
+        this._mouse_event_data.prev_x = clientX;
 
         log("Move: ",
             this._coords.lt_limit.tleft, "(", this._coords.lt_ix, ")",
@@ -564,15 +565,14 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                 else if (this._coords.lt_ix < last_ix)
                     revamp_ix = this._coords.lt_ix + 1;
             } else if ((this._coords.rt_limit.tright + this.translatex) < 0) {
-                /*The leftt index is not changed*/
+                /*The left index is not changed*/
                 if (this.loop || this._coords.rt_ix < last_ix)
                     revamp_ix = this._coords.lt_ix;
             }
         } else if (direction == 'R') { /* moving towards right */
             this._mouse_event_data.direction = 'R'
-            if ((this._coords.rt_limit.tleft + this.translatex) > 0) {
-                revamp_ix = this._coords.lt_ix;;
-            } else if ((this._coords.lt_limit.tleft + this.translatex) > 0) {
+            if ((this._coords.lt_limit.tleft + this.translatex) > 0 || 
+                (this._coords.rt_limit.tleft + this.translatex) > 0) {
                 if (this.loop)
                     revamp_ix = (this._coords.lt_ix == 0)?
                         last_ix:(this._coords.lt_ix - 1);
@@ -620,9 +620,10 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
         }
     }
     @eventOptions({passive: true})
-    private _touchStartEvent(event:MouseEvent) {
+    private _touchStartEvent(event:MouseEvent|TouchEvent) {
+        let clientX = event.touches?event.touches[0].clientX:event.clientX
         this._mouse_event_data = new MouseEventData(
-            event.clientX - (this.translatex || 0), this,
+            clientX - (this.translatex || 0), this,
             this._touchMoveEvent, this._touchEndEvent);
         this._mouse_event_data.moved_x = 0;
         this.showing = false;

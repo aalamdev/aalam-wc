@@ -21,6 +21,7 @@ export default defineConfig({
       }
   },
   server: {
+    host: "0.0.0.0",
     proxy: {
         '^/aalam/.*': 'http://192.168.122.233',
     }
