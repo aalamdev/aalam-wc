@@ -540,7 +540,8 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
 
         let last_ix = this.slide_items.length - 1;
         let revamp_ix = null;
-        let clientX = (event.touches?event.touches[0].clientX:event.clientX);
+        let clientX = ((event as TouchEvent).touches?
+            (event as TouchEvent).touches[0].clientX:(event as MouseEvent).clientX);
         let direction = this._mouse_event_data.prev_x > clientX?
             'L':((this._mouse_event_data.prev_x < clientX)?
                  'R':this._mouse_event_data.direction);
@@ -621,7 +622,8 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
     }
     @eventOptions({passive: true})
     private _touchStartEvent(event:MouseEvent|TouchEvent) {
-        let clientX = event.touches?event.touches[0].clientX:event.clientX
+        let clientX = (event as TouchEvent).touches?
+            (event as TouchEvent).touches[0].clientX:(event as MouseEvent).clientX;
         this._mouse_event_data = new MouseEventData(
             clientX - (this.translatex || 0), this,
             this._touchMoveEvent, this._touchEndEvent);
