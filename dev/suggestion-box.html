@@ -4,10 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Aalam Suggestion Box</title>
-        <script
-            type="module"
-            src="../src/suggestion-box.ts"
-        ></script>
+        <script type="module" src="../src/suggestion-box.ts"></script>
     </head>
     <style>
         body {
@@ -139,22 +136,99 @@
             async function handleInput(ele) {
                 this.show_empty = false;
                 let res = [
-                    { name: "Ajay", description: "nothing to say" },
-                    { name: "vijay", description: "fraud" },
-                    { name: "abisheik", description: "chubby" },
-                    { name: "aneesh", description: "lean" },
-                    { name: "arun", description: "chutty" },
+                    {
+                        name: "T-Shirt",
+                        description: "A comfortable and stylish t-shirt",
+                    },
+                    {
+                        name: "formal shirt",
+                        description: "A comfortable and professional shirt",
+                    },
+                    {
+                        name: "jean pant",
+                        description: "A comfortable and stylish pants",
+                    },
+                    {
+                        name: "cotton pant",
+                        description: "A comfortable pant to wear ",
+                    },
+                    {
+                        name: "jackets",
+                        description: "Makes look cool ",
+                    },
                 ];
                 ele.setSuggestion(res, true);
             }
             async function loadmoreEntries(ele) {
                 let res = [
-                    { name: "tidel", description: "coimbatore" },
-                    { name: "No one replce", description: "23" },
-                    { name: "harsha", description: "22" },
-                    { name: "aaa", description: "hahdh" },
-                    { name: "kskks", description: "god" },
-                    { name: "trwy", description: "teudyg" },
+                    {
+                        name: "T-Shirt",
+                        description: "A comfortable and stylish t-shirt",
+                        price: 19.99,
+                        color: "Blue",
+                    },
+                    {
+                        name: "Hoodie",
+                        description: "A cozy and warm hoodie for chilly days",
+                        price: 29.99,
+                        color: "Grey",
+                    },
+                    {
+                        name: "Jeans",
+                        description:
+                            "Classic and versatile jeans for any occasion",
+                        price: 34.99,
+                        size: 32,
+                    },
+                    {
+                        name: "Sneakers",
+                        description:
+                            "Comfortable and stylish sneakers for everyday wear",
+                        price: 59.99,
+                        brand: "Sporty Brand",
+                    },
+                    {
+                        name: "Dress",
+                        description:
+                            "A flowy and elegant dress for a special night out",
+                        price: 44.99,
+                        color: "Black",
+                    },
+                    {
+                        name: "Watch",
+                        description:
+                            "A sleek and sophisticated watch to complete your look",
+                        price: 129.99,
+                        material: "Stainless Steel",
+                    },
+                    {
+                        name: "Sunglasses",
+                        description:
+                            "Protect your eyes in style with these cool sunglasses",
+                        price: 24.99,
+                        brand: "Shady Company",
+                    },
+                    {
+                        name: "Backpack",
+                        description:
+                            "A spacious and sturdy backpack for all your adventures",
+                        price: 69.99,
+                        color: "Green",
+                    },
+                    {
+                        name: "Wallet",
+                        description:
+                            "A sleek and practical wallet to keep your essentials safe",
+                        price: 39.99,
+                        material: "Leather",
+                    },
+                    {
+                        name: "Phone Case",
+                        description:
+                            "Protect your phone in style with this eye-catching case",
+                        price: 14.99,
+                        color: "Pink",
+                    },
                 ];
                 ele.appendSuggestion(res, true);
             }

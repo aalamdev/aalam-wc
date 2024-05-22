@@ -4,7 +4,7 @@ import { queryAssignedElements } from "lit/decorators.js";
 
 @customElement("aalam-sgn-box")
 export class SuggestionBox extends LitElement {
-    static styles = css`
+    static override styles = css`
         :host {
             display: block;
             position: relative;
@@ -68,17 +68,17 @@ export class SuggestionBox extends LitElement {
     private _outClickListener = this.windowClickEvent.bind(this);
     private input_temp: HTMLElement | null | string = null;
 
-    connectedCallback() {
+    override connectedCallback() {
         super.connectedCallback();
         this.addEventListener("mouseout", this._mouseOutEvent);
         document.addEventListener("click", this._outClickListener);
     }
-    disconnectedCallback() {
+    override disconnectedCallback() {
         super.disconnectedCallback();
         this.removeEventListener("mouseout", this._mouseOutEvent);
         document.addEventListener("click", this._outClickListener);
     }
-    render() {
+    override render() {
         return html`
             <div style="position:relative">
                 <div
@@ -125,6 +125,7 @@ export class SuggestionBox extends LitElement {
         if (this.result[this._indexOfTarget(event)]) {
             (this.input_el as HTMLInputElement).value =
                 this.result[this._indexOfTarget(event)]?.["name"];
+            this.show_container=false;
         } else if (this._indexOfTarget(event) === this.result.length) {
             this.loadmoreentry(event);
         }
@@ -149,6 +150,7 @@ export class SuggestionBox extends LitElement {
     }
 
     inputfield() {
+        (this.input_el as HTMLInputElement).value =""
         this.index = -1;
     }
     private _inputFocusEvent(event: any) {
@@ -279,6 +281,7 @@ export class SuggestionBox extends LitElement {
         this.prevIndex = this.index;
         if (selectedValue) {
             (this.input_el as HTMLInputElement).value = selectedValue;
+            this.show_container=false;
         }
     }
     _highlight(name: any) {
@@ -339,7 +342,7 @@ export class SuggestionBox extends LitElement {
             this.appendChild(el);
         }
     }
-    loadmoreentry(event:Event) {
+    loadmoreentry(event: Event) {
         const loadmore = new CustomEvent("loadmore", {
             bubbles: true,
         });
@@ -377,7 +380,9 @@ export class SuggestionBox extends LitElement {
             el.innerHTML = `<div>Loadmore</div>`;
             this.appendChild(el);
         }
-        console.log(this.private_items.length)
-        this.private_items[this.private_items.length -1 - 6].classList.add("sgn-active")
+        console.log(this.private_items.length);
+        this.private_items[this.private_items.length - 1 - suggestions.length].classList.add(
+            "sgn-active"
+        );
     }
 }
