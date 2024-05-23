@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <style>
+    :root {--primary-color: red;}
+    </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Datepicker Demo</title>
+    <script type="module" src="../src/dtpick.ts"></script>
+  </head>
+  <body>
+    <style>
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            gap:10px;
+        }
+        .grid> div {height:600px;width:calc(25vw - 14px);padding:15px;border:1px solid #ccc;box-sizing:border-box}
+        @media (max-width:992px) {
+            .grid {
+                grid-template-columns: auto;
+            }
+            .grid div {width:100%;}
+        }
+        aalam-dtpick {height:calc(600px - 4em - 30px);display:block;}
+    </style>
+    <div class="grid" style="margin-bottom:10px;">
+        <div><h2>Date</h2><aalam-dtpick format="DD-MM-YYYY" type="d" maxval="20-12-2028" minval="23-08-2013"></aalam-dtpick></div>
+        <div><h2>Date Time</h2><aalam-dtpick format="DD-MM-YYYY hh:mm:ss" type="t" maxval="20-12-2028 05:06:04" minval="23-08-2013 13:45:23"></aalam-dtpick></div>
+        <div><h2>Month</h2><aalam-dtpick format="MM-YYYY" type="m" maxval="12-2028" minval="08-2013"></aalam-dtpick></div>
+        <div><h2>Year</h2><aalam-dtpick format="YYYY" type="y" maxval="20-12-2028" minval="23-08-2013"></aalam-dtpick></div>
+    </div>
+    <div class="grid">
+        <div><h2>Date Range</h2><aalam-dtpick range format="DD-MM-YYYY" type="d" maxval="20-12-2028" minval="23-08-2013"></aalam-dtpick></div>
+        <div><h2>Date Time Range</h2><aalam-dtpick range format="DD-MM-YYYY hh:mm:ss" type="t" maxval="20-12-2028 05:06:05" minval="23-08-2013 13:45:23"></aalam-dtpick></div>
+        <div><h2>Month Range</h2><aalam-dtpick range format="MM-YYYY" type="m" maxval="12-2028" minval="08-2013"></aalam-dtpick></div>
+        <div><h2>Year Range</h2><aalam-dtpick range format="YYYY" type="y" maxval="20-12-2028" minval="23-08-2013"></aalam-dtpick></div>
+    </div>
+  </body>
+</html>

@@ -57,3 +57,38 @@ export function getResponsiveValues(val_str:string, def_values:string|{[key:stri
     }
     return ret;
 }
+
+export class SortedArray<T> extends Array<T> {
+    private _check:Function;
+
+    constructor(comparefn?:Function) {
+        super();
+        this._check = comparefn || ((a:any, b:any) => a < b);
+    }
+    _sortedIndex(v:T) {
+        var low = 0,
+            high = this.length;
+
+        while (low < high) {
+            var mid = (low + high) >>> 1;
+            if (this._check(this[mid], v)) low = mid + 1;
+            else high = mid;
+        }
+        return low;
+    }
+    insert(v:T) {
+        if (this.indexOf(v) >= 0)
+            return;
+        let ix = this._sortedIndex(v)
+        this.splice(ix, 0, v);
+    }
+    get(index:number):T {
+        return index >= 0?this[index]:this[this.length + index];
+    }
+    clone():SortedArray<T> {
+        let ret = new SortedArray<T>(this._check);
+        for (let i of this)
+            ret.push(i);
+        return ret;
+    }
+}
