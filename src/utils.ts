@@ -1,15 +1,16 @@
 export const screen_size = ['xs', 's', 'm', 'l', 'xl'];
 export const screen_limits:{[key:string]:Array<number|null>} = {
-    'xs': [0,    640],
-    's':  [640,  992],
-    'm':  [992,  1200],
-    'l':  [1200, 1600],
-    'xl': [1600, null]
+    'xs': [0,    641],
+    's':  [641,  993],
+    'm':  [993,  1201],
+    'l':  [1201, 1601],
+    'xl': [1601, null]
 };
 export interface ResponsiveVal {
     ll:number|null;
     ul:number|null;
     val:string;
+    cond: string;
 }
 
 export function parseAttrVal(val:string, validator?:Function):{[key:string]:string} {
@@ -32,7 +33,7 @@ export function parseAttrVal(val:string, validator?:Function):{[key:string]:stri
     return val_obj
 }
 
-export function getResponsiveValues(val_str:string, def_values:string|{[key:string]:string}, validator:Function):Array<ResponsiveVal> {
+export function getResponsiveValues(val_str:string, def_values:string|{[key:string]:string}, validator?:Function):Array<ResponsiveVal> {
     let val_obj = parseAttrVal(val_str, validator)
     if (typeof def_values == 'string')
         def_values = parseAttrVal(def_values);
@@ -49,11 +50,15 @@ export function getResponsiveValues(val_str:string, def_values:string|{[key:stri
         let prev_ret = ret.length?ret[ret.length - 1]:null;
         if (val_obj[s]) {
             if (!prev_ret || prev_ret['val'] != val_obj[s])
-                ret.push({'ll': ll, 'ul': ul, 'val': val_obj[s]})
+                ret.push({'ll': ll, 'ul': ul, 'val': val_obj[s], 'cond': ''})
             else if (prev_ret?.['val'] == val_obj[s])
                 prev_ret['ul'] = ul;
         } else if (prev_ret)
             prev_ret['ul'] = ul;
+    }
+    for (let r of ret) {
+        let {ll, ul} =  r;
+        r['cond'] = `(min-width:${ll}px)${ll != null && ul != null?' and ':''}${ul != null?`(max-width:${ul}px)`:''}`;
     }
     return ret;
 }
