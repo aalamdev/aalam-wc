@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <style>
+        .modal-body {border-radius:25px;height:100%;box-sizing:border-box;
+                     padding:15px;min-width:320px;background-color:white;
+                     overflow:auto;margin:auto;}
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Modal Demo</title>
+        <script type="module" src="../src/modal.ts"></script>
+    </head>
+    <body>
+        <h1>Modal Demo</h1>
+        <script>
+            function buttonClicked() {
+                let el = document.getElementById("modal-l1");
+                el.show();
+            }
+            function modalButtonClicked() {
+                let el2 = document.getElementById("modal-l2");
+                el2.show();
+            }
+            function next3modal() {
+                let l3 = document.getElementById("modal-l3");
+                l3.show();
+            }
+            function closeModal() {
+                let el = document.getElementById("modal-l1");
+                el.hide();
+            }
+            function modalShown() {
+                console.log("modal shown event received");
+            }
+            function inserElement() {
+                console.log("Inserting an element in modal body");
+                let el = document.getElementById('modal-body');
+                let new_el = document.createElement('button');
+                new_el.classList.add('close-sel')
+                new_el.innerText = "NEW CLOSE";
+                el.appendChild(new_el);
+            }
+            function buttonClose() {
+                let l = document.getElementById("modal-l2");
+                l.hide();
+            }
+            function openOuter() {
+                let out = document.getElementById("modal-outer");
+                console.log("openouter called - modal out - ", out);
+                out.show();
+            }
+            function openInner() {
+                let inner = document.getElementById("modal-inner");
+                inner.show();
+            }
+            function closeInner() {
+                let ci = document.getElementById("modal-inner");
+                ci.hide();
+            }
+            function closeOuter() {
+                let co = document.getElementById("modal-outer");
+                co.hide();
+            }
+        </script>
+
+        <button onclick="buttonClicked()">open L1</button>
+        <button onclick="openOuter()">open outer</button>
+        <button onclick="openInner()">open inner</button>
+        <div>
+            <aalam-modal guidesel="top:.top-guide;left:#left-guide" id="modal-outer" pos="s:left;l:right;m:bottom-center" animate="xs:r2l">
+                <div slot="modal-body" class="modal-body">
+                    <div class="top-guide" style="height:20px;width:30px;border-top:3px solid #000;margin:auto"> </div>
+                    <div style="background:red">
+                        <button onclick="closeOuter()">close outer</button>
+                        <h1 style="color:white">outer</h1>
+                        <div style="height:300px;width:200px;background:grey;"></div>
+                        <div style="height:400px;width:500px;background:yellow;"></div>
+                        <div style="height:600px;width:700px;background:orange"></div>
+                        <div id="left-guide" style="height:20px;width:30px;border-bottom:3px solid #000;margin:auto"> </div>
+                    </div>
+                </div>
+            </aalam-modal>
+        </div>
+        <div id="modal-praent">
+            <aalam-modal id="modal-inner" pos="s:bottom-right">
+                <div slot="modal-body" class="modal-body">
+                    <button onclick="closeInner()">close inner</button>
+                    <div style="background:green">
+                        <h1 style="color:white">inner</h1>
+                        <div style="height:300px;width:200px;background:grey;"></div>
+                        <div style="height:400px;width:500px;background:yellow;"></div>
+                        <div style="height:600px;width:700px;background:orange"></div>
+                    </div>
+                </div>
+            </aalam-modal>
+            <aalam-modal id="modal-l1" animate="m:l2r" height="m:60vh" width="m:50vw" guidesel="right:.right-guide;left:.left-guide;bottom:.bottom-guide;top:.top-guide" pos="xs:left;m:right;l:center;xl:bottom"  closesel=".close-sel">
+                <div slot="modal-body" class="modal-body" id="modal-body" >
+                    <div class="right-guide" style="background:orange;"><p> class: right-guide, pos: right</p><div style="background:yellow;height:20px;width:20px;border-top:3px solid #000;margin:auto;"></div></div>
+                    <div class="top-guide" style="background:yellow;"><p> class: top-guide, pos: top</p><div style="background:red;height:20px;width:20px;border-top:3px solid #000;margin:auto;"></div></div>
+                    <div class="left-guide" style="background:blue;position:static;"><p>class: left-guide, pos: left</p><div style="background:green;display:flex;position:sticky;left:0px;height:20px;width:20px;border-left:4px solid #000;margin:auto;"></div></div>
+                    <div class="bottom-guide" style="background:red;"><p> class: bottom-guide, pos: bottom</p><div style="background:grey;height:20px;width:20px;border-top:3px solid #000;margin:auto;"></div></div>
+                    <div style="padding:9px">
+                        <h1>L1 modal</h1>
+                        <p class="close-sel"> this is modal content</p>
+                        <button onclick="closeModal()">close L1</button>
+                        <button onclick="inserElement()">New element</button>
+                        <button onclick="modalButtonClicked()">open L2</button>
+                    </div>
+                    <div style="height:300px;width:200px;background:green;"></div>
+                    <div style="height:400px;width:500px;background:yellow;"></div>
+                    <div style="height:600px;width:700px;background:orange"></div>
+                    <aalam-modal guidesel='left:.expand' closesel=".close-sel" pos="m:left" id="modal-l2">
+                            <div slot="modal-body" class="modal-body" style="padding:3px">
+                                <div style="display:flex">
+                                    <div style="">
+                                        <div style="padding:9px">
+                                            <h2>L2 modal</h2>
+                                            <button class="close-sel">exit</button>
+                                            <button onclick="buttonClose()">close L2</button>
+                                            <button onclick="next3modal()">open L3</button>
+                                        </div>
+                                        <div style="height:300px;width:200px;background:grey;"></div>
+                                        <div style="height:400px;width:500px;background:yellow;"></div>
+                                        <div style="height:600px;width:700px;background:orange"></div>
+                                    </div>
+                                    <div style="height:20px;width:20px;border-right:3px solid #000;position:sticky;top:50%" class="expand"></div>
+                                </div>
+                            </div>
+                                <aalam-modal pos="l:top" id="modal-l3">
+                                    <div slot="modal-body" class="modal-body">
+                                        <div style="padding:9px">
+                                            <h2>L3 modal</h2>
+                                        </div>
+                                        <div style="height:300px;width:200px;background:red;"></div>
+                                        <div style="height:400px;width:500px;background:yellow;"></div>
+                                        <div style="height:600px;width:700px;background:orange"></div>
+                                    </div>
+                                </aalam-modal>
+                            </div>
+                     </aalam-modal>
+                </div>
+            </aalam-modal>
+        </div>
+    </body>
+<html>
