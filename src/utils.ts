@@ -12,24 +12,30 @@ export interface ResponsiveVal {
     val:string;
 }
 
-function _parseResponsiveValue(val_str:string, validator?:Function):{[key:string]:string} {
+export function parseAttrVal(val:string, validator?:Function):{[key:string]:string} {
+    let pos = 0;
     let val_obj:{[key:string]:string} = {};
-    for (let spl of val_str.split(";")) {
-        let [size, val] = spl.split(":");
-        if (!val)
-            continue;
-        size = size.trim();
-        val = val.trim();
-        if (!validator || validator(val))
-            val_obj[size] = val;
+    while (pos < val.length) {
+        let col_ix = val.indexOf(":", pos);
+        if (col_ix < 0)
+            break
+        let key = val.substr(pos, col_ix - pos)
+        col_ix += 1;
+        let sem_ix = val.indexOf(";", col_ix);
+        if (sem_ix < 0)
+            sem_ix = val.length;
+        let res = val.substr(col_ix, sem_ix - col_ix).trim();
+        if (!validator || validator(res))
+            val_obj[key.trim()] = res;
+        pos = sem_ix + 1;
     }
     return val_obj
 }
 
 export function getResponsiveValues(val_str:string, def_values:string|{[key:string]:string}, validator:Function):Array<ResponsiveVal> {
-    let val_obj = _parseResponsiveValue(val_str, validator)
+    let val_obj = parseAttrVal(val_str, validator)
     if (typeof def_values == 'string')
-        def_values = _parseResponsiveValue(def_values);
+        def_values = parseAttrVal(def_values);
 
     let ret:Array<ResponsiveVal> = [];
     for (let s of screen_size) {

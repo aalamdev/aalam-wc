@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Managed Input</title>
+    <script type="module" src="../src/minput.ts"></script>
+  </head>
+  <body>
+    <style>
+        .minput {
+            border:1px solid #ddd;
+            padding:12px 12px;
+            position:relative;
+            width:fit-content;
+            margin:40px;
+        }
+        .minput::before {
+            content: attr(data-label);
+            position:absolute;
+            top:0;
+            left:10px;
+            font-size:0.9rem;
+            text-align:center;
+            background:white;
+            padding:0 6px;
+            color:blue;
+            transform:translate(0, -50%);
+        }
+        #otp::part(inp-field) {
+            padding:10px;
+            border:1px solid blue;
+            text-align:center;
+        }
+    </style>
+    <div class="minput" data-label="From Date">
+    <aalam-minput init="dt:03;mon:04;yr:2035;sec:34" order="dt,mon,yr,hr,min,sec"
+        data-dt="type:n;chars:2;ph:DD;sepnxt:/;gapnxt:5px;min:1;max:31"
+        data-mon="type:n;chars:2;ph:MM;sepnxt:/;gapnxt:5px;min:1;max:12"
+        data-yr="type:n;chars:4;ph:YYYY;gapnxt:30px"
+        data-hr="type:n;chars:2;ph:HH;gapnxt:5px;sepnxt::"
+        data-min="type:n;chars:2;ph:MM;gapnxt:5px;sepnxt::"
+        data-sec="type:n;chars:2;ph:SS"></aalam-minput>
+    </div>
+    <div class="minput" data-label="Card Details">
+    <aalam-minput order="x1,x2,x3,x4,mm,yyyy,cvv"
+        data-x*="type:n;chars:4;ph:xxxx;gapnxt:10px;"
+        data-mm="type:n;chars:2;ph:MM;sepnxt:/;gapnxt:5px;min:1;max:12"
+        data-yyyy="chars:4;ph:YYYY;gapnxt:20px"
+        data-cvv="chars:3;ph:CVV"></aalam-minput>
+    </div>
+
+    <div style="margin:40px">
+        <div><label>OTP</label></div>
+        <aalam-minput order="n1,n2,n3,n4,n5,n6" id="otp"
+            data-n*="type:n;chars:1;gapnxt:10px;"></aalam-minput>
+    </div>
+  </body>
+</html>
+
