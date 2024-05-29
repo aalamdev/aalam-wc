@@ -20,13 +20,15 @@ export class AalamManagedInputElement extends LitElement {
     private _items:string[] = [];
     private _dset:{[key:string]: {[key:string]:string}} = {};
     private _evnt_data:{[key:string]:any} = {};
-    private _isNum = (spec:{[key:string]:string}) => ['n', 'num', 'number'].indexOf((spec['type'] || '').toLowerCase()) >= 0;
+    private _isNum = (spec:{[key:string]:string}) => ['n', 'num', 'number']
+        .indexOf((spec['type'] || '').toLowerCase()) >= 0;
     private _getItemSpec(iname:string):{[key:string]:string} {
         let dkey = iname;
         if (!(iname in this._dset)) {
             if (!this.dataset[dkey]) {
                 for (let k of Object.keys(this.dataset)) {
-                    if (k[k.length - 1] == '*' && iname.startsWith(k.substr(0, k.length - 1))) {
+                    if (k[k.length - 1] == '*' &&
+                        iname.startsWith(k.substr(0, k.length - 1))) {
                         dkey = k;
                         break
                     }
@@ -43,10 +45,11 @@ export class AalamManagedInputElement extends LitElement {
     }
     private _itemHtml(item:string, index:number) {
         let data = this._getItemSpec(item);
+        let is_last = index == (this._items.length - 1);
         let style_map:{[key:string]:string} = {}
         if (data['chars'])
             style_map['width'] = `${+data.chars + 1}ch`;
-        if (data['gapnxt'] && !data['sepnxt'])
+        if (data['gapnxt'] && !data['sepnxt'] && !is_last)
             style_map['margin-right'] = data['gapnxt'];
         let sep_styles:{[key:string]:string} = {}
         if (data['sepnxt']) {
@@ -55,9 +58,12 @@ export class AalamManagedInputElement extends LitElement {
             sep_styles['text-align'] = 'center';
         }
         return html`
-<input id="${item}" part="inp-field" class="fld" data-ix="${index}" type="${data.type == 'string'?'text':'tel'}" style=${styleMap(style_map)} placeholder="${data.ph}"
-    @input=${this._inputEvent} @keydown=${this._inputKeyEvent} @blur=${this._blurEvent} autocomplet="off"/>
-${when(data['sepnxt'], () => html`<div style=${styleMap(sep_styles)}>${data['sepnxt']}</div>`)}
+<input id="${item}" part="inp-field" class="fld" data-ix="${index}"
+    type="${data.type == 'text'?'text':'tel'}" style=${styleMap(style_map)}
+    placeholder="${data.ph}" @input=${this._inputEvent}
+    @keydown=${this._inputKeyEvent} @blur=${this._blurEvent}
+    autocomplet="off"/>
+${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}>${data['sepnxt']}</div>`)}
 `
     }
     private _inputKeyEvent(event:KeyboardEvent) {
@@ -88,7 +94,8 @@ ${when(data['sepnxt'], () => html`<div style=${styleMap(sep_styles)}>${data['sep
             let data = this._getItemSpec(inp_el.id);
             if (inp_el.selectionStart != inp_el.selectionEnd)
                 return true;
-            if (inp_el.value.length >= +data['chars'] && event.key.match(/^[a-z0-9!"#$%&'()*+,.\/:;<=>?@\[\] ^_`{|}~-]*$/g)) {
+            if (inp_el.value.length >= +data['chars'] &&
+                event.key.match(/^[a-z0-9!"#$%&'()*+,.\/:;<=>?@\[\] ^_`{|}~-]*$/g)) {
                 event.preventDefault();
                 return false;
             }
@@ -114,7 +121,8 @@ ${when(data['sepnxt'], () => html`<div style=${styleMap(sep_styles)}>${data['sep
                 all: {...this._evnt_data}
             }
         }))
-        this.value = this._items.map(i => `${i}:${this._evnt_data[i] || ''}`).join(";");
+        this.value = this._items.map(
+            i => `${i}:${this._evnt_data[i] || ''}`).join(";");
     }
     private _inputEvent(event:KeyboardEvent) {
         let etgt = event.target as HTMLInputElement;
@@ -135,7 +143,8 @@ ${when(data['sepnxt'], () => html`<div style=${styleMap(sep_styles)}>${data['sep
         for (let i in this._items) {
             let fld = this._items[i];
             let val = obj[fld] || '';
-            this._evnt_data[fld] = this._isNum(this._getItemSpec(fld))?+val:val;
+            this._evnt_data[fld] = this._isNum(
+                this._getItemSpec(fld))?+val:val;
             this.input_els[i].value = obj[fld] || '';
         }
     }
