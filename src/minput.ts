@@ -60,11 +60,14 @@ export class AalamManagedInputElement extends LitElement {
         return html`
 <input id="${item}" part="inp-field" class="fld" data-ix="${index}"
     type="${data.type == 'text'?'text':'tel'}" style=${styleMap(style_map)}
-    placeholder="${data.ph}" @input=${this._inputEvent}
-    @keydown=${this._inputKeyEvent} @blur=${this._blurEvent}
+    placeholder="${data.ph}" @input=${this._inputEvent} @blur=${this._blurEvent}
+    @keydown=${this._inputKeyEvent} @click=${this._clickEvent}
     autocomplet="off"/>
 ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}>${data['sepnxt']}</div>`)}
 `
+    }
+    private _clickEvent(event:PointerEvent) {
+        (event.target as HTMLInputElement).select();
     }
     private _inputKeyEvent(event:KeyboardEvent) {
         let el = event.target as HTMLInputElement;
@@ -72,7 +75,7 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
         let inp_el = this.input_els[ix];
         let nxt_ix = (ix == this._items.length - 1)?0:(ix + 1);
         let prev_ix = (ix == 0)?this._items.length - 1:(ix - 1);
-        let ss = inp_el.selectionStart;
+        let ss = inp_el.selectionStart as number;
 
         if (event.key == 'ArrowRight' || event.key == 'Delete') {
             if (ss == inp_el.value.length) {
@@ -90,22 +93,40 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
                 if (event.key == 'ArrowLeft')
                     event.preventDefault();
             }
+        } else if (event.key == 'ArrowUp' || event.key == 'ArrowDown') {
+            let data = this._getItemSpec(inp_el.id);
+            let cur_val = +inp_el.value
+            if (isNaN(cur_val)) return;
+            if (event.key == 'ArrowUp' &&
+                (!data['nmax'] || cur_val <= (+data['nmax'] - 1)) &&
+                (!data['chars'] || (""+ (cur_val + 1)).length <= +data['chars']))
+                inp_el.value = "" + (cur_val + 1);
+            else if (event.key == 'ArrowDown' &&
+                    (!data['nmin'] || cur_val >= (+data['nmin'] + 1)) &&
+                    (!data['chars'] || ("" + (cur_val - 1)).length <= +data['chars']))
+                inp_el.value = "" + (cur_val - 1);
+            this._raiseEvent(inp_el, data);
         } else {
             let data = this._getItemSpec(inp_el.id);
             if (inp_el.selectionStart != inp_el.selectionEnd)
                 return true;
-            if (inp_el.value.length >= +data['chars'] &&
-                event.key.match(/^[a-z0-9!"#$%&'()*+,.\/:;<=>?@\[\] ^_`{|}~-]*$/g)) {
-                event.preventDefault();
-                return false;
+
+            if (event.key.match(/^[a-z0-9!"#$%&'()*+,.\/:;<=>?@\[\] ^_`{|}~-]*$/g)) {
+                let o = inp_el.value;
+                let limit_crossed = this._isNum(data) && data['nmax'] &&
+                                    +data['nmax'] < +(o.slice(0, ss) +
+                                                      event.key +
+                                                      o.slice(ss))
+                if (inp_el.value.length >= +data['chars'] || limit_crossed) {
+                    event.preventDefault();
+                    return false;
+                }
             }
         }
         return true;
     }
-    private _blurEvent(event:FocusEvent) {
-        let el = event.target as HTMLInputElement;
+    private _raiseEvent(el:HTMLInputElement, spec:{[key:string]:string}) {
         let fld = el.id;
-        let spec = this._getItemSpec(fld);
         let is_num = this._isNum(spec)
         if (this._evnt_data[fld] == (is_num?+el.value:el.value))
             return;
@@ -124,6 +145,13 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
         this.value = this._items.map(
             i => `${i}:${this._evnt_data[i] || ''}`).join(";");
     }
+    private _blurEvent(event:FocusEvent) {
+        let el = event.target as HTMLInputElement;
+        /* We raise event here, so that the event wasnt raised due to limitation in the 
+         * character limit while key input event, but the input is focussed out.
+         */
+        this._raiseEvent(el, this._getItemSpec(el.id));
+    }
     private _inputEvent(event:KeyboardEvent) {
         let etgt = event.target as HTMLInputElement;
         let cur_fld = etgt.id;
@@ -132,10 +160,17 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
 
         let cur_data = this._getItemSpec(cur_fld);
         let cur_el:HTMLInputElement = etgt;
-        if (cur_el.value.length >= +cur_data['chars']) {
+        let is_num = this._isNum(cur_data);
+        let limit_crossed = is_num && cur_data['nmax'] && +cur_data['nmax'] < +(cur_el.value + '0')
+        if (cur_el.value.length >= +cur_data['chars'] || limit_crossed) {
+            if (limit_crossed && cur_el.value.length > +cur_data['chars'])
+                cur_el.value = cur_data['nmax'];
+            else if (is_num && cur_data['nmin'] && +cur_el.value < +cur_data['nmin'])
+                cur_el.value = cur_data['nmin'];
             let nxt_el = this.input_els[nxt_ix];
             nxt_el.focus();
             nxt_el.select();
+            this._raiseEvent(cur_el, cur_data);
         }
     }
     private _valueChanged() {
@@ -183,5 +218,8 @@ input[type=number] {-moz-appearance: textfield;}
         super.firstUpdated(arg);
         if (this.value)
             this._valueChanged();
+    }
+    public get valdata() {
+        return {...this._evnt_data}
     }
 }

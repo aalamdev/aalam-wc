@@ -36,26 +36,32 @@
     </style>
     <div class="minput" data-label="From Date">
     <aalam-minput init="dt:03;mon:04;yr:2035;sec:34" order="dt,mon,yr,hr,min,sec"
-        data-dt="type:n;chars:2;ph:DD;sepnxt:/;gapnxt:5px;min:1;max:31"
-        data-mon="type:n;chars:2;ph:MM;sepnxt:/;gapnxt:5px;min:1;max:12"
-        data-yr="type:n;chars:4;ph:YYYY;gapnxt:30px"
-        data-hr="type:n;chars:2;ph:HH;gapnxt:5px;sepnxt::"
-        data-min="type:n;chars:2;ph:MM;gapnxt:5px;sepnxt::"
-        data-sec="type:n;chars:2;ph:SS"></aalam-minput>
+        data-dt="type:n;chars:2;ph:DD;sepnxt:/;gapnxt:5px;nmax:31;nmin:1"
+        data-mon="type:n;chars:2;ph:MM;sepnxt:/;gapnxt:5px;nmax:12;nmin:1"
+        data-yr="type:n;chars:4;ph:YYYY;gapnxt:30px;nmin:1900"
+        data-hr="type:n;chars:2;ph:HH;gapnxt:5px;sepnxt::;nmax:23;nmin:0"
+        data-min="type:n;chars:2;ph:MM;gapnxt:5px;sepnxt::;nmax:59;nmin:0"
+        data-sec="type:n;chars:2;ph:SS;nmax:59;nmin:0"></aalam-minput>
     </div>
     <div class="minput" data-label="Card Details">
     <aalam-minput order="x1,x2,x3,x4,mm,yyyy,cvv"
         data-x*="type:n;chars:4;ph:xxxx;gapnxt:10px;"
-        data-mm="type:n;chars:2;ph:MM;sepnxt:/;gapnxt:5px;min:1;max:12"
-        data-yyyy="chars:4;ph:YYYY;gapnxt:20px"
+        data-mm="type:n;chars:2;ph:MM;sepnxt:/;gapnxt:5px;min:1;nmax:12;nmin:1"
+        data-yyyy="chars:4;ph:YYYY;gapnxt:20px;nmin:1900"
         data-cvv="chars:3;ph:CVV"></aalam-minput>
     </div>
 
     <div style="margin:40px">
         <div><label>OTP</label></div>
         <aalam-minput order="n1,n2,n3,n4,n5,n6" id="otp"
-            data-n*="type:n;chars:1;gapnxt:10px;"></aalam-minput>
+            data-n*="type:n;chars:1;gapnxt:10px;nmin:0;"></aalam-minput>
     </div>
+    <div class="minput" style="margin:40px;" data-label="Num test">
+        <aalam-minput order="n1,n2,n3"
+data-n1="chars:1;type:number;nmax:7;nmin:2;ph:1"
+data-n*="chars:2;type:num;gapnxt:10px;sepnxt::;ph:n*;nmax:15;nmin:1">
+        </aalam-minput>
+     </div>
   </body>
 </html>
 

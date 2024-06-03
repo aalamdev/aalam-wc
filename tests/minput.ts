@@ -203,8 +203,143 @@ data-n*="chars:2;type:text;gapnxt:10px;sepnxt::;ph:n*">
         expect(el.shadowRoot.activeElement).to.be.equal(inp2);
         expect(inp2.selectionStart).to.be.equal(0);
         expect(inp2.value).to.be.equal('c');
+
+        await sendKeys({press:'ArrowRight'})
+        await sendKeys({press:'ArrowRight'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp3);
+        expect(inp3.selectionStart).to.be.equal(0);
+        expect(inp3.value).to.be.equal('');
+
+        await sendKeys({press:'ArrowUp'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp3);
+        expect(inp3.value).to.be.equal('1');
+
+        await sendKeys({press:'ArrowUp'})
+        await sendKeys({press:'ArrowUp'})
+        await sendKeys({press:'ArrowUp'})
+        await sendKeys({press:'ArrowUp'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp3);
+        expect(inp3.value).to.be.equal('5');
     });
-    it("check key events", async () => {
+    it("check number inputs", async () => {
+        const el = await fixture(html`<aalam-minput order="n1,n2,n3"
+data-n1="chars:1;type:number;nmax:7;nmin:2"
+data-n*="chars:2;type:num;gapnxt:10px;sepnxt::;ph:n*;nmax:15;nmin:1">
+</aalam-minput>`)
+        let inp1 = el.shadowRoot.querySelector("#n1");
+        let inp2 = el.shadowRoot.querySelector("#n2");
+        let inp3 = el.shadowRoot.querySelector("#n3");
+        inp1.focus();
+
+        let ev_dets = [];
+        el.addEventListener("change", (event) => {
+            ev_dets.push(event.detail)});
+
+        await sendKeys({type: '5431'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp2);
+        expect(inp1.value).to.be.equal('2'); /*1 is less than min val(2)*/
+        expect(inp2.value).to.be.equal('4');
+        expect(inp3.value).to.be.equal('3');
+        expect(ev_dets.length).to.be.equal(4);
+        expect(ev_dets[0].changed, "n1")
+        expect(ev_dets[0].old_val, undefined)
+        expect(ev_dets[0].new_val, '5')
+        expect(ev_dets[1].changed, "n2")
+        expect(ev_dets[1].old_val, undefined)
+        expect(ev_dets[1].new_val, '4')
+        expect(ev_dets[2].changed, "n3")
+        expect(ev_dets[2].old_val, undefined)
+        expect(ev_dets[2].new_val, '3')
+        expect(ev_dets[3].changed, "n1")
+        expect(ev_dets[3].old_val, '5')
+        expect(ev_dets[3].new_val, '2')
+
+        ev_dets = [];
+        inp1.focus();
+
+        await sendKeys({press:'ArrowUp'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp1);
+        expect(inp1.value).to.be.equal('3');
+        await sendKeys({press:'ArrowUp'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp1);
+        expect(inp1.value).to.be.equal('4');
+        await sendKeys({press:'ArrowDown'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp1);
+        expect(inp1.value).to.be.equal('3');
+        await sendKeys({press:'ArrowDown'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp1);
+        expect(inp1.value).to.be.equal('2');
+        await sendKeys({press:'ArrowDown'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp1);
+        expect(inp1.value).to.be.equal('2');
+        expect(ev_dets.length).to.be.equal(4);
+        expect(ev_dets[3].changed, "n1")
+        expect(ev_dets[3].old_val, '3')
+        expect(ev_dets[3].new_val, '2')
+
+        ev_dets = [];
+        await sendKeys({press:'ArrowUp'})
+        await sendKeys({press:'ArrowUp'})
+        await sendKeys({press:'ArrowUp'})
+        await sendKeys({press:'ArrowUp'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp1);
+        expect(inp1.value).to.be.equal('6');
+        expect(ev_dets.length).to.be.equal(4);
+        expect(ev_dets[3].changed, "n1")
+        expect(ev_dets[3].old_val, '5')
+        expect(ev_dets[3].new_val, '6')
+
+        await sendKeys({press:'ArrowUp'})
+        expect(inp1.value).to.be.equal('7');
+        expect(ev_dets.length).to.be.equal(5);
+        expect(ev_dets[4].changed, "n1")
+        expect(ev_dets[4].old_val, '6')
+        expect(ev_dets[4].new_val, '7')
+        ev_dets = [];
+
+        await sendKeys({press:'ArrowUp'})
+        expect(inp1.value).to.be.equal('7');
+        expect(ev_dets.length).to.be.equal(0);
+
+        inp2.click();
+        await sendKeys({type: '11'})
+        expect(inp2.value).to.be.equal('11');
+        expect(ev_dets.length).to.be.equal(1);
+        expect(ev_dets[0].changed, "n2")
+        expect(ev_dets[0].old_val, '4')
+        expect(ev_dets[0].new_val, '11')
+        expect(el.shadowRoot.activeElement).to.be.equal(inp3);
+
+        ev_dets = [];
+        await sendKeys({press:'ArrowLeft'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp2);
+        expect(ev_dets.length).to.be.equal(0);
+        await sendKeys({type: '23'})
+        expect(inp2.value).to.be.equal('11');
+        console.error(ev_dets);
+        expect(ev_dets.length).to.be.equal(0);
+
+        await sendKeys({press: 'Backspace'})
+        expect(inp2.value).to.be.equal('1');
+        expect(ev_dets.length).to.be.equal(0);
+
+        await sendKeys({type: '6'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp2);
+        expect(inp2.value).to.be.equal('1');
+        expect(ev_dets.length).to.be.equal(0);
+
+        await sendKeys({press: 'Backspace'})
+        expect(inp2.value).to.be.equal('');
+
+        await sendKeys({type: '00'})
+        expect(el.shadowRoot.activeElement).to.be.equal(inp3);
+        expect(inp2.value).to.be.equal('1');
+        expect(ev_dets.length).to.be.equal(1);
+        expect(ev_dets[0].changed, "n2")
+        expect(ev_dets[0].old_val, '11')
+        expect(ev_dets[0].new_val, '1')
+    })
+    it("check event notification", async () => {
         /*Check for arrow keys & delete/backspace keys*/
         const el = await fixture(html`<aalam-minput order="n1,n2,n3"
 data-n1="chars:1;type:text;"
