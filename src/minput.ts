@@ -154,20 +154,21 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
                 if (event.key == 'ArrowUp' &&
                     (!data['nmax'] || (data['loop'] == '1' && data['nmin']) || cur_val <= (+data['nmax'] - 1)) &&
                     (!data['chars'] || (""+ (cur_val + 1)).length <= +data['chars'])) {
-                    if (data['loop'] == '1' && data['nmin'] && data['nmax'] && cur_val == +data['nmax'])
+                    if (data['loop'] == '1' && data['nmin'] && data['nmax'] && cur_val >= +data['nmax'])
                         cur_val = +data['nmin'] - 1;
                     inp_el.value = "" + (cur_val + 1);
                 } else if (event.key == 'ArrowDown' &&
                         (!data['nmin'] || (data['loop'] == '1' && data['nmax']) || cur_val >= (+data['nmin'] + 1)) &&
                         (!data['chars'] || ("" + (cur_val - 1)).length <= +data['chars'])) {
-                    if (data['loop'] == '1' && data['nmin'] && data['nmax'] && cur_val == +data['nmin'])
+                    if (data['loop'] == '1' && data['nmin'] != null && data['nmax'] && cur_val <= +data['nmin'])
                         cur_val = +data['nmax'] + 1;
                     inp_el.value = "" + (cur_val - 1);
                 }
             }
             this._raiseEvent(inp_el, data);
         } else {
-            let is_visible_key = event.key.match(/^[A-Za-z0-9!"#$%&'()*+,.\/:;<=>?@\[\] ^_`{|}~-]*$/g) != null;
+            let is_visible_key = event.key.length == 1 && event.key.match(
+                /^[A-Za-z0-9!"#$%&'()*+,.\/:;<=>?@\[\] ^_`{|}~-]*$/g) != null;
             if (data['choices']?.length) {
                 return this._choicesKeyDown(event, data, is_visible_key);
             }
