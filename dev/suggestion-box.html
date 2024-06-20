@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Aalam Suggestion Box</title>
-        <script type="module" src="../src/suggestion-box.ts"></script>
+        <script type="module" src="/src/suggestion-box.ts"></script>
     </head>
     <style>
         body {
@@ -12,11 +12,10 @@
             gap: 100px;
         }
         aalam-sgn-box {
-            margin-top:40px;
+            margin-top: 40px;
             padding: 0;
             box-sizing: border-box;
             display: flex;
-            
         }
         aalam-sgn-box .input {
             display: flex;
@@ -33,10 +32,11 @@
             font-size: 15px;
             padding-left: 13px;
         }
-
         aalam-sgn-box::part(sgn-container) {
-            margin-top: -15px;
-            width: 310px;
+            position: absolute;
+            max-height: 250px;
+            overflow: auto;
+            width: 100%;
             margin-left: 3px;
             box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
             border-radius: 10px;
@@ -81,89 +81,116 @@
             border-top-right-radius: 30px;
             border-bottom-right-radius: 30px;
         }
-        .content{
+        .content {
             display: flex;
-           gap: 50px;
-           padding: 20px 0 0 20px ;
+            gap: 50px;
+            padding: 20px 0 0 20px;
         }
     </style>
     <body>
         <div class="content">
             <div class="class-1">
-            <h1>Suggestion box for server response</h1>
-            <ul>
-                <li>It has the minimum character of 2 letters </li>
-                <li>suggestions retrieve from server by user input</li>
-                <li>Loadmore can append more suggestion</li>
-                <li>User can provide the template for list item or template from server response</li>
-                 <li>Text highligh can be given as highlight="end" or highlight="matched"</li>
-            </ul>
-        <aalam-sgn-box id="sgnbox" minchar="1">
-            <div class="input" slot="sgn-input">
-                <input id="box1" type="text" placeholder="search..." />
+                <h1>Suggestion box for server response</h1>
+                <ul>
+                    <li>It has the minimum character of 2 letters</li>
+                    <li>suggestions retrieve from server by user input</li>
+                    <li>Loadmore can append more suggestion</li>
+                    <li>
+                        User can provide the template for list item or template
+                        from server response
+                    </li>
+                    <li>
+                        Text highligh can be given as highlight="end" or
+                        highlight="matched"
+                    </li>
+                </ul>
+                <aalam-sgn-box id="sgnbox" minchar="1">
+                    <div class="input" slot="sgn-input">
+                        <input
+                            id="box1"
+                            type="text"
+                            placeholder="search..."
+                            autocomplete="off"
+                        />
+                    </div>
+                    <div slot="sgn-item-template" id="sgn-item-template">
+                        <div class="container">
+                            <p name="name">{name}</p>
+                            <p class="description">{description}</p>
+                        </div>
+                    </div>
+                    <div class="sgn-empty" slot="sgn-empty">Empty Items</div>
+                </aalam-sgn-box>
             </div>
-            <div slot="sgn-item-template">
-                <div class="container">
-                    <p name="name">{title}</p>
-                    <p class="description">{description}</p>
-                </div>
+            <hr />
+            <div class="class-2">
+                <h1>Suggestion box for constant list</h1>
+                <ul>
+                    <li>
+                        User can provide minmum character, here we using 1
+                        letters as min char
+                    </li>
+                    <li>List and listkey can be given by user</li>
+                    <li>There is no load more option here</li>
+                    <li>user can also provide the template</li>
+                    <li>
+                        Text highligh can be given as highlight="end" or
+                        highlight="matched"
+                    </li>
+                </ul>
+                <aalam-sgn-box id="sgnbox1" highlight="end" minchar="2">
+                    <div class="div" slot="sgn-input">
+                        <input type="text" placeholder="search..." />
+                    </div>
+                    <div slot="sgn-item-template">
+                        <div class="container">
+                            <p name="name">{name}</p>
+                            <p class="description">{description}</p>
+                        </div>
+                    </div>
+                    <div class="sgn-empty" slot="sgn-empty">
+                        This is empty...
+                    </div>
+                </aalam-sgn-box>
             </div>
-            <div class="sgn-empty" slot="sgn-empty">Empty Items</div>
-        </aalam-sgn-box>
-        </div>
-        <hr/>
-        <div class="class-2">
-            <h1>Suggestion box for constant list</h1>
-            <ul>
-                <li>User can provide minmum character, here we using 1 letters as min char</li>
-                <li>List and listkey can be given by user</li>
-                <li>There is no load more option here</li>
-                <li>user can also provide the template</li>
-                <li>Text highligh can be given as highlight="end" or highlight="matched"</li>
-            </ul>
-        <aalam-sgn-box id="sgnbox1" highlight="end" minchar=2>
-            <div class="div" slot="sgn-input">
-                <input type="text" placeholder="search..." />
+            <hr />
+            <div class="class-3">
+                <h1>Suggestion box without template</h1>
+                <ul>
+                    <li>here, there is no need to provide template</li>
+                    <li>
+                        List key can be given to setsuggestion and
+                        appendsuggestion methods
+                    </li>
+                    <li>
+                        Text highligh can be given as highlight="end" or
+                        highlight="matched"
+                    </li>
+                    <li>loadmore also avaiable based on the response type</li>
+                </ul>
+                <aalam-sgn-box id="sgnbox2" highlight="end" minchar="3">
+                    <div class="div" slot="sgn-input">
+                        <input type="text" placeholder="search..." />
+                    </div>
+                    <div class="sgn-empty" slot="sgn-empty">
+                        This is empty...
+                    </div>
+                </aalam-sgn-box>
             </div>
-            <div slot="sgn-item-template">
-                <div class="container">
-                    <p name="name">{name}</p>
-                    <p class="description">{description}</p>
-                </div>
-            </div>
-            <div class="sgn-empty" slot="sgn-empty">This is empty...</div>
-        </aalam-sgn-box>
-        </div>
-        <hr/>
-        <div class="class-3">
-            <h1>Suggestion box with default template</h1>
-            <ul>
-                <li>here, there is no need to provide template </li>
-                <li>List key can be given to setsuggestion and appendsuggestion methods</li>
-                <li>Text highligh can be given as highlight="end" or highlight="matched"</li>
-                <li>loadmore also avaiable based on the response type</li>
-            </ul>
-        <aalam-sgn-box id="sgnbox2" highlight="end" minchar="3">
-            <div class="div" slot="sgn-input">
-                <input type="text" placeholder="search..." />
-            </div>
-            <div class="sgn-empty" slot="sgn-empty">This is empty...</div>
-        </aalam-sgn-box>
-        </div>
         </div>
         <script>
             let el_key = "name";
             let el_list = [
                 {
-                    name: "laptop",
+                    name: "mobile",
                     description: "My device",
                 },
                 {
-                    name: "mobile",
+                    name: "mobile1",
                     description: "portable device",
                 },
                 {
-                    name: "pc",
+                    name: "mobile2",
                     description: "personal computer",
                 },
             ];
@@ -172,6 +199,8 @@
             el.listkey = el_key;
 
             let ele = document.getElementById("sgnbox");
+            let e_key = "name";
+            ele.listkey = e_key;
             ele.addEventListener("loadmore", () => {
                 loadmoreEntries(ele);
             });
@@ -187,99 +216,102 @@
                         description: "A comfortable and stylish t-shirt",
                     },
                     {
-                        title: "formal shirt",
+                        name: "formal shirt",
                         description: "A comfortable and professional shirt",
                     },
                     {
-                        title: "jean pant",
+                        name: "jean pant",
                         description: "A comfortable and stylish pants",
                     },
                     {
-                        title: "cotton pant",
+                        name: "cotton pant",
                         description: "A comfortable pant to wear ",
                     },
                     {
-                        title: "jackets",
+                        name: "jackets",
                         description: "Makes look cool ",
                     },
+                    "ajay",
+                    "vijay",
                 ];
-                ele.setSuggestion(res, true, "title");
+                ele.setSuggestion(res, false);
             }
             async function loadmoreEntries(ele) {
                 let res = [
                     {
-                        title: "T-Shirt",
+                        name: "T-Shirt",
                         description: "A comfortable and stylish t-shirt",
                         price: 19.99,
                         color: "Blue",
                     },
                     {
-                        title: "Hoodie",
+                        name: "Hoodie",
                         description: "A cozy and warm hoodie for chilly days",
                         price: 29.99,
                         color: "Grey",
                     },
                     {
-                        title: "Jeans",
+                        name: "Jeans",
                         description:
                             "Classic and versatile jeans for any occasion",
                         price: 34.99,
                         size: 32,
                     },
                     {
-                        title: "Sneakers",
+                        name: "Sneakers",
                         description:
                             "Comfortable and stylish sneakers for everyday wear",
                         price: 59.99,
                         brand: "Sporty Brand",
                     },
                     {
-                        title: "Dress",
+                        name: "Dress",
                         description:
                             "A flowy and elegant dress for a special night out",
                         price: 44.99,
                         color: "Black",
                     },
                     {
-                        title: "Watch",
+                        name: "Watch",
                         description:
                             "A sleek and sophisticated watch to complete your look",
                         price: 129.99,
                         material: "Stainless Steel",
                     },
                     {
-                        title: "Sunglasses",
+                        name: "Sunglasses",
                         description:
                             "Protect your eyes in style with these cool sunglasses",
                         price: 24.99,
                         brand: "Shady Company",
                     },
                     {
-                        title: "Backpack",
+                        name: "Backpack",
                         description:
                             "A spacious and sturdy backpack for all your adventures",
                         price: 69.99,
                         color: "Green",
                     },
                     {
-                        title: "Wallet",
+                        name: "Wallet",
                         description:
                             "A sleek and practical wallet to keep your essentials safe",
                         price: 39.99,
                         material: "Leather",
                     },
                     {
-                        title: "Phone Case",
+                        name: "Phone Case",
                         description:
                             "Protect your phone in style with this eye-catching case",
                         price: 14.99,
                         color: "Pink",
                     },
                 ];
-                ele.appendSuggestion(res, true, "title");
+                ele.appendSuggestion(res, true);
             }
 
             let elem = document.getElementById("sgnbox2");
+            elem.listkey = "name";
             elem.addEventListener("loadmore", () => {
                 loadmoreEntries(elem);
             });
@@ -295,96 +327,97 @@
                         description: "A comfortable and stylish t-shirt",
                     },
                     {
-                        title: "formal shirt",
+                        name: "formal shirt",
                         description: "A comfortable and professional shirt",
                     },
                     {
-                        title: "jean pant",
+                        name: "jean pant",
                         description: "A comfortable and stylish pants",
                     },
                     {
-                        title: "cotton pant",
+                        name: "cotton pant",
                         description: "A comfortable pant to wear ",
                     },
                     {
-                        title: "jackets",
+                        name: "jackets",
                         description: "Makes look cool ",
                     },
+                    "ajay",
                 ];
-                elem.setSuggestion(res, true, "title");
+                elem.setSuggestion(res, true);
             }
             async function loadmoreEntries(elem) {
                 let res = [
                     {
-                        title: "T-Shirt",
+                        name: "T-Shirt",
                         description: "A comfortable and stylish t-shirt",
                         price: 19.99,
                         color: "Blue",
                     },
                     {
-                        title: "Hoodie",
+                        name: "Hoodie",
                         description: "A cozy and warm hoodie for chilly days",
                         price: 29.99,
                         color: "Grey",
                     },
                     {
-                        title: "Jeans",
+                        name: "Jeans",
                         description:
                             "Classic and versatile jeans for any occasion",
                         price: 34.99,
                         size: 32,
                     },
                     {
-                        title: "Sneakers",
+                        name: "Sneakers",
                         description:
                             "Comfortable and stylish sneakers for everyday wear",
                         price: 59.99,
                         brand: "Sporty Brand",
                     },
                     {
-                        title: "Dress",
+                        name: "Dress",
                         description:
                             "A flowy and elegant dress for a special night out",
                         price: 44.99,
                         color: "Black",
                     },
                     {
-                        title: "Watch",
+                        name: "Watch",
                         description:
                             "A sleek and sophisticated watch to complete your look",
                         price: 129.99,
                         material: "Stainless Steel",
                     },
                     {
-                        title: "Sunglasses",
+                        name: "Sunglasses",
                         description:
                             "Protect your eyes in style with these cool sunglasses",
                         price: 24.99,
                         brand: "Shady Company",
                     },
                     {
-                        title: "Backpack",
+                        name: "Backpack",
                         description:
                             "A spacious and sturdy backpack for all your adventures",
                         price: 69.99,
                         color: "Green",
                     },
                     {
-                        title: "Wallet",
+                        name: "Wallet",
                         description:
                             "A sleek and practical wallet to keep your essentials safe",
                         price: 39.99,
                         material: "Leather",
                     },
                     {
-                        title: "Phone Case",
+                        name: "Phone Case",
                         description:
                             "Protect your phone in style with this eye-catching case",
                         price: 14.99,
                         color: "Pink",
                     },
                 ];
-                elem.appendSuggestion(res, true, "title");
+                elem.appendSuggestion(res, true);
             }
         </script>
     </body>
