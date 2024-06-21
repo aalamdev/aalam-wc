@@ -4,9 +4,7 @@ import { queryAssignedElements } from "lit/decorators.js";
 
 @customElement("aalam-sgn-box")
 export class SuggestionBox extends LitElement {
-    static override styles = css`
-        
-    `;
+    static override styles = css``;
     @queryAssignedElements({ slot: "sgn-item-template" })
     template_slots: Array<HTMLElement>;
 
@@ -29,7 +27,7 @@ export class SuggestionBox extends LitElement {
     size: number = 0;
 
     @state()
-    result: Array<{ [key: string]: string } | string> = [];
+    result: Array<{ [key: string]: string } | string | any> = [];
 
     @state()
     input_el: HTMLElement | null | string = null;
@@ -66,14 +64,14 @@ export class SuggestionBox extends LitElement {
     }
     override render() {
         return html`
-            <div style="position:relative">
+            <div style="position:absolute">
                 <div part="sgn-input" @focusin=${this._inputFocusEvent} @keydown=${this.keyDownInputEvent} >
-                    <slot name="sgn-input" id="sgn-input" @input=${this._inputEvent} @click=${this._inputSelectEvent}>
+                    <slot name="sgn-input" id="sgn-input" @input=${this._inputEvent} @click=${this._inputSelectEvent} >
                         <input type="text" />
                     </slot>
                 </div>
                 <slot name="sgn-item-template" style="display:none"></slot>
-                <div id="sgn-container" part="sgn-container" style="display:${this.show_container ? "block" : "none"};">
+                <div id="sgn-container" part="sgn-container" style="display:${this.show_container ? "block" : "none"};" >
                     <div style="display:${this.show_empty ? "block" : "none"}">
                         <slot id="sgn-empty" name="sgn-empty"></slot>
                     </div>
@@ -173,14 +171,15 @@ export class SuggestionBox extends LitElement {
                     template = obj[key];
                 }
 
-                str = str.replace(
-                    new RegExp("\\{" + key + "\\}", "gi"),
-                    template
-                );
+                str = str.replace(new RegExp(`\\{${key}\\}`, "gi"), template);
             }
+            
+            str = str.replace(/\{[^}]+\}/g, "");
+
             return str;
         }
     }
+
     keyDownInputEvent(e: any) {
         const resultLength = this.result.length;
         switch (e.key) {
@@ -266,7 +265,6 @@ export class SuggestionBox extends LitElement {
     }
 
     private _setActive(resultLength: number) {
-
         if (this.prevIndex >= 0 && this.prevIndex < resultLength) {
             const prevItem = this.private_items[this.prevIndex];
             if (prevItem) {
