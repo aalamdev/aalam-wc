@@ -1,18 +1,51 @@
 export const screen_size = ['xs', 's', 'm', 'l', 'xl'];
 export const screen_limits:{[key:string]:Array<number|null>} = {
     'xs': [0,    640],
-    's':  [640,  992],
-    'm':  [992,  1200],
-    'l':  [1200, 1600],
-    'xl': [1600, null]
+    's':  [641,  992],
+    'm':  [993,  1200],
+    'l':  [1201, 1600],
+    'xl': [1601, null]
 };
+export function animationCSS(
+        open_sel:string, close_sel:string, as:object, dur:number):{
+            [key:string]:any} {
+    const animateTransform = (x:string, y:string) => {
+        return {open: {from: `transform:translate(${x}, ${y});opacity:0`,
+                       to: `opacity:1;transform:translate(0px, 0px)`},
+                close: {from: `transform:translate(0px, 0px)`,
+                        to: `transform:translate(${x},${y})`}
+        }
+    }
+    const animate_defs:{ [key:string]:any} = {
+        b2t: animateTransform("0px", "100%"),
+        t2b: animateTransform('0px', "-100%"),
+        r2l: animateTransform("100%", '0px'),
+        l2r: animateTransform("-100%", '0px'),
+        fade: {open: {from: "opacity:0", to: "opacity: 1"},
+               close: {from: "opacity:1", to: "opacity:0"}}
+    }
+    const animationMode = (as:object, dur:number, val:string):{
+            [key:string]:any} => {
+        if(as[val])
+            return `
+{animation:${as[val]}-${val} ${dur}ms}
+@keyframes ${as[val]}-${val}
+    {from {${animate_defs[as[val]].close.from}}
+    to {${animate_defs[as[val]].close.to}}}`
+    }
+    return `${open_sel} ${animationMode(as, dur, 'open')}
+            ${close_sel} ${animationMode(as, dur, 'close')}`
+}
+
 export interface ResponsiveVal {
     ll:number|null;
     ul:number|null;
     val:string;
+    cond: string;
 }
 
-export function parseAttrVal(val:string, validator?:Function):{[key:string]:string} {
+export function parseAttrVal(val:string, validator?:Function):{
+                                [key:string]:string} {
     let pos = 0;
     let val_obj:{[key:string]:string} = {};
     while (pos < val.length) {
@@ -29,10 +62,12 @@ export function parseAttrVal(val:string, validator?:Function):{[key:string]:stri
             val_obj[key.trim()] = res;
         pos = sem_ix + 1;
     }
-    return val_obj
+    return val_obj;
 }
 
-export function getResponsiveValues(val_str:string, def_values:string|{[key:string]:string}, validator:Function):Array<ResponsiveVal> {
+export function getResponsiveValues(val_str:string,
+                                    def_values:string|{[key:string]:string},
+                                    validator?:Function):Array<ResponsiveVal> {
     let val_obj = parseAttrVal(val_str, validator)
     if (typeof def_values == 'string')
         def_values = parseAttrVal(def_values);
@@ -49,11 +84,16 @@ export function getResponsiveValues(val_str:string, def_values:string|{[key:stri
         let prev_ret = ret.length?ret[ret.length - 1]:null;
         if (val_obj[s]) {
             if (!prev_ret || prev_ret['val'] != val_obj[s])
-                ret.push({'ll': ll, 'ul': ul, 'val': val_obj[s]})
+                ret.push({'ll': ll, 'ul': ul, 'val': val_obj[s], 'cond': ''})
             else if (prev_ret?.['val'] == val_obj[s])
                 prev_ret['ul'] = ul;
         } else if (prev_ret)
             prev_ret['ul'] = ul;
+    }
+    for (let r of ret) {
+        let {ll, ul} =  r;
+        r['cond'] = `(min-width:${ll}px)${ll != null && ul != null?' and ':''}
+                                        ${ul != null?`(max-width:${ul}px)`:''}`;
     }
     return ret;
 }
@@ -92,3 +132,4 @@ export class SortedArray<T> extends Array<T> {
         return ret;
     }
 }
+
