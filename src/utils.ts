@@ -26,14 +26,16 @@ export function animationCSS(
             close_sel:string,
             as:{[key:string]:string},
             dur:number):string {
-    const animationMode = (as:{[key:string]:string}, dur:number, val:string):string => {
+    const animationMode = (as:{[key:string]:string},
+                           dur:number,
+                           val:string):string => {
         if(as[val])
             return `
 {animation:${as[val]}-${val} ${dur}ms}
 @keyframes ${as[val]}-${val}
-    {from {${animate_defs[as[val]].close.from}}
-    to {${animate_defs[as[val]].close.to}}}`
-        return '';
+    {from {${animate_defs[as[val]][val].from}}
+    to {${animate_defs[as[val]][val].to}}}`
+        return `{}`;
     }
     return `${open_sel} ${animationMode(as, dur, 'open')}
             ${close_sel} ${animationMode(as, dur, 'close')}`
