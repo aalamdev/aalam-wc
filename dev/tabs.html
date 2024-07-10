@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <style>
+            .parentDiv {margin-left:10px;border:2px solid blue;
+                        margin-bottom:20px}
+            .title-tab {padding:4px;text-decoration:underline}
+            button.title-tab {text-decoration:none}
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Tabs Demo</title>
+        <script type="module" src="../src/tabs.ts"></script>
+    </head>
+    <body>
+        <h1>Tabs Demo</h1>
+        <script>
+            let index = 3;
+            function addNewTab() {
+                let el = document.getElementById("tab2");
+                index += 1;
+                let title = document.createElement("button")
+                title.classList.add("title-tab")
+                title.classList.add("tab-active")
+                title.slot = "tab-title"
+                title.innerText = "title " + index;
+
+                let div = document.createElement("div");
+                div.classList.add("bdy")
+                div.classList.add("tab-active");
+                div.slot = "tab-body";
+                div.innerText = "body " + index;
+                el.appendChild(title)
+                el.appendChild(div);
+            }
+        </script>
+        <div class="parentDiv">
+            <aalam-tabs class="tab1 sty" colsize="title:40%;body:60%"
+                        animation="b2t" fashion="xs:ow">
+                <div id="tabslot" slot="tab-title" class="title-tab">title1
+                </div>
+                <div class="bdy" slot="tab-body">body1</div>
+
+                <div slot="tab-title" class="title-tab tab-active">title2</div>
+                <div slot="tab-body" class="bdy">body2</div>
+
+                <div slot="tab-title" class="title-tab tab-active">title3</div>
+                <div slot="tab-body" class="bdy">body3</div>
+
+            </aalam-tabs>
+        </div>
+
+        <div class="parentDiv">
+            <aalam-tabs id="tab2" class="tab1 sty" animation="show:l2r;hide:r2l"
+                        fashion="xs:clumn;s:row;l:column;xl:accordion">
+                <button slot="tab-title" class="title-tab">title 1</button>
+                <div class="bdy tab-active" slot="tab-body">body 1</div>
+
+                <button slot="tab-title" class="tab-active title-tab">title 2
+                </button>
+                <div class="bdy tab-active" slot="tab-body">body 2</div>
+
+                <button slot="tab-title" class="title-tab tab-active">title 3
+                </button>
+                <div class="bdy" slot="tab-body">body 3</div>
+            </aalam-tabs>
+        </div>
+        <button onclick="addNewTab()">New tab item</button>
+    </body>
+<html>
