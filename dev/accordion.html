@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script type="module" src="/src/accordion.ts"></script>
+        <title>Accordion Example</title>
+        <style>
+            .aalam-accordion {
+                display: block;
+            }
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                background-color: #f0f0f0;
+                margin: 0;
+                padding: 20px;
+            }
+
+            .container {
+                margin-bottom: 15px;
+                background-color: #fff;
+                border-radius: 5px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .acc-title {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px;
+                cursor: pointer;
+                border-bottom: 1px solid #ddd;
+                background-color: #f9f9f9;
+                border-radius: 5px 5px 0 0;
+            }
+
+            .acc-title span {
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            .acc-body {
+                display: none;
+                background-color: #fff;
+                border-radius: 0 0 5px 5px;
+            }
+
+            .acc-body p {
+                padding: 20px;
+                margin: 0;
+                display: block;
+                left: 20px;
+            }
+
+            .acc-body.active {
+                display: block;
+            }
+
+            button {
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                padding: 8px 15px;
+                cursor: pointer;
+                border-radius: 3px;
+                transition: background-color 0.3s ease;
+            }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+            label {
+                margin-right: 15px;
+            }
+
+            input[type="checkbox"] {
+                margin-right: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <aalam-accordion id="accordion" activecls="ac" animationDur="300" nomultiple nocloseall>
+            <header class="container ac">
+                <div class="acc-title" id="t1">
+                    <span>What is Artificial Intelligence?</span>
+                    <button>Toggle</button>
+                </div>
+                <div class="acc-body">
+                    <p>
+                        Artificial Intelligence (AI) is the simulation of human
+                        intelligence processes by machines, especially computer
+                        systems. These processes include learning (the
+                        acquisition of information and rules for using the
+                        information), reasoning (using rules to reach
+                        approximate or definite conclusions), and
+                        self-correction.
+                    </p>
+
+                    <p></p>
+                </div>
+            </header>
+            <article class="container ac">
+                <div class="acc-title" id="t2">
+                    <span>What is Machine Learning?</span>
+                    <button>Toggle</button>
+                </div>
+                <div class="acc-body">
+                    <p>
+                        Machine Learning is a subset of AI that provides systems
+                        the ability to automatically learn and improve from
+                        experience without being explicitly programmed. It
+                        focuses on the development of computer programs that can
+                        access data and use it to learn for themselves.
+                    </p>
+                </div>
+            </article>
+            <div class="container ac">
+                <div class="acc-title" id="t3">
+                    <span>What is Blockchain?</span>
+                    <button>Toggle</button>
+                </div>
+                <div class="acc-body">
+                    <p>
+                        Blockchain is a decentralized, distributed ledger
+                        technology that records the provenance of a digital
+                        asset. By decentralizing the data, blockchain eliminates
+                        the need for intermediaries, reduces the risk of fraud,
+                        and enhances transparency.
+                    </p>
+                </div>
+            </div>
+
+            <div class="container ac">
+                <div class="acc-title" id="t3">
+                    <span>What is cloud?</span>
+                    <button>Toggle</button>
+                </div>
+                <div class="acc-body">
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis, cum!
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="container ac">
+                <div class="acc-title" id="t3">
+                    <span>What is big data?</span>
+                    <button>Toggle</button>
+                </div>
+                <div class="acc-body">
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis, cum!
+                    </p>
+                </div>
+            </div>
+        </aalam-accordion>
+        <div>
+            <label>
+                <input type="checkbox" id="nocloseall" /> No Close All
+            </label>
+            <label>
+                <input type="checkbox" id="nomultiple" /> No Multiple
+            </label>
+        </div>
+        <script>
+            const accordion = document.getElementById("accordion");
+            const noCloseAllCheckbox = document.getElementById("nocloseall");
+            const noMultipleCheckbox = document.getElementById("nomultiple");
+
+            noCloseAllCheckbox.addEventListener("change", (event) => {
+                if (event.target.checked) {
+                    accordion.setAttribute("nocloseall", event.target.checked);
+                } else {
+                    accordion.removeAttribute("nocloseall");
+                }
+            });
+
+            noMultipleCheckbox.addEventListener("change", (event) => {
+                if (event.target.checked) {
+                    accordion.setAttribute("nomultiple", event.target.checked);
+                } else {
+                    accordion.removeAttribute("nomultiple");
+                }
+            });
+        </script>
+    </body>
+</html>
