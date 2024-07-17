@@ -14,7 +14,8 @@ export default defineConfig({
             'toggle-switch': path.resolve(__dirname, "src/toggle-switch.ts"),
             'slider': path.resolve(__dirname, "src/slider.ts"),
             'minput': path.resolve(__dirname, "src/minput.ts"),
-            'tabs': path.resolve(__dirname, "src/tabs.ts")
+            'tabs': path.resolve(__dirname, "src/tabs.ts"),
+            'modal': path.resolve(__dirname, "src/modal.ts")
           },
           output: [{
             format: 'esm',
