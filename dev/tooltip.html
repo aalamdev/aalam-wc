@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <style>
+            .tt-body {
+                display:none;
+                background: #222;
+                color: white;
+                font-weight:bold;
+                padding: 5px;
+                border-radius: 4px;
+                font-size: 90%;
+                width:max-content;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+            .tt-arrow {
+                position: absolute;
+                background: #222;
+                width: 8px;
+                height: 8px;
+                transform: rotate(45deg);
+            }
+            #container {
+                left: 50%;
+                top: 50%;
+                position:absolute;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Tooltip Demo</title>
+        <script type="module" src="../src/tooltip.ts"></script>
+    </head>
+    <body>
+        <div id="container">
+            <aalam-tooltip position="right">
+                <button>Btn element</button>
+            </aalam-tooltip>
+        </div>
+    </body>
+<html>
