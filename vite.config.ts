@@ -15,7 +15,8 @@ export default defineConfig({
             'slider': path.resolve(__dirname, "src/slider.ts"),
             'minput': path.resolve(__dirname, "src/minput.ts"),
             'tabs': path.resolve(__dirname, "src/tabs.ts"),
-            'modal': path.resolve(__dirname, "src/modal.ts")
+            'modal': path.resolve(__dirname, "src/modal.ts"),
+            'tooltip':path.resolve(__dirname, "src/tooltip.ts")
           },
           output: [{
             format: 'esm',

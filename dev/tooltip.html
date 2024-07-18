@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <style>
+            aalam-tooltip::part(tt-body) {
+                background: #222;
+                color: white;
+                font-weight:bold;
+                padding: 5px;
+                border-radius: 4px;
+                font-size: 90%;
+                width:max-content;
+            }
+            aalam-tooltip::part(tt-arrow) {
+                background: #222;
+                width: 8px;
+                height: 8px;
+                transform: rotate(45deg);
+            }
+            #container {
+                left: 50%;
+                top: 50%;
+                position:absolute;
+                margin-bottom:10px;
+            }
+            fieldset {
+                margin-top: 40px;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Tooltip Demo</title>
+        <script type="module" src="../src/tooltip.ts"></script>
+    </head>
+    <body>
+        <div id="container">
+            <aalam-tooltip msg="show me" id="ttp" position="top">
+                <button>Btn element</button>
+            </aalam-tooltip>
+            <fieldset>
+                <legend>position</legend>
+                <div>
+                    <input type="radio" name="pos" id="top-pos" value="top"/>
+                    <label for="top">top</label>
+                </div>
+                <div>
+                    <input type="radio" name="pos" id="right" value="right"/>
+                    <label for="right">right</label>
+                </div>
+                <div>
+                    <input type="radio" name="pos" id="bottom" value="bottom"/>
+                    <label for="bottom">bottom</label>
+                </div>
+                <div>
+                    <input type="radio" name="pos" id="left" value="left"/>
+                    <label for="left">left</label>
+                </div>
+            </fieldset>
+        </div>
+        <script>
+            const tooltip = document.getElementById("ttp");
+            const pos = document.querySelectorAll('input[name="pos"]');
+            window.onload = pos[0].checked = true;
+            for(let i=0; i < pos.length; i++) {
+                pos[i].addEventListener("change", () => {
+                    tooltip.setAttribute("position", event.target.value);
+                });
+            }
+        </script>
+    </body>
+<html>
