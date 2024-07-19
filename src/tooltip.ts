@@ -1,32 +1,33 @@
-import {LitElement, html} from 'lit';
-import {customElement, state, property} from 'lit/decorators.js';
+import {LitElement, html, css} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
+import {query} from 'lit/decorators/query.js';
 import {computePosition, flip, shift, offset, arrow} from '@floating-ui/dom';
 
 @customElement('aalam-tooltip')
 export class AalamTooltip extends LitElement {
 
-    static disabledFeatures = ['shadow'];
-
     @property({type:String, attribute:true})
     msg = 'This is a Tooltip';
 
     @property({type:String, attribute:true})
-    bodycls = 'tt-body';
-
-    @property({type:String, attribute:true})
-    arrowcls = 'tt-arrow';
-
-    @property({type:String, attribute:true})
     position = 'top';
+
+    @query('#body')
+    body_el:HTMLElement;
+
+    @query("#arrow")
+    arrow_el:HTMLElement;
 
     constructor() {
         super();
     }
-    override attributeChangedCallback(name:string, old_val:string, new_val:string) {
+    override attributeChangedCallback(
+        name:string, old_val:string, new_val:string) {
         super.attributeChangedCallback(name, old_val, new_val);
         if(name == 'position') {
             let validatePosition = (v:string) => {
-                return (v=='top'||v=='bottom'||v == 'right'||v == 'left')
+                return (v == 'top' || v == 'bottom' ||
+                        v == 'right' || v == 'left')
             }
             if(!validatePosition(this.position))
                 this.position = 'top';
@@ -38,69 +39,70 @@ export class AalamTooltip extends LitElement {
     }
     override disconnectedCallback() {
         super.disconnectedCallback();
-        let body_el = document.getElementsByClassName(this.bodycls);
-        body_el.remove();
     }
-    override createRenderRoot() {
-        return this;
+    override render() {
+        return html`
+<slot></slot>
+<div id="body" part="tt-body">${this.msg}
+    <div id="arrow" part="tt-arrow"></div>
+</div>`
+    }
+    static override get styles() {
+        return css`
+:host {position:relative}
+#body {display:none;position:absolute}
+#arrow {position:absolute}`
     }
     private _createTooltip() {
-        //const el = this.children[0];
-        const body_el = document.createElement("div");
-        const arrow_el = document.createElement("div");
-        this.setAttribute('aria-describedby', "tooltip");
-        body_el.setAttribute('role', "tooltip");
-        body_el.innerText = this.msg;
-        body_el.classList.add(this.bodycls);
-        arrow_el.classList.add(this.arrowcls);
-        body_el.appendChild(arrow_el);
-        this.appendChild(body_el);
-
         let update = () => {
-            computePosition(this, body_el, {
-                    placement: this.position,
+            computePosition(this, this.body_el, {
+                    placement: this.position as any,
                     middleware: [
                         offset(6),
                         flip(),
                         shift({padding: 5}),
-                        arrow({element: arrow_el}),
+                        arrow({element: this.arrow_el}),
                     ],
                 }).then(({x, y, placement, middlewareData}) => {
-                    Object.assign(body_el.style, {
+                    Object.assign(this.body_el.style, {
                         left: `${x}px`,
                         top: `${y}px`,
                     });
 
-                    const {x: arrowX, y: arrowY} = middlewareData.arrow;
-                    const staticSide = {
+                    const {x: arrowX, y: arrowY} = middlewareData.arrow as any;
+                    const staticSide:string|undefined = {
                         top: 'bottom',
                         right: 'left',
                         bottom: 'top',
                         left: 'right',
                     }[placement.split('-')[0]];
-                    Object.assign(arrow_el.style, {
+                    let obj:{[key:string]: string} = {
                         left: arrowX != null ? `${arrowX}px`:'',
                         top: arrowY != null ? `${arrowY}px`:'',
                         right: '',
                         bottom: '',
-                        [staticSide]: `-4px`,
-                    });
+                    }
+                    if (staticSide)
+                        obj[staticSide] = '-4px',
+                    Object.assign(this.arrow_el.style, obj);
             });
         }
         let showTooltip = () => {
-            body_el.style.display = 'block';
+            this.body_el.style.display = 'block';
             update();
         }
         let hideTooltip = () => {
-            body_el.style.display = '';
+            this.body_el.style.display = '';
         }
         [
             ['mouseenter', showTooltip],
             ['mouseleave', hideTooltip],
             ['focus', showTooltip],
             ['blur', hideTooltip],
-        ].forEach(([event, listener]) => {
-            this.addEventListener(event, listener);
+        ].forEach(([event_name, listener]) => {
+            this.addEventListener(
+                event_name as string,
+                listener as EventListenerOrEventListenerObject);
         });
     }
 }
