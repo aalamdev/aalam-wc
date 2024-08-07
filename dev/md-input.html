@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <script type="module" src="/@vite/client"></script>
+
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <style>
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Input box with custom label Demo</title>
+        <script type="module" src="../src/md-input.ts"></script>
+    </head>
+    <body>
+        <h1 style="margin-bottom:50px">Input box demo</h1>
+        <div>
+            <h3>Outline</h3>
+            <aalam-md-input charcount="5" prefix="$" mode="outline" suffix=".com">
+                <input slot="input" id="dev">
+                <span slot='leading-icon'>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15px" height="15px"><g id="_01_align_center" data-name="01 align center"><path d="M21,24H19V18.957A2.96,2.96,0,0,0,16.043,16H7.957A2.96,2.96,0,0,0,5,18.957V24H3V18.957A4.963,4.963,0,0,1,7.957,14h8.086A4.963,4.963,0,0,1,21,18.957Z"/><path d="M12,12a6,6,0,1,1,6-6A6.006,6.006,0,0,1,12,12ZM12,2a4,4,0,1,0,4,4A4,4,0,0,0,12,2Z"/></g></svg>
+                </span>
+                <span slot='trailing-icon'>
+                    <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="15px" height="15px"><path d="M23.271,9.419A15.866,15.866,0,0,0,19.9,5.51l2.8-2.8a1,1,0,0,0-1.414-1.414L18.241,4.345A12.054,12.054,0,0,0,12,2.655C5.809,2.655,2.281,6.893.729,9.419a4.908,4.908,0,0,0,0,5.162A15.866,15.866,0,0,0,4.1,18.49l-2.8,2.8a1,1,0,1,0,1.414,1.414l3.052-3.052A12.054,12.054,0,0,0,12,21.345c6.191,0,9.719-4.238,11.271-6.764A4.908,4.908,0,0,0,23.271,9.419ZM2.433,13.534a2.918,2.918,0,0,1,0-3.068C3.767,8.3,6.782,4.655,12,4.655A10.1,10.1,0,0,1,16.766,5.82L14.753,7.833a4.992,4.992,0,0,0-6.92,6.92l-2.31,2.31A13.723,13.723,0,0,1,2.433,13.534ZM15,12a3,3,0,0,1-3,3,2.951,2.951,0,0,1-1.285-.3L14.7,10.715A2.951,2.951,0,0,1,15,12ZM9,12a3,3,0,0,1,3-3,2.951,2.951,0,0,1,1.285.3L9.3,13.285A2.951,2.951,0,0,1,9,12Zm12.567,1.534C20.233,15.7,17.218,19.345,12,19.345A10.1,10.1,0,0,1,7.234,18.18l2.013-2.013a4.992,4.992,0,0,0,6.92-6.92l2.31-2.31a13.723,13.723,0,0,1,3.09,3.529A2.918,2.918,0,0,1,21.567,13.534Z"/></svg>
+                </span>
+                <span slot="helper-text">helper text</span>
+            </aalam-md-input>
+        </div>
+        <hr/>
+        <div>
+            <h3>Filled</h3>
+            <aalam-md-input fillColor="normal:yellow;hover:blue;focus:red" mode="filled">
+                <input slot="input" id="dev">
+                <span slot='leading-icon'>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15px" height="15px"><g id="_01_align_center" data-name="01 align center"><path d="M21,24H19V18.957A2.96,2.96,0,0,0,16.043,16H7.957A2.96,2.96,0,0,0,5,18.957V24H3V18.957A4.963,4.963,0,0,1,7.957,14h8.086A4.963,4.963,0,0,1,21,18.957Z"/><path d="M12,12a6,6,0,1,1,6-6A6.006,6.006,0,0,1,12,12ZM12,2a4,4,0,1,0,4,4A4,4,0,0,0,12,2Z"/></g></svg>
+                </span>
+                <span slot='trailing-icon'>
+                    <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="15px" height="15px"><path d="M23.271,9.419A15.866,15.866,0,0,0,19.9,5.51l2.8-2.8a1,1,0,0,0-1.414-1.414L18.241,4.345A12.054,12.054,0,0,0,12,2.655C5.809,2.655,2.281,6.893.729,9.419a4.908,4.908,0,0,0,0,5.162A15.866,15.866,0,0,0,4.1,18.49l-2.8,2.8a1,1,0,1,0,1.414,1.414l3.052-3.052A12.054,12.054,0,0,0,12,21.345c6.191,0,9.719-4.238,11.271-6.764A4.908,4.908,0,0,0,23.271,9.419ZM2.433,13.534a2.918,2.918,0,0,1,0-3.068C3.767,8.3,6.782,4.655,12,4.655A10.1,10.1,0,0,1,16.766,5.82L14.753,7.833a4.992,4.992,0,0,0-6.92,6.92l-2.31,2.31A13.723,13.723,0,0,1,2.433,13.534ZM15,12a3,3,0,0,1-3,3,2.951,2.951,0,0,1-1.285-.3L14.7,10.715A2.951,2.951,0,0,1,15,12ZM9,12a3,3,0,0,1,3-3,2.951,2.951,0,0,1,1.285.3L9.3,13.285A2.951,2.951,0,0,1,9,12Zm12.567,1.534C20.233,15.7,17.218,19.345,12,19.345A10.1,10.1,0,0,1,7.234,18.18l2.013-2.013a4.992,4.992,0,0,0,6.92-6.92l2.31-2.31a13.723,13.723,0,0,1,3.09,3.529A2.918,2.918,0,0,1,21.567,13.534Z"/></svg>
+                </span>
+                <span slot="helper-text">helper text</span>
+            </aalam-md-input>
+        </div>
+        <div style='display:none'>
+            <h1>Block</h1>
+                <input id="input-slot" slot="input" id="dev">
+                <span id='lead-slot' slot='leading-icon'>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15px" height="15px"><g id="_01_align_center" data-name="01 align center"><path d="M21,24H19V18.957A2.96,2.96,0,0,0,16.043,16H7.957A2.96,2.96,0,0,0,5,18.957V24H3V18.957A4.963,4.963,0,0,1,7.957,14h8.086A4.963,4.963,0,0,1,21,18.957Z"/><path d="M12,12a6,6,0,1,1,6-6A6.006,6.006,0,0,1,12,12ZM12,2a4,4,0,1,0,4,4A4,4,0,0,0,12,2Z"/></g></svg>
+                </span>
+                <span id='trail-slot' slot='trailing-icon'>
+                    <svg xmlns="http://www.w1.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="15px" height="15px"><path d="M23.271,9.419A15.866,15.866,0,0,0,19.9,5.51l2.8-2.8a1,1,0,0,0-1.414-1.414L18.241,4.345A12.054,12.054,0,0,0,12,2.655C5.809,2.655,2.281,6.893.729,9.419a4.908,4.908,0,0,0,0,5.162A15.866,15.866,0,0,0,4.1,18.49l-2.8,2.8a1,1,0,1,0,1.414,1.414l3.052-3.052A12.054,12.054,0,0,0,12,21.345c6.191,0,9.719-4.238,11.271-6.764A4.908,4.908,0,0,0,23.271,9.419ZM2.433,13.534a2.918,2.918,0,0,1,0-3.068C3.767,8.3,6.782,4.655,12,4.655A10.1,10.1,0,0,1,16.766,5.82L14.753,7.833a4.992,4.992,0,0,0-6.92,6.92l-2.31,2.31A13.723,13.723,0,0,1,2.433,13.534ZM15,12a3,3,0,0,1-3,3,2.951,2.951,0,0,1-1.285-.3L14.7,10.715A2.951,2.951,0,0,1,15,12ZM9,12a3,3,0,0,1,3-3,2.951,2.951,0,0,1,1.285.3L9.3,13.285A2.951,2.951,0,0,1,9,12Zm12.567,1.534C20.233,15.7,17.218,19.345,12,19.345A10.1,10.1,0,0,1,7.234,18.18l2.013-2.013a4.992,4.992,0,0,0,6.92-6.92l2.31-2.31a13.723,13.723,0,0,1,3.09,3.529A2.918,2.918,0,0,1,21.567,13.534Z"/></svg>
+                </span>
+                <span id='helper-slot' slot="helper-text">helper text</span>
+        </div>
+        <div id="customize">
+            <h3>customize</h3>
+            <aalam-md-input id='md-inp'>
+            </aalam-md-input>
+            <fieldset>
+                <legend>slot</legend>
+                <div>
+                    <input type="checkBox" name='slot-el' id="lead-icon" value="leading-icon">
+                    <label for='lead-icon'>leading icon</label>
+                </div>
+                <div>
+                    <input type="checkBox" name='slot-el' id='trail-icon' value='trailing-icon'>
+                    <label for="trail-icon">trailing icon</label>
+                </div>
+                <div>
+                    <input type="checkBox" name='slot-el' id='help-msg' value='helper-text'>
+                    <label for='help-msg'>help msg</label>
+                </div>
+                <div>
+                    <input type="checkBox" name='slot-el' id='input-el' value='input'>
+                    <label for='input'>input</label>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>attribute</legend>
+                <h3>mode</h3>
+                <div>
+                    <input type='radio' name='display-mode' id='outline-mode' value='outline'>
+                    <label for='outline-mode'>outline</label>
+                </div>
+                <div>
+                    <input type='radio' name='display-mode' id='filled-mode' value='filled'>
+                    <label for='filled-mode'>filled</label>
+                </div>
+                <hr>
+                <h3>other</h3>
+                <div>
+                    <input type='checkBox' name='prefix' id='prefix_el' value='@'>
+                    <label for='prefix'>prefix</label>
+                </div>
+                <div>
+                    <input type='checkBox' name='suffix' id='suffix_el' value='#'>
+                    <label for='suffix'>suffix</label>
+                </div>
+                <div>
+                    <input type='checkBox' name='disabled' id='disabled_el' value='disabled'>
+                    <label for='disabled'>disabled</label>
+                </div>
+                <div>
+                    <input type='checkBox' name='charcount_el' id='ch_count' value=5>
+                    <label for='ch_count'>character count </label>
+                </div>
+            </fieldset>
+        </div>
+        <script>
+            const md_inp = document.getElementById('md-inp');
+            const display_mode = document.querySelectorAll('input[name="display-mode"]');
+            for(let i = 0; i < display_mode.length; i++) {
+                display_mode[i].addEventListener('change', () => {
+                    md_inp.setAttribute('mode', event.target.value);
+                });
+            }
+            const pre = document.getElementById('prefix_el');
+            pre.addEventListener('change', () => {
+                if(event.target.checked)
+                    md_inp.setAttribute('prefix', pre.value);
+                else
+                    md_inp.removeAttribute('prefix');
+            });
+            const suf = document.getElementById('suffix_el');
+            suf.addEventListener('change', () => {
+                if(event.target.checked)
+                    md_inp.setAttribute('suffix', suf.value);
+                else
+                    md_inp.removeAttribute('suffix');
+            });
+            const cc = document.getElementById('ch_count');
+            cc.addEventListener('change', () => {
+                if(event.target.checked)
+                    md_inp.setAttribute('charcount', cc.value)
+                else
+                    md_inp.removeAttribute('charcount');
+            });
+            const disab = document.getElementById('disabled_el');
+            disab.addEventListener('change', () => {
+                if(event.target.checked)
+                    md_inp.setAttribute('disabled', '');
+                else
+                    md_inp.removeAttribute('disabled');
+            });
+            const lead_icon = document.getElementById('lead-icon');
+            const lead_slot = document.getElementById('lead-slot');
+            const lead_parent = lead_slot.parentElement;
+            lead_icon.addEventListener( 'change', () => {
+                if(event.target.checked) {
+                    md_inp.appendChild(lead_slot);
+                }
+                else {
+                    lead_parent.appendChild(lead_slot);
+                }
+            });
+            const trail_icon = document.getElementById('trail-icon');
+            const trail_slot = document.getElementById('trail-slot');
+            const trail_parent = trail_slot.parentElement;
+            trail_icon.addEventListener('change', () => {
+                if(event.target.checked) {
+                    md_inp.appendChild(trail_slot);
+                }
+                else {
+                    trail_parent.appendChild(trail_slot);
+                }
+            });
+            const help_msg = document.getElementById('help-msg');
+            const help_slot = document.getElementById('helper-slot');
+            const help_parent = help_slot.parentElement;
+            help_msg.addEventListener('change', () => {
+                if(event.target.checked) {
+                    md_inp.appendChild(help_slot);
+                }
+                else {
+                    help_parent.appendChild(help_slot);
+                }
+            });
+            const input_el = document.getElementById('input-el');
+            const input_slot = document.getElementById('input-slot');
+            const input_parent = input_slot.parentElement;
+            input_el.addEventListener('change', () => {
+                if(event.target.checked) {
+                    md_inp.appendChild(input_slot);
+                }
+                else {
+                    input_parent.appendChild(input_slot);
+                }
+            });
+        </script>
+    </body>
+<html>
