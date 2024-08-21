@@ -17,7 +17,8 @@ export default defineConfig({
             'tabs': path.resolve(__dirname, "src/tabs.ts"),
             'modal': path.resolve(__dirname, "src/modal.ts"),
             'tooltip':path.resolve(__dirname, "src/tooltip.ts"),
-            'md-input':path.resolve(__dirname, "src/md-input.ts")
+            'md-input':path.resolve(__dirname, "src/md-input.ts"),
+            'txtloop':path.resolve(__dirname, "src/txtloop.ts")
           },
           output: [{
             format: 'esm',
