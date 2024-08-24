@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dropdown Example</title>
+        <script type="module" src="../src/dropdown.ts"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #636363;
+                /*align-items: center;
+                justify-content:center;
+                position:fixed;
+                left:40%;*/
+                /*top:80%;*/
+            }
+            .navbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background-color: #232f3e;
+                padding: 10px 20px;
+                color: white;
+            }
+            .navbar a {
+                color: white;
+                text-decoration: none;
+                padding: 8px 16px;
+            }
+            .navbar .logo {
+                font-size: 24px;
+                font-weight: bold;
+            }
+            .navbar .menu {
+                display: flex;
+                gap: 20px;
+                height:50px;
+                align-items:center;
+            }
+            aalam-dropdown {
+                margin-top: 10px;
+            }
+            .toggler {
+                background: none;
+                border: none;
+                background-color: green;
+                color: white;
+                cursor: pointer;
+                padding: 8px 16px;
+                font-size: 16px;
+            }
+            .dropdown-body {
+                background-color: white;
+                color: black;
+                padding: 10px;
+                border-radius: 4px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .dropdown-item {
+                padding: 8px 16px;
+                cursor: pointer;
+                perspective: 1000px;
+            }
+            .dropdown-item:hover {
+                background-color: #ddd;
+            }
+            /*#services-dropdown:not(.test) [slot="dd-body"] {
+                display: none;
+            }
+            #services-dropdown.test [slot="dd-body"] {
+                display: block;
+            }*/
+            .item-1 {
+                transform-origin: top center;
+                animation: translateX 300ms 0ms ease-in-out forwards;
+            }
+            .item-2 {
+                transform-origin: top center;
+                animation: translateX 300ms 60ms ease-in-out forwards;
+            }
+            .item-3 {
+                transform-origin: top center;
+                animation: translateX 300ms 120ms ease-in-out forwards;
+            }
+            @keyframes translateX {
+                0% {
+                    opacity: 0;
+                    transform: translateX(60px);
+                }
+                80% {
+                    transform: translateX(-5px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateX(0px);
+                }
+            }
+
+            .link1 {
+                transform-origin: top center;
+                animation: rotateZ 300ms 60ms ease-in-out forwards;
+            }
+            .link2 {
+                transform-origin: top center;
+                animation: rotateZ 300ms 120ms ease-in-out forwards;
+            }
+            .link2 {
+                transform-origin: top center;
+                animation: rotateZ 300ms 180ms ease-in-out forwards;
+            }
+
+            @keyframes rotateZ {
+                0% {
+                    opacity: 0;
+                    transform: translateZ(290px);
+                }
+
+                80% {
+                    transform: translateZ(10px);
+                }
+
+                100% {
+                    opacity: 1;
+                    transform: translateZ(0);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="navbar">
+            <div class="logo">AALAM</div>
+            <div class="offer">SHOW OFFERS BELOW</div>
+            <div class="menu">
+                <aalam-dropdown id="about-dropdown" mode="hover"
+                    position="top-left" boundsel="about-toggler"
+                    animation="hide:conceal-y" closesel='.closesel'
+                    offset=20>
+                    <button slot="dd-toggler" class="toggler about-toggler">
+                        About
+                    </button>
+                    <div slot="dd-body" class="dropdown-body">
+                        <div class="dropdown-item link1">Link 1 setting</div>
+                        <div class="dropdown-item link2 closesel">Link 2</div>
+                        <div class="dropdown-item link3">Link 3</div>
+                        <div class="dropdown-item link1 closesel">Link 4</div>
+                        <div class="dropdown-item link2">Link 5</div>
+                        <div class="dropdown-item link3">Link 6</div>
+                    </div>
+                </aalam-dropdown>
+                <aalam-dropdown id="home-dropdown"
+                    animation="show:reveal-x;hide:conceal-y"
+                    animationDur="1000" mode="hover" closesel="closesel"
+                    position="top" boundsel=".navbar">
+                    <button slot="dd-toggler" class="toggler home-toggler">
+                        Home
+                    </button>
+                    <div slot="dd-body" class="dropdown-body">
+                        <img src="https://t4.ftcdn.net/jpg/01/43/23/83/360_F_143238306_lh0ap42wgot36y44WybfQpvsJB5A1CHc.jpg" />
+                    </div>
+                </aalam-dropdown>
+
+
+                <aalam-dropdown id="services-dropdown" mode="hover"
+                    position="bottom-left" animation="fade-in"
+                    closesel="closesel" id="Services">
+                    <button slot="dd-toggler" class="toggler services-toggler">
+                        Services
+                    </button>
+                    <div slot="dd-body" class="dropdown-body">
+                        <aalam-dropdown id="link1"
+                            animation="show:reveal-y;hide:conceal-y"
+                            animationDur="90" mode="click" position="right-top"
+                            closesel="closesel">
+                            <div slot="dd-toggler" class="dropdown-item item-1">
+                                Link 1
+                            </div>
+                            <div slot="dd-body" class="dropdown-body">
+                                <div class="dropdown-item">
+                                    Sub Item 1
+                                </div>
+                                <div class="dropdown-item closesel">
+                                    Sub Item 2
+                                </div>
+                                <div class="dropdown-item">
+                                    Sub Item 3
+                                </div>
+                            </div>
+                        </aalam-dropdown>
+                        <div>
+                            <aalam-dropdown id="link2"
+                                animation="show:reveal-y;hide:conceal-y"
+                                animationDur="90" mode="hover"
+                                position="right-top"
+                                closesel=".closesel">
+                                <div slot="dd-toggler"
+                                    class="dropdown-item item-2">
+                                    Link 2
+                                </div>
+                                <div slot="dd-body" class="dropdown-body">
+                                    <div class="dropdown-item">
+                                        Sub el 1
+                                    </div>
+                                    <div class="dropdown-item closesel">
+                                        Sub el 2
+                                    </div>
+                                    <div class="dropdown-item">
+                                        Sub el 3
+                                    </div>
+                                </div>
+                            </aalam-dropdown>
+                        </div>
+                        <div>
+                            <aalam-dropdown id="link3"
+                                animation="show:reveal-y;hide:conceal-y"
+                                animationDur="90" mode="hover"
+                                position="right-top"
+                                closesel="closesel" offset=50>
+                                <div slot="dd-toggler"
+                                    class="dropdown-item item-3">
+                                    Link 3
+                                </div>
+                                <div slot="dd-body" class="dropdown-body">
+                                    <aalam-dropdown id='sub-img'
+                                        animation='show:fade-in;hide:fade-out'
+                                        animationDur="100" mode='hover'
+                                        position='top'>
+                                        <div slot='dd-toggler'
+                                            class='rop-down-item'>
+                                            img
+                                        </div>
+                                        <div slot="dd-body"
+                                            class="dropdown-body">
+                                            <img src="https://t4.ftcdn.net/jpg/01/43/23/83/360_F_143238306_lh0ap42wgot36y44WybfQpvsJB5A1CHc.jpg" />
+                                        </div>
+                                    </aalam-dropdown>
+                                    <div class="dropdown-item">
+                                        Sub 1
+                                    </div>
+                                    <div class="dropdown-item closesel">
+                                        Sub 2
+                                    </div>
+                                    <div class="dropdown-item">
+                                        Sub 3
+                                    </div>
+                                </div>
+                            </aalam-dropdown>
+                        </div>
+                    </div>
+                </aalam-dropdown>
+            </div>
+        </div>
+
+        <script>
+            function handleShowEvent(event) {
+                if (event.target.id === "services-dropdown") {
+                    event.target.classList.add("test");
+                    const body = event.target.querySelector('[slot="dd-body"]');
+                    const dropdown_content =
+                        event.target.shadowRoot.querySelector(
+                            ".dropdown-content");
+                }
+            }
+            function handleHideEvent(event) {
+                event.target.classList.remove("test");
+            }
+        </script>
+    </body>
+</html>
