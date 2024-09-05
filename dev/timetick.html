@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <link rel="icon" type="image/svg+xml" href="/vite.svg"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title> Time tick  </title>
+        <script type="module" src="../src/timetick.ts"></script>
+        <style>
+            #time [data-timetick] {
+                padding:8px;
+                border-radius:50%;
+                background-color: rgba(45,123,234,0.2);
+                position:relative;
+            }
+            #id{
+                color:red;
+            }
+        </style>
+    </head>
+    <body>
+        <center style='margin-top:50px'>
+            <aalam-timetick id='time' elapseat="9:30:00 oct 02 2029">
+                <div id='t-tick' slot="tt-tick">
+                    <span id="year-slot" 
+                          style="width:50px; display:inline-block;">
+                        <span data-timetick="year"></span>
+                        <br/>Years
+                    </span>
+                    <span id="month-slot"
+                          style="width:50px; display:inline-block;">
+                        <span data-timetick="month"></span>
+                        <br/>Mon
+                    </span>
+                    <span id="week-slot"
+                          style="width:50px; display:inline-block;">
+                        <span data-timetick="week"></span>
+                        <br/>Week
+                    </span>
+                    <span id="day-slot"
+                          style="width:50px; display:inline-block;">
+                        <span data-timetick="day"></span>
+                        <br/>Days
+                    </span>
+                    <span id="hour-slot"
+                          style="width:50px; display:inline-block;">
+                        <span data-timetick="hour"></span>
+                        <br/>Hrs
+                    </span>
+                    <span id="min-slot"
+                          style="width:50px; display:inline-block;">
+                        <span data-timetick="min"></span>
+                        <br/>Mins
+                    </span>
+                    <span id="sec-slot"
+                          style="width:50px; display:inline-block;">
+                        <span data-timetick="sec"></span>
+                        <br/>Sec
+                    </span>
+                </div>
+                <div slot="tt-elapsed">
+                   <br><span id="id" data-msg="msg"> Time has expired </span><br/>
+                </div>
+            </aalam-timetick>
+
+                <div>
+                    <label for="elapse-date"> set the time <label>
+                    <input type="datetime-local" id="elapse-date" onchange="dateInputChanged(this)">
+                </div>
+
+            <br/>
+            <fieldset style='width:300px; text-align:initial;'>
+                <legend> What you like to display </legend>
+                <div>
+                    <input type="checkBox"  name='slot-el' id="year-El"
+                        checked autocomplete="off" onchange="toggleElement(this, 'year')">
+                    <label for="year_El">year</label>
+                </div>
+                <div>
+                    <input type="checkBox" name='slot-el' id="month-El"
+                        checked autocomplete="off"  onchange="toggleElement(this, 'month')">
+                    <label for="month_El">month</label>
+                </div>
+                <div>
+                    <input type="checkBox" name='slot-el' id="week-El"
+                        checked autocomplete="off" onchange="toggleElement(this, 'week')">
+                    <label for="week_El">week</label>
+                </div>
+                <div>
+                    <input type="checkBox" name='slot-el' id="day-El"
+                        checked autocomplete="off"  onchange="toggleElement(this, 'day')">
+                    <label for="day_El">day</label>
+                </div>
+                <div>
+                    <input type="checkbox" name='slot-el' id="hour-El"
+                        checked autocomplete="off"  onchange="toggleElement(this, 'hour')">
+                    <label for="hour_El">hour</label>
+                </div>
+                <div>
+                    <input type="checkbox" name='slot-el' id="minute-El"
+                        checked autocomplete="off" onchange="toggleElement(this, 'min')">
+                    <label for="minute_El">minute</label>
+                </div>
+                <div>
+                    <input type="checkbox" name='slot-el' id="second-El"
+                        checked autocomplete="off" onchange="toggleElement(this, 'sec')">
+                    <label for="second_El">second</label>
+                </div>
+            </fieldset>
+
+        </center>
+
+        <div id='temp' style='display:none'>
+            <div style='height:20px;width:40px'></div>
+        </div>
+
+        <script>
+            let tt = document.querySelector('aalam-timetick');
+            function toggleElement(el, cls) {
+                let child = tt.querySelector(`#${cls}-slot`);
+                if (el.checked) {
+                    child.style.display = "inline-block";
+                    child.querySelector("span").setAttribute('data-timetick',cls);
+                } else {
+                    child.style.display = "none";
+                    child.querySelector('span').removeAttribute('data-timetick');
+                }
+                tt.elementHolder();
+                tt.startTimer();
+            }
+            function dateInputChanged(el) {
+                let dt = el.value;
+                if (!dt)
+                    alert("Invalid date selection");
+                tt.setAttribute('elapseat',dt);
+            }
+        </script>
+    </body>
+</html>

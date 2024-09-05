@@ -19,7 +19,8 @@ export default defineConfig({
             'tooltip':path.resolve(__dirname, "src/tooltip.ts"),
             'md-input':path.resolve(__dirname, "src/md-input.ts"),
             'txtloop':path.resolve(__dirname, "src/txtloop.ts"),
-            'dropdown':path.resolve(__dirname, "src/dropdown.ts")
+            'dropdown':path.resolve(__dirname, "src/dropdown.ts"),
+            'timetick':path.resolve(__dirname, "src/timetick.ts")
           },
           output: [{
             format: 'esm',
