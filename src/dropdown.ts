@@ -45,6 +45,8 @@ export class AalamDropdown extends LitElement {
     private _cleanup: (() => void) | null = null;
     private _animation_styles:{[key:string]:string} = {show:'', hide:''};
     private _parent_dd_element:HTMLElement|null;
+    private _outside_click_event_listener = this._handleOutsideClick.bind(this);
+    private _hide_event_listener = this.hide.bind(this);
 
     override attributeChangedCallback(
         name:string, old_val:string, new_val:string) {
@@ -91,23 +93,24 @@ export class AalamDropdown extends LitElement {
     }
     override connectedCallback() {
         super.connectedCallback();
-        document.addEventListener("click", this._handleOutsideClick.bind(this));
+        document.addEventListener("click", this._outside_click_event_listener);
         this.renderRoot.addEventListener("slotchange", (e) => {
             this._slotChangedEvent(e)
         });
         let el = this.parentElement;
-        let ix = 0;
+        let ix = 1;
         while(el) {
             if(el.tagName == 'AALAM-DROPDOWN') {
-                if(this.mode == 'click')
-                    el.addEventListener('hide', this.hide);
+                if(this.mode == 'click') {
+                    el.addEventListener('hide', this._hide_event_listener);
                     this._parent_dd_element = el;
-                ix = parseInt(el.style.getPropertyValue('--z-Index')) + 1;
+                }
+                ix = parseInt(el.style.getPropertyValue('--z-index')) + 1;
                 break;
             }
             el = el.parentElement;
         }
-        this.style.setProperty('--z-Index', `${ix}`);
+        this.style.setProperty('--z-index', `${ix}`);
         this.style.setProperty('--anim-dur', `${this.animationDur}ms`);
         this.style.setProperty("--pseudo-display", "none");
     }
@@ -118,9 +121,10 @@ export class AalamDropdown extends LitElement {
             this.removeEventListener("mouseleave", this._handleMouseLeave);
         } else {
             if(this._parent_dd_element)
-                this._parent_dd_element.removeEventListener('hide', this.hide);
+                this._parent_dd_element.removeEventListener('hide', this._hide_event_listener);
         }
-        document.removeEventListener("click", this._handleOutsideClick);
+        document.removeEventListener(
+            "click", this._outside_click_event_listener);
         if (this._cleanup) {
             this._cleanup();
             this._cleanup = null;
@@ -143,7 +147,7 @@ export class AalamDropdown extends LitElement {
 ::slotted([slot="dd-toggler"]) {cursor: pointer;}
 .dd-container {display:none;border: 1px solid #ddd;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: absolute;z-index:var(--z-Index);width: max-content;}
+    position: absolute;z-index:var(--z-index);width: max-content;}
 :host::before {
     content: " ";
     display: var(--pseudo-display, none);
@@ -262,13 +266,21 @@ export class AalamDropdown extends LitElement {
     }
     private _handleOutsideClick(event: MouseEvent) {
         let target = event.target as HTMLElement|null;
+        if (!this._isOpen) return;
         while (target) {
-            if (target == this)
+            if (target == this) {
                 break;
-            target = target.parentElement
+            }
+            let _target = target.assignedSlot?(
+                target.assignedSlot.parentElement?
+                    target.assignedSlot.parentElement:
+                    target.parentElement):
+                target.parentElement || (<ShadowRoot>target.getRootNode())?.host;
+            target = _target as HTMLElement;
         }
-        if(!target)
+        if(!target) {
             this.hide();
+        }
     }
     private _toggleDropdown = (event: MouseEvent) => {
         const target = event.target as HTMLElement;

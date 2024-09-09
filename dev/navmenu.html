@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Aalam Nav Menu Example</title>
+        <script type="module" src="../src/navmenu.ts"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+            }
+            .nav-container {
+                background-color: orange;
+                padding: 0px;
+                padding-top:10px;
+                padding-bottom:10px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 5);
+                width: 70%;
+                display:inline-block;
+            }
+            .nav-menu-item {
+                padding: 10px 20px;
+                cursor: pointer;
+            }
+            .toggle-menu {
+                cursor: pointer;
+                background-color: blue;
+                color: #fff;
+                padding: 10px 20px;
+            }
+            #upper-div {
+                display:inline-block;
+                width:100px;
+                background:violet;
+                height:100%;
+            }
+            #lower-div {
+                display:inline-block;
+                background:green;
+                height:80px;
+                width:250px;
+                /*position:absolute;
+                left:calc(60% + 220px);*/
+            }
+            #outer-div {
+                background:yellow;
+                width:100%;
+                height:100px;
+                display:inline-block;
+            }
+            [slot=dd-body] {
+                background:red;
+            }
+        </style>
+    </head>
+    <body>
+        <div id='outer-div'>
+            <div id='upper-div'>
+            </div>
+            <div class="nav-container">
+                <aalam-navmenu direction="last">
+                    <div id='home' slot="menu-item" class="nav-menu-item"
+                        data-priority="12">
+                        Home
+                    </div>
+                    <div id='about' slot="menu-item" class="nav-menu-item"
+                        data-priority="2">
+                        About
+                    </div>
+                    <aalam-dropdown id='services' slot='menu-item'
+                        boundsel=".nav-container"
+                        mode='click' position="bottom" data-priority='3'
+                        class='nav-menu-item'>
+                        <div id='service-toggler' slot='dd-toggler'>Services
+                        </div>
+                        <div slot='dd-body'>
+                            <div>Services 1</div>
+                            <div>Services 2</div>
+                            <aalam-dropdown id='service3' slot='nav-menu'
+                                position='right-bottom'
+                                mode='click' boundsel='.native'>
+                                <div slot='dd-toggler'>Services 3</div>
+                                <div slot='dd-body' style='background:blue'>
+                                    <div>Sub-service 1</div>
+                                    <div>Sub-srvice 2</div>
+                                </div>
+                            </aalam-dropdown>
+                        </div>
+                    </aalam-dropdown>
+                    <div id='contact' slot="menu-item" class="nav-menu-item"
+                        data-priority="2">
+                        Contact
+                    </div>
+                    <div id='portfolio' slot="menu-item" class="nav-menu-item"
+                        data-priority="1">
+                        Portfolio
+                    </div>
+                    <div id='projects' slot="menu-item" class="nav-menu-item"
+                        data-priority="6">
+                        Projects
+                    </div>
+                    <div id='name' slot="menu-item" class="nav-menu-item"
+                        data-priority="7">
+                        Name
+                    </div>
+                    <div id='class' slot="menu-item" class="nav-menu-item"
+                        data-priority="8">
+                        Class
+                    </div>
+                    <div id='native' slot="menu-item"
+                        class="nav-menu-item native" data-priority="9">
+                        Native
+                    </div>
+                    <div id='address' slot="menu-item" class="nav-menu-item"
+                        data-priority="10">
+                        Address
+                    </div>
+                    <div id='height' slot="menu-item" class="nav-menu-item"
+                        data-priority="11">
+                        Height
+                    </div>
+                    <div id='logout' slot="menu-item" class="nav-menu-item"
+                        data-priority="1">
+                        Logout
+                    </div>
+                    <div id='toggle' slot="toggle-item"
+                        class="toggle-menu">More
+                    </div>
+        </div>
+        <div id='lower-div'></div>
+        <div style='padding-top:50px'>
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
+                vel ligula eget turpis consequat dictum.
+            </p>
+        </div>
+    </body>
+</html>
