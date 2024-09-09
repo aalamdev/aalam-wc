@@ -69,7 +69,7 @@
         <button onclick="openInner()"> open inner</button>
         <button onclick="openl1()"> l1 open </button>
         <div>
-            <aalam-modal  guidesel="top:.top-guide;left:#left-guide" 
+            <aalam-modal  guidesel="top:.top-guide, 15;left:#left-guide" 
                           id="modal-outer" animate="xs:r2l">
                 <div slot="modal-body" class="modal-body">
                     <div style="height:20px;border-top:3px solid #000;
@@ -108,8 +108,8 @@
             </aalam-modal>
         </div>
         <div id="modal-parent2">
-            <aalam-modal guidesel="right:.right-guide;left:.left-guide;
-                                   bottom:.bottom-guide;top:.top-guide"
+            <aalam-modal guidesel="right:.right-guide,edge;left:.left-guide,10;
+                                   bottom:.bottom-guide,60;top:.top-guide,5"
                          pos="xs:left;s:bottom-center;l:top-center;m:top-right;xl:center;"
                                closesel=".close-sel" id="modal-l1"
                          animation="xs:t2b;m:b2t;l:r2l;xl:l2r">

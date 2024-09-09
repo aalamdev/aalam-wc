@@ -104,8 +104,10 @@ export class AalamModal extends LitElement {
     private _mouse_move_listener:any;
     private _mouse_prev_x:number;
     private _mouse_prev_y:number;
+    private _mouse_direction:{x: number|null, y:number|null};
     private _wrp_init_bounds:DOMRect|null;
     private _cur_pos:string|null;
+    private _clamp_values:{[key:string]:number|null} = {};
 
     constructor() {
         super();
@@ -146,9 +148,20 @@ export class AalamModal extends LitElement {
                 });
         } else if(name == 'guidesel') {
             let tmp = parseAttrVal(new_val);
-            this._guide_value = {}
-            for (let k of Object.keys(tmp))
-                this._guide_value[tmp[k]] = k;
+            for(let i in tmp) {
+                if(tmp[i].includes(',')) {
+                    let x = tmp[i].split(',');
+                    tmp[i] = x[0];
+                    if(x[1] == 'edge')
+                        this._clamp_values[i] = 0;
+                    else {
+                        let num = +x[1];
+                        if (!isNaN(num) && num <= 20 && num >= 0)
+                            this._clamp_values[i] = num;
+                    }
+                }
+                this._guide_value[tmp[i]] = i;
+            }
         }
     }
     override connectedCallback() {
@@ -267,7 +280,6 @@ ${this._animateStyles()}
             this._wrapper_el.style.bottom = '';
             this._wrapper_el.style.height = '';
         }
-
     }
     private _clearTimer() {
         if (this._timer_obj) {
@@ -312,6 +324,7 @@ ${this._animateStyles()}
         if (!this._wrp_init_bounds)
             this._wrp_init_bounds = this._wrapper_el.getBoundingClientRect();
         let el = event.target as HTMLElement | null;
+        this._mouse_direction = {x: null, y: null};
         while (el) {
             if(el.matches(Object.keys(this._guide_value).join(","))) {
                 this._mouse_prev_y = clientY;
@@ -356,6 +369,8 @@ ${this._animateStyles()}
 
         this._mouse_prev_y = clientY;
         this._mouse_prev_x = clientX;
+        this._mouse_direction.x = xdiff;
+        this._mouse_direction.y = ydiff;
         if (xdiff) {
             let calc;
             if (this._mouse_pos_mod == 'left') {
@@ -415,11 +430,37 @@ ${this._animateStyles()}
             }
         }
     }
+    private _clampPoint() {
+        let vw = window.innerWidth;
+        let vh = window.innerHeight;
+        if (this._mouse_pos_mod == 'left') {
+            if (this._mouse_direction.x && this._mouse_direction.x < 0 &&
+                    this._clamp_values.left != null)
+                this._wrapper_el.style.left =
+                    (vw / 100) * this._clamp_values.left + 'px';
+        } else if (this._mouse_pos_mod == 'right') {
+            if (this._mouse_direction.x && this._mouse_direction.x > 0 &&
+                    this._clamp_values.right != null)
+                this._wrapper_el.style.right =
+                    (vw / 100) * this._clamp_values.right + "px";
+        } else if (this._mouse_pos_mod == 'top') {
+            if (this._mouse_direction.y && this._mouse_direction.y < 0 &&
+                    this._clamp_values.top != null)
+                this._wrapper_el.style.top =
+                    (vh / 100) * this._clamp_values.top + 'px';
+        } else if (this._mouse_pos_mod == 'bottom') {
+            if (this._mouse_direction.y && this._mouse_direction.y > 0 &&
+                    this._clamp_values.bottom != null)
+                this._wrapper_el.style.bottom =
+                    (vh / 100) * this._clamp_values.bottom + "px";
+        }
+    }
     private _mouseUpEvent() {
         document.removeEventListener("mouseup", this._mouse_up_listener);
         document.removeEventListener("touchend", this._mouse_up_listener);
         document.removeEventListener("mousemove", this._mouse_move_listener);
         document.removeEventListener("touchmove", this._mouse_move_listener);
+        this._clampPoint();
         this._mouse_move_listener = this._mouse_up_listener = null;
     }
     private _posStyles() {
