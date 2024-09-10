@@ -53,6 +53,7 @@ export class AalamTabs extends LitElement {
     private _column_size:{[key:string]:string} = {title:'30%', body:'70%'};
     private _fashion_style:Array<ResponsiveVal> =
                 [{ll: 0, ul: null, val: "row", cond: "(min-width:0px)"}];
+    private _observer:MutationObserver;
 
     constructor() {
         super();
@@ -60,8 +61,8 @@ export class AalamTabs extends LitElement {
     override attributeChangedCallback(
                 name:string, old_val:string, new_val:string) {
         super.attributeChangedCallback(name, old_val, new_val);
-        if(name == 'animation') {
-            if(trans_defs[new_val])
+        if (name == 'animation') {
+            if (trans_defs[new_val])
                 this._animation_styles = {open: new_val, close: new_val}
             else {
                 this._animation_styles = parseAttrVal(new_val, (v:string) => {
@@ -71,15 +72,15 @@ export class AalamTabs extends LitElement {
                     open:this._animation_styles?.show,
                     close:this._animation_styles?.hide};
             }
-        } else if(name == 'fashion') {
+        } else if (name == 'fashion') {
             this._fashion_style = getResponsiveValues(
                 new_val, this.DEFAULT_VALUES.fashion, (v:string) => {
                     return (v == 'row' || v == 'column' || v == 'accordion');
                 });
             let val = this._checkFashion();
-            if(val != this._internal_fashion)
+            if (val != this._internal_fashion)
                 this._changeFashionStyle(val);
-        } else if(name == "colsize") {
+        } else if (name == "colsize") {
             this._column_size = parseAttrVal(new_val, (v:string) => {
                 try {
                     CSSStyleValue.parse("grid-template-columns", v)
@@ -90,7 +91,7 @@ export class AalamTabs extends LitElement {
         }
     }
     override render() {
-        if(this._internal_fashion == 'accordion') {
+        if (this._internal_fashion == 'accordion') {
             return html`
 <div @click=${this._titleClicked}
      @transitionend=${this._transitionEndEvent}>
@@ -116,46 +117,48 @@ export class AalamTabs extends LitElement {
     override connectedCallback() {
         super.connectedCallback();
         this.renderRoot.addEventListener("slotchange", (e) => {
-            this._slotChangedEvent(e)});
+                                         this._slotChangedEvent(e)});
         window.addEventListener("resize", this._resizeListener);
-        this.addEventListener("DOMNodeInserted", this._node_insert_listener);
+        this._observer = new MutationObserver(this._node_insert_listener);
+        this._observer.observe(this, { childList: true, subtree : true});
+
     }
     override disconnectedCallback() {
         window.removeEventListener("resize", this._resizeListener);
-        this.removeEventListener("DOMNodeInserted", this._node_insert_listener);
+        if (this._observer) {
+            this._observer.disconnect();
+        }
     }
     override firstUpdated() {
-        if(!this.animation || (
-                !this._animation_styles.open && !this._animation_styles.close))
-            this.animationDur = 0;
         this._openActive();
-        if(this._cur_ix == null)
+        if (this._cur_ix == null)
             this.show(0);
     }
-    private _nodeInserted(event:Event) {
-        let el = event.target as HTMLElement;
-        if(this._internal_fashion == 'accordion' && (
-               el.matches("[slot=tab-title]") || el.matches("[slot=tab-body]")))
+    private _nodeInserted(mutations:MutationRecord[]) {
+        let num_added_nodes = 0;
+        for (let record of mutations)
+            num_added_nodes += record.addedNodes.length;
+        if (this._internal_fashion == 'accordion' && num_added_nodes > 0)
             this._showAccordion();
-        else
-            return;
     }
     private _slotChangedEvent(event:Event) {
-        if(!event.target)
+        if (!event.target)
             return;
         let nodes = (event.target as HTMLSlotElement).assignedElements();
         let name = (event.target as HTMLSlotElement)?.name;
-        if(name == 'tab-body') {
+        if (name == 'tab-body' || name == 'tab-title') {
             for(let i of nodes) {
-                if(i != (nodes[this._cur_ix])) {
-                    (i as HTMLElement).style.display = 'none';
+                if (i != (nodes[this._cur_ix])) {
+                    if (name == 'tab-body')
+                        (i as HTMLElement).style.display = 'none';
                     i.classList.remove(this.activecls);
                 }
             }
-        } else if(name == 'acc') {
+        } else if (name == 'acc') {
             for(let i of nodes) {
-                if(i != (nodes[this._cur_ix])) {
+                if (i != (nodes[this._cur_ix])) {
                     (i.children[1] as HTMLElement).style.display = 'none';
+                    i.children[0].classList.remove(this.activecls);
                     i.children[1].classList.remove(this.activecls);
                 }
             }
@@ -164,7 +167,7 @@ export class AalamTabs extends LitElement {
     private _openActive() {
         let val = this.querySelectorAll("[slot=tab-title]");
         for(let i = 0;i < val.length; i++) {
-            if(val[i].classList.contains(this.activecls)) {
+            if (val[i].classList.contains(this.activecls)) {
                 this.show(i);
                 break;
             }
@@ -173,21 +176,21 @@ export class AalamTabs extends LitElement {
     private _checkFashion():string {
         let vw = window.innerWidth;
         for(let style of this._fashion_style)
-            if((style.ll || 0) <= vw && (
+            if ((style.ll || 0) <= vw && (
                     !style.ul || style.ul >= vw))
                 return style.val;
         return '';
     }
     private _changeFashionStyle(val:string) {
         this._internal_fashion = val;
-        if(val == 'accordion')
+        if (val == 'accordion')
             this._showAccordion();
         else
             this._showRC();
     }
     private _resizeEvent() {
         let val = this._checkFashion();
-        if(this._internal_fashion != val) {
+        if (this._internal_fashion != val) {
             this._changeFashionStyle(val);
             this._openActive();
         }
@@ -218,17 +221,20 @@ export class AalamTabs extends LitElement {
         let title = this.querySelectorAll("[slot=tab-title]");
         let el = e.target as HTMLElement;
         while(el) {
-            if(el.slot == "tab-title") {
+            if (el.slot == "tab-title") {
                 let ix = Array.prototype.indexOf.call(title, el);
                 this.show(ix);
                 break;
-            } else if(el.parentElement)
+            } else if (el.parentElement) {
                 el = el.parentElement;
+            } else {
+                break;
+            }
         }
     }
     private _transitionEndEvent(e:Event) {
         let el = e.target as HTMLElement;
-        if(el.hasAttribute("data-anim"))
+        if (el.hasAttribute("data-anim"))
             el.style.display = 'none';
         el.style.transition = '';
         el.style.transform = '';
@@ -240,16 +246,16 @@ export class AalamTabs extends LitElement {
         return;
     }
     private _setTransition(val:string, prop:string) {
-        if(this._animation_styles[val])
+        if (this._animation_styles[val])
             return trans_defs[this._animation_styles[val]][val][prop];
     }
     private _show(ix:number, prev_ix:number) {
         let title = this.querySelectorAll("[slot=tab-title]");
         let body = this.querySelectorAll("[slot=tab-body]");
         let bix = body[ix] as HTMLElement;
-        if(prev_ix != null) {
+        if (prev_ix != null) {
             let bpix = body[prev_ix] as HTMLElement;
-            if(this._animation_styles.close) {
+            if (this._animation_styles.close) {
                 let val = `${this._animation_styles.close == 'fade'?
                                   `opacity`:`transform`}`;
                 bpix.setAttribute("data-anim", '');
@@ -272,9 +278,9 @@ export class AalamTabs extends LitElement {
         }
         title[ix]?.classList.add(this.activecls);
         bix?.classList.add(this.activecls);
-        if(bix)
+        if (bix)
             bix.style.display = 'block';
-        if(this._animation_styles.open) {
+        if (this._animation_styles.open) {
             let val = `${this._animation_styles.open == 'fade'?
                              `opacity`:`transform`}`;
             bix.style.transitionProperty = val;
@@ -287,16 +293,16 @@ export class AalamTabs extends LitElement {
                     val,`${this._setTransition('open', 'end')}`);
             })
         }
-        if(this._animation_styles.close)
+        if (this._animation_styles.close)
             bix.removeAttribute("data-anim");
         this.dispatchEvent(
             new CustomEvent("show", {detail:{ix}}));
     }
     show(ix:number) {
-        if(this._cur_ix == ix && this._cur_ix != null)
+        if (this._cur_ix == ix && this._cur_ix != null)
             return
         this._show(ix, this._cur_ix);
-        if(this._cur_ix != ix)
+        if (this._cur_ix != ix)
             this._cur_ix = ix;
         this.dispatchEvent(
             new CustomEvent("change", {detail:{ix}}));
