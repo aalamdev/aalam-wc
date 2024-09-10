@@ -163,7 +163,9 @@ describe('aalam-modal', () => {
         const el1 = await fixture(html`
 <div id="parent">
     <aalam-modal id="modal">
-        <div slot="modal-body">
+       
+
+ <div slot="modal-body">
             <div style="height:20px;width:40px;background:orange"></div>
         </div>
     </aalam-modal>
@@ -1264,4 +1266,274 @@ describe('aalam-modal', () => {
         mock_stmout.restore();
         }
     });
+    it('clamp', async () => {
+       const el1 = await fixture(html`
+<div>
+    <div id="parent">
+        <aalam-modal id="modal"
+                     pos="l:top;xl:top-center;m:bottom;s:top;xs:top-right"
+                     guidesel="right:.right-guide,20;left:.left-guide,15;
+                               bottom:.bottom-guide,edge;top:.top-guide,15">
+           <div id="modal-body" slot="modal-body" class="modal-body">
+               <div class="right-guide" style="background:orange;">
+                   <p> class: right-guide, pos: right</p>
+                   <div style="background:yellow;height:20px;
+                               margin:auto;width:20px;
+                               border-top:3px solid #000">
+                   </div>
+               </div>
+               <div class="top-guide" style="background:yellow">
+                   <p> class: top-guide, pos: top</p>
+                   <div style="background:red;height:20px;
+                               width:20px;margin:auto;
+                               border-top:3px solid #000">
+                   </div>
+                </div>
+                <div class="left-guide" style="background:blue;
+                                               position:static">
+                    <p>class: left-guide, pos: left</p>
+                    <div style="background:green;display:flex;
+                                position:sticky;left:0px;
+                                height:20px;width:20px;
+                                border-left:4px solid #000;
+                                margin:auto;">
+                    </div>
+                </div>
+                <div class="bottom-guide" style="background:red">
+                    <p> class: bottom-guide, pos: bottom</p>
+                    <div style="background:grey;height:20px;
+                                width:20px;margin:auto;
+                                border-top:3px solid #000">
+                    </div>
+                </div>
+            </div>
+        </aalam-modal>
+    </div>
+</div>`);
+       const modal = el1.querySelector("#modal");
+       const modal_body = el1.querySelector("#modal-body");
+       const r_guide = modal.querySelector(".right-guide");
+       const l_guide = modal.querySelector(".left-guide");
+       const t_guide = modal.querySelector(".top-guide");
+       const b_guide = modal.querySelector(".bottom-guide");
+       modal.animationDur = 0;
+       modal_body.style.height="100%";
+       modal_body.style.overflow="auto";
+       modal_body.style.margin="auto";
+       modal_body.style.boxSizing="border-box";
+       modal.show();
+       await modal.updated();
+       element_bounds(modal);
+       expect(modal.parentElement).to.equal(document.body);
+
+       await setViewport({width:1680, height:800});
+
+       let r_clamp = 1680 - (1680 / 100) * 20;
+       let l_clamp = (1680 / 100) * 15;
+
+       let r_guide_rect = r_guide.getBoundingClientRect();
+       let t_guide_rect = t_guide.getBoundingClientRect();
+       let l_guide_rect = l_guide.getBoundingClientRect();
+       let b_guide_rect = b_guide.getBoundingClientRect();
+
+       let [sx, sy, ex, ey] = [
+            r_guide_rect.x + r_guide_rect.width - 100,
+            r_guide_rect.y + 10,
+            r_guide_rect.x + r_guide_rect.width - 420,
+            r_guide_rect.y + 10];
+       let bounds = modal_body.getBoundingClientRect();
+       await sendMouse({type:'move', position: [sx, sy]});
+
+
+       await sendMouse({type:'down'});
+       await sendMouse({type:'move', position: [ex, ey]});
+       await sendMouse({type: 'up'});
+       expect(modal.open).to.equal(false);
+
+       modal.show();
+       await modal.updated();
+       element_bounds(modal);
+
+       [sx, sy] = [
+            r_guide_rect.x + Math.round(r_guide_rect.width / 2),
+            r_guide_rect.y + Math.round(r_guide_rect.height / 2)];
+       [ex, ey] = [sx + 20, sy];
+       bounds = modal_body.getBoundingClientRect();
+       await sendMouse({type:'move', position: [sx, sy]});
+       await sendMouse({type:'down'});
+       await sendMouse({type:'move', position: [ex, ey]});
+       await sendMouse({type:'up'});
+       expect(modal.open).to.equal(true);
+
+       bounds = modal_body.getBoundingClientRect();
+       expect(bounds.right).to.equal(r_clamp);
+
+       l_guide_rect = l_guide.getBoundingClientRect();
+       [sx, sy] = [
+            l_guide_rect.x + Math.round(l_guide_rect.width / 2),
+            l_guide_rect.y + Math.round(l_guide_rect.height / 2)];
+       [ex, ey] = [sx - 40, sy];
+       await sendMouse({type:'move', position: [sx, sy]});
+       await sendMouse({type:'down'});
+       await sendMouse({type:'move', position: [ex, ey]});
+       await sendMouse({type:'up'});
+       expect(modal.open).to.equal(true);
+
+       bounds = modal_body.getBoundingClientRect();
+       expect(bounds.left).to.equal(l_clamp);
+       let bnds_lft = bounds.left;
+
+       [sx, sy] = [
+            l_guide_rect.x + Math.round(l_guide_rect.width / 2),
+            l_guide_rect.y + Math.round(l_guide_rect.height / 2)];
+       [ex, ey] = [sx + 20, sy];
+
+       await sendMouse({type:'move', position: [sx, sy]});
+       await sendMouse({type:'down'});
+       await sendMouse({type:'move', position: [ex, ey]});
+       await sendMouse({type:'up'});
+
+       expect(modal.open).to.equal(true);
+
+       bounds = modal_body.getBoundingClientRect();
+       expect(bounds.left).to.equal(bnds_lft + 20);
+
+        [sx, sy] = [
+             l_guide_rect.x + Math.round(l_guide_rect.width / 2),
+             l_guide_rect.y + Math.round(l_guide_rect.height / 2)];
+        [ex, ey] = [sx - 40, sy];
+        await sendMouse({type:'move', position: [sx, sy]});
+        await sendMouse({type:'down'});
+        await sendMouse({type:'move', position: [ex, ey]});
+        await sendMouse({type:'up'});
+        expect(modal.open).to.equal(true);
+
+        bounds = modal_body.getBoundingClientRect();
+        expect(bounds.left).to.equal(l_clamp);
+
+        await setViewport({width:1400, height:800});
+
+        r_clamp = 1400 - (1400 / 100) * 20;
+        l_clamp = (1400 / 100) * 15;
+        let b_clamp = 800;
+
+        expect(modal.open).to.equal(true);
+        element_bounds(modal);
+
+        b_guide_rect = b_guide.getBoundingClientRect();
+        [sx, sy] = [
+             b_guide_rect.x + Math.round(b_guide_rect.width / 2),
+             b_guide_rect.y + Math.round(b_guide_rect.height / 2)];
+        [ex, ey] = [sx, sy + 20];
+
+        await sendMouse({type:'move', position: [sx, sy]});
+        await sendMouse({type:'down'});
+        await sendMouse({type:'move', position: [ex, ey]});
+        await sendMouse({type:'up'});
+
+        bounds = modal_body.getBoundingClientRect();
+        expect(bounds.bottom).to.equal(b_clamp);
+        let bnds_bottom = bounds.bottom;
+
+        b_guide_rect = b_guide.getBoundingClientRect();
+        [sx, sy] = [
+             b_guide_rect.x + Math.round(b_guide_rect.width / 2),
+             b_guide_rect.y + Math.round(b_guide_rect.height / 2)];
+        [ex, ey] = [sx, sy - 20];
+
+        await sendMouse({type:'move', position: [sx, sy]});
+        await sendMouse({type:'down'});
+        await sendMouse({type:'move', position: [ex, ey]});
+        await sendMouse({type:'up'});
+
+        expect(modal.open).to.equal(true);
+        bounds = modal_body.getBoundingClientRect();
+        element_bounds(modal);
+        expect(bounds.bottom).to.equal(bnds_bottom - 20);
+
+        b_guide_rect = b_guide.getBoundingClientRect();
+        [sx, sy] = [
+             b_guide_rect.x + Math.round(b_guide_rect.width / 2),
+             b_guide_rect.y + Math.round(b_guide_rect.height / 2)];
+        [ex, ey] = [sx, sy + 20];
+
+        await sendMouse({type:'move', position: [sx, sy]});
+        await sendMouse({type:'down'});
+        await sendMouse({type:'move', position: [ex, ey]});
+        await sendMouse({type:'up'});
+
+        bounds = modal_body.getBoundingClientRect();
+        expect(bounds.bottom).to.equal(b_clamp);
+        r_guide_rect = r_guide.getBoundingClientRect();
+        [sx, sy] = [
+             r_guide_rect.x + Math.round(r_guide_rect.width / 2),
+             r_guide_rect.y + Math.round(r_guide_rect.height / 2)];
+        [ex, ey] = [sx + 20, sy];
+        bounds = modal_body.getBoundingClientRect();
+        await sendMouse({type:'move', position: [sx, sy]});
+        await sendMouse({type:'down'});
+        await sendMouse({type:'move', position: [ex, ey]});
+        await sendMouse({type:'up'});
+        expect(modal.open).to.equal(true);
+
+        bounds = modal_body.getBoundingClientRect();
+        expect(bounds.right).to.equal(r_clamp);
+
+        await modal.hide();
+        await modal.show();
+        await setViewport({width:1200, height:610});
+        expect(modal.open).to.equal(true);
+
+        bounds = modal_body.getBoundingClientRect();
+        t_guide_rect = t_guide.getBoundingClientRect();
+
+        [sx, sy] = [
+             t_guide_rect.x + Math.round(t_guide_rect.width / 2),
+             t_guide_rect.y + Math.round(t_guide_rect.height / 2)];
+        [ex, ey] = [sx, sy - 20];
+
+        let t_clamp = (610 / 100) * 15;
+        r_clamp = 1200 - (1200 / 100) * 20;
+
+        await sendMouse({type:'move', position:[sx, sy]});
+        await sendMouse({type:'down'});
+        await sendMouse({type:'move', position:[ex, ey]});
+        await sendMouse({type:'up'});
+
+        expect(modal.open).to.equal(true);
+        element_bounds(modal);
+        bounds = modal_body.getBoundingClientRect();
+        expect(bounds.top).to.equal(t_clamp);
+
+        t_guide_rect = t_guide.getBoundingClientRect();
+        [sx, sy] = [
+             t_guide_rect.x + Math.round(t_guide_rect.width / 2),
+             Math.round(t_guide_rect.y) + Math.round(t_guide_rect.height / 2)];
+        [ex, ey] = [sx, sy + 20];
+
+        await sendMouse({type:'move', position:[sx, sy]});
+        await sendMouse({type:'down'});
+        await sendMouse({type:'move', position:[ex, ey]});
+        await sendMouse({type:'up'});
+
+        expect(modal.open).to.equal(true);
+        element_bounds(modal);
+        bounds = modal_body.getBoundingClientRect();
+        expect(bounds.top).to.equal(t_clamp + 20);
+
+        r_guide_rect = r_guide.getBoundingClientRect();
+        [sx, sy] = [
+             r_guide_rect.x + Math.round(r_guide_rect.width / 2),
+             Math.round(r_guide_rect.y) + Math.round(r_guide_rect.height / 2)];
+        [ex, ey] = [sx + 20, sy];
+        bounds = modal_body.getBoundingClientRect();
+        await sendMouse({type:'move', position: [sx, sy]});
+        await sendMouse({type:'down'});
+        await sendMouse({type:'move', position: [ex, ey]});
+        await sendMouse({type:'up'});
+        expect(modal.open).to.equal(true);
+
+        bounds = modal_body.getBoundingClientRect();
+        expect(bounds.right).to.equal(r_clamp);
+   });
 });
