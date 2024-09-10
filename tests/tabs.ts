@@ -143,6 +143,7 @@ describe('aalam-tabs', () => {
 
         await setViewport({width:1000, height:640});
         create_slot_el(tabs);
+        await tabs.updated();
         window.dispatchEvent(new Event('resize'));
         expect(tabs._internal_fashion).to.equal('row');
         expect(validate_el(tabs, 2)).to.equal(true);
