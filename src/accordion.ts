@@ -184,3 +184,9 @@ export class AalamAccordion extends LitElement {
         }
     }
 }
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'aalam-accordion': AalamAccordion;
+    }
+}

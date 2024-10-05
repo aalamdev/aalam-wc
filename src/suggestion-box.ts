@@ -484,3 +484,9 @@ export class SuggestionBox extends LitElement {
         }
     }
 }
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'aalam-sgn-box': SuggestionBox;
+    }
+}

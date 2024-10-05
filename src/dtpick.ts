@@ -1413,3 +1413,9 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
                            "ss", pad(val.getSeconds()));
     }
 }
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'aalam-dtpick':AalamDatePickerElement;
+    }
+}

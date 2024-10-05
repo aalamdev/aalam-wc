@@ -955,3 +955,9 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
         return this._show(index, index > this.anchorindex?'L':'R')
     }
 }
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'aalam-slider': AalamSliderElement
+    }
+}
