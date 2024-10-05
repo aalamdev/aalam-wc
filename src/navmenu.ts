@@ -155,3 +155,9 @@ export class AalamNavMenu extends LitElement {
 }
 
 customElements.define("aalam-navmenu", AalamNavMenu)
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'aalam-navmenu': AalamNavMenu;
+    }
+}

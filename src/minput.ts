@@ -290,3 +290,9 @@ input[type=number] {-moz-appearance: textfield;}
         return {...this._evnt_data}
     }
 }
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'aalam-minput': AalamManagedInputElement;
+    }
+}
