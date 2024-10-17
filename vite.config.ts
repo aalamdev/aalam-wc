@@ -21,7 +21,10 @@ export default defineConfig({
             'txtloop':path.resolve(__dirname, "src/txtloop.ts"),
             'dropdown':path.resolve(__dirname, "src/dropdown.ts"),
             'timetick':path.resolve(__dirname, "src/timetick.ts"),
-            'navmenu':path.resolve(__dirname, "src/navmenu.ts")
+            'navmenu':path.resolve(__dirname, "src/navmenu.ts"),
+            'accordion': path.resolve(__dirname, 'src/accordion.ts'),
+            'dtpick': path.resolve(__dirname, 'src/dtpick.ts'),
+            'sgn-box': path.resolve(__dirname, 'src/suggestion-box.ts')
           },
           output: [{
             format: 'esm',
