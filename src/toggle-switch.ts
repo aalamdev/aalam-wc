@@ -85,7 +85,7 @@ export class AalamSwitchElement extends LitElement {
         .switch-dial > svg {height:calc(${this.height} - 6px);width:calc(${this.height} - 6px);}
         :host([status='on']) .switch-container {background-color:${this.onColor};}
         </style>
-        <div class="switch-container"   @click=${this._onClick}>
+        <div class="switch-container" part="switch-container"  @click=${this._onClick}>
                 <span class="switch-dial">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                       <circle r="45" cx="50" cy="50" fill="${this.dialColor}" />

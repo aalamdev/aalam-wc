@@ -1,7 +1,7 @@
 {
   "name": "aalam-wc",
   "description": "aalam-wc is a Javascript library for building user interface.",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "keywords": [
     "aalam-wc",
     "aalam web components"
