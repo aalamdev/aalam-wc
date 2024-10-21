@@ -105,8 +105,10 @@ export class AalamTabs extends LitElement {
             }
             return html`
 <div style=${this._internal_fashion=='column'?styleMap(fashionColumn):''}>
-    <div style="display:flex;flex-direction:${this._internal_fashion}">
-        <slot name="tab-title" @click=${this._titleClicked}></slot>
+    <div part="tab-title-holder">
+        <div part="tab-title" style="display:flex;flex-direction:${this._internal_fashion}">
+            <slot name="tab-title" @click=${this._titleClicked}></slot>
+        </div>
     </div>
     <div @transitionend=${this._transitionEndEvent}>
         <slot name="tab-body"></slot>

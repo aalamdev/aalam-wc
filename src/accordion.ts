@@ -118,10 +118,9 @@ export class AalamAccordion extends LitElement {
             body.style.display = "block";
 
             if (animate && this.animationDur !== 0) {
-                let height = body.scrollHeight;
                 body.style.overflow = "hidden";
                 body.style.height = "0px";
-                const fullHeight = height + "px";
+                const fullHeight = "auto";
                 body.style.transitionProperty = "height";
                 body.style.transitionDuration = `${this.animationDur}ms`;
                 body.style.transitionTimingFunction = "ease";
