@@ -120,13 +120,14 @@ export class AalamAccordion extends LitElement {
             if (animate && this.animationDur !== 0) {
                 body.style.overflow = "hidden";
                 body.style.height = "0px";
-                const fullHeight = "auto";
+                var openheight = body.scrollHeight + "px";
+                body.style.height = openheight;
                 body.style.transitionProperty = "height";
                 body.style.transitionDuration = `${this.animationDur}ms`;
                 body.style.transitionTimingFunction = "ease";
 
                 requestAnimationFrame(() => {
-                    body.style.height = fullHeight;
+                    body.style.height = openheight;
                 });
             }
         }
@@ -151,6 +152,8 @@ export class AalamAccordion extends LitElement {
         if (body) {
             if (animate && this.animationDur !== 0) {
                 body.style.height = body.scrollHeight + "px";
+                var closeheight = body.scrollHeight + "px";
+                body.style.height = closeheight;
                 body.style.overflow = "hidden";
                 body.style.transitionProperty = "height";
                 body.style.transitionDuration = `${this.animationDur}ms`;
