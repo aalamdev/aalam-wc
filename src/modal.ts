@@ -189,7 +189,7 @@ ${this._hwStyles('width', this._width_breakpoints)}
 ${this._animateStyles()}
 <div @click=${!this.nobgclose?this._containerClicked:null}
      class="__modal-container" style="${styleMap(cont_styles)}">
-    <div id="__wrapper" class="__modal-wrapper __resp_pos __resp_height
+    <div id="__wrapper" part="modal-dialog" class="__modal-wrapper __resp_pos __resp_height
              __resp_width ${(this._mouse_up_listener != null)?
              "mousedown":""} ${this.open?'animate-open':'animate-close'}"
         @animationend=${this._animationEndEvent}
@@ -197,7 +197,7 @@ ${this._animateStyles()}
         @dragstart=${this.guidesel?this._dragStart:null}
         @mousedown=${this.guidesel?this._touchStart:null}
         @click=${this._wrapperClickedEvent}>
-        <slot name="modal-body" id="slot-body" class="modal-body">
+        <slot name="modal-dialog" id="slot-body" class="modal-body">
         </slot>
     </div>
 </div>`
@@ -470,12 +470,11 @@ ${this._animateStyles()}
         let dir = (s:{[key:string]:string|number}) => {
             return `${Object.keys(s).map(k => `${k}:${s[k]}`).join(";")}`
         }
-        let ix= 0 ;
         for (let bp of this._position_breakpoints) {
             let addn_cont_def = null;
             let wrapper_def = null;
             let mc_style = null;
-            ix = ix+1;
+            let bt = null;
             if(bp.val.endsWith("center")) {
                 mc_style = "display:flex !important;justify-content:center";
                 if(bp.val == 'center') {
@@ -483,9 +482,14 @@ ${this._animateStyles()}
                     addn_cont_def = "align-items:flex-start";
                 }
             }
+            if(bp.val.startsWith('bottom'))
+                bt = "border-bottom-left-radius:0px !important;border-bottom-right-radius:0px !important";
+            else if(bp.val.startsWith('top'))
+                bt = "border-top-left-radius:0px !important;border-top-right-radius:0px !important";
             ret.push(`
 @media screen and ${bp.cond} {.__resp_pos {${dir(position_defs[bp.val])}}
 ${wrapper_def?`.__modal-wrapper {${wrapper_def}}`:''}
+${bt?`.__modal-wrapper {${bt}}`:``}
 .__modal-container {overflow:auto;${addn_cont_def};${mc_style}}}`);
         }
         return html`<style>${map(ret, (r) => html`${r}`)}</style>`
