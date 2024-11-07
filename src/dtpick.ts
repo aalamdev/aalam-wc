@@ -3,9 +3,9 @@ import {when} from 'lit/directives/when.js';
 import {map} from 'lit/directives/map.js';
 import {range} from 'lit/directives/range.js';
 import {customElement, property, state, query} from 'lit/decorators.js';
-
 import {SortedArray} from "./utils";
 import {AalamManagedInputElement} from "./minput";
+import "./scroller";
 import "./minput";
 
 const NUM_DAYS_MS = 24 * 60 * 60 * 1000
@@ -79,9 +79,11 @@ class ModelCalendar {
         const checkDis = (day:number) => (day > dis_fr || day < dis_to)?'item-oor':'';
 
         return html`
-${witer.map((week:number[]) =>
+${witer.map((week:number[], ix:number) =>
 html`<div class="cal-week" part="cal-week"
-    style="--gpweekstart:${this.gap_days + +week[0] - 1};--gpweekend:${this.gap_days + +week[week.length -1] - 1}">
+    style="--gpweekstart:${this.gap_days + (ix == 0?1:+week[0]) - 1};
+--gpweekend:${this.gap_days + ((ix == (witer.length - 1))?this.last.getDate():+week[week.length - 1]) - 1};
+--startoff:${ix == 0?this.first.getDay():0};--endoff:${ix == (witer.length - 1)?this.last.getDay():6}">
     ${week.map(day => html`<div part="cal-day ${cls_map[day]?.part || ''} ${checkDis(day)}"
         class="__sel cal-day ${cls_map[day]?.cls || cls_map[day]?.part || ''} ${checkDis(day)}"
         style="--gpday:${day?(this.gap_days + day - 1):-1}"
@@ -186,6 +188,12 @@ export class AalamDatePickerElement extends LitElement {
     @query("#year-selector")
     yr_sel_el:HTMLElement|null;
 
+    @query("#date1-tm-dd")
+    scrl_dd1:HTMLElement|null;
+
+    @query("#date2-tm-dd")
+    scrl_dd2:HTMLElement|null;
+
     @state()
     type:string = 'd';
 
@@ -211,6 +219,20 @@ export class AalamDatePickerElement extends LitElement {
     @state()
     private current_view:string = "d"; //d|m|y
 
+    @state()
+    private date1_tm_scrl = false;
+
+    @state()
+    private date2_tm_scrl = false;
+
+    @state()
+    private mer1:string;
+
+    @state()
+    private mer2:string;
+
+    private hr_limits;
+    private min_limits;
     private _scrollLimitHits:{[key:string]:boolean} = {
         'top': false, 'btm': false};
     private _intr_observer:IntersectionObserver|null;
@@ -226,21 +248,23 @@ export class AalamDatePickerElement extends LitElement {
                                   this._scrollLimitHits['btm'] = false;}
     private _monthGap = (m:number, y:number):number => (y - 1) * 12 + m;
     private _yearGap = (y:number|undefined):number => y || 0;
-    private _yrsBase = (y:number):number => y - (y % YEARS_SPAN)
+    private _yrsBase = (y:number):number => y - (y % YEARS_SPAN);
     private _minputVal(d:Date|null, cls:string):string {
         if (!d)
             return '';
-
         if (this.type == 'd' || this.type == 't') {
-            if (cls != 'tm')
+            if (cls != 'tm') {
                 return `dt:${d && pad(d.getDate()) || ''};mon:${
                     d && pad(d.getMonth() + 1) || ''};yr:${
                     d && d.getFullYear() || ''}`
-            else if (this.type == 't')
+            }
+            else if (this.type == 't') {
+                let mer = (d == this.date1?this.mer1:(d == this.date2?this.mer2:''));
                 return `hr:${d && pad((d.getHours() % 12) || 12) || ''};min:${
                 d && pad(d.getMinutes()) || ''};sec:${
-                d && pad(d.getSeconds()) || ''};mdn:${
-                d && d.getHours() >= 12?'PM':'AM' || ''}`;
+                d && pad(d.getSeconds()) || ''};mdn:${mer || (
+                d && d.getHours() >= 12?'PM':'AM') || ''}`;
+            }
         } else if (this.type == 'm') {
             return `yr:${d && d.getFullYear()};mon:${d && pad(d.getMonth() + 1)}`;
         } else if (this.type == 'y') {
@@ -405,26 +429,32 @@ ${cal.html(cls_map)}
         let diff_yrs = Math.floor(diffMonths/NUM_MONTH_IN_YR);
         let diff_mnt = diffMonths - (diff_yrs * NUM_MONTH_IN_YR);
         let gpday = next.gap_days - 1;
-        return html`<div part='break-block' class="break-block __sel"  style="--gpday:${gpday}">
-<div part="break-block-desc" class="break-block-desc">
-    ${diff_yrs?html`${diff_yrs} years`:''}
-    ${diff_yrs && diff_mnt?html` &amp; <br/>`:''}
-    ${diff_mnt?html`${diff_mnt} months`:''}
-</div>
-<div>
+        return html`
+<div part='break-block' class="break-block __sel"  style="--gpday:${gpday}">
     <div part="cal-break-extender-bfr"
         class="ext-bfr ext-cal __sel"
         @click=${() => this._extendCalendars(prev, (diffMonths > 6?6:diff_mnt))}>
-        ${this._breakMonthsHtml(prev, (diffMonths > 6?6:diff_mnt))}
+            ${this._breakMonthsHtml(prev, (diffMonths > 6?6:diff_mnt))}
+            <span part="cal-break-extender-bfr-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none">
+                    <path stroke="#2E3A43" stroke-linecap="round" stroke-width="1.3" d="m5 9 4.48 5.534a.5.5 0 0 0 .768.01L15 9"/>
+                    <path stroke="#2E3A43" stroke-linecap="round" stroke-width="1.3" d="m5 5 4.48 5.534a.5.5 0 0 0 .768.01L15 5"/>
+                </svg>
+            </span>
     </div>
-    ${when(diffMonths > 6, () => html`<div part="cal-break-extender-aft"
+    <div part="break-block-desc" class="break-block-desc">
+        ${diff_yrs?html`${diff_yrs} years`:''}${diff_yrs && diff_mnt?html`, `:''}${diff_mnt?html`${diff_mnt} months`:''}
+    </div>
+    ${when(diffMonths > 6, () => html`
+    <div part="cal-break-extender-aft"
         class="ext-aft ext-cal __sel"
         @click=${() => this._extendCalendars(next, -6)}>
         ${this._breakMonthsHtml(next, -6)}
+            <span part="cal-break-extender-aft-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"><path stroke="#2E3A43" stroke-linecap="round" stroke-width="1.3" d="m5 11 4.48-5.533a.5.5 0 0 1 .768-.011L15 11"/><path stroke="#2E3A43" stroke-linecap="round" stroke-width="1.3" d="m5 15 4.48-5.533a.5.5 0 0 1 .768-.011L15 15"/></svg>
+            </span>
     </div>`)}
-</div>
-</div>
-`
+</div>`
     }
     private _calsHtml() {
         let chtml = [];
@@ -470,23 +500,28 @@ ${cal.html(cls_map)}
     }
     private _monthBreakHtml(prev:number, next:number, diff:number) {
         let gpday = this._monthGap(1, next) - 1;
-        return html`<div part='break-block' class="break-block __sel"  style="--gpday:${gpday}">
-<div part="break-block-desc" class="break-block-desc"
-    data-y=${diff}>
-    ${diff} years
-</div>
-<div>
+        return html`
+<div part='break-block' class="break-block __sel"  style="--gpday:${gpday}">
     <div part="cal-break-extender-bfr"
         class="ext-bfr ext-mon __sel"
         @click=${() => this._extendMonths(prev, diff > 6?6:diff)}>
-        ${prev} - ${prev + (diff > 6?6:diff)}
+            ${prev} - ${prev + (diff > 6?6:diff)}
+            <span part="cal-break-extender-bfr-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"><path stroke="#2E3A43" stroke-linecap="round" stroke-width="1.3" d="m5 9 4.48 5.534a.5.5 0 0 0 .768.01L15 9"/><path stroke="#2E3A43" stroke-linecap="round" stroke-width="1.3" d="m5 5 4.48 5.534a.5.5 0 0 0 .768.01L15 5"/></svg>
+            </span>
     </div>
-    ${when(diff > 6, () => html`<div part="cal-break-extender-aft"
+    <div part="break-block-desc" class="break-block-desc" data-y=${diff}>
+        ${diff} years
+    </div>
+    ${when(diff > 6, () => html`
+    <div part="cal-break-extender-aft"
         class="ext-aft ext-mon __sel"
         @click=${() => this._extendMonths(next, -6)}>
-        ${next - 6} - ${next}
+            ${next - 6} - ${next}
+            <span part="cal-break-extender-aft-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"><path stroke="#2E3A43" stroke-linecap="round" stroke-width="1.3" d="m5 11 4.48-5.533a.5.5 0 0 1 .768-.011L15 11"/><path stroke="#2E3A43" stroke-linecap="round" stroke-width="1.3" d="m5 15 4.48-5.533a.5.5 0 0 1 .768-.011L15 15"/></svg>
+            </span>
     </div>`)}
-</div>
 </div>
 `
     }
@@ -566,21 +601,32 @@ ${cal.html(cls_map)}
                         entry.target.id == '__scr_hldr_top'?6:0,
                         entry.target.id == '__scr_hldr_btm'?6:0)
                 }
-            } else if (rr && 
+            } else if (rr &&
                        (entry.target.classList.contains("cal-title") ||
                        entry.target.classList.contains("month-title"))) {
                 let dset = (entry.target as HTMLElement).dataset;
                 let [m, y] = [+(dset.m || 0), +(dset.y || 0)];
+                let diff = Math.abs(rr.y - cr.y)
                 if (entry.isIntersecting) {
-                    let diff = Math.abs(rr.y - cr.y)
-                    if (diff > 2*cr.height)
-                        return;
+                    if (diff > 2 * cr.height) {
+                        if (m && this.month_sel_el && !this.month_sel_el.textContent) {
+                            if (m == 1) {
+                                m = 12;y -= 1;
+                            }else
+                                m -= 1
+                        } else if (!m && this.yr_sel_el && !this.yr_sel_el.textContent) {
+                            y -= 1;
+                        } else 
+                           return;
+                    }
                     if (entry.target.classList.contains("cal-title")) {
                         if (m == 1) {
                             m = 12;y -= 1;
                         } else
                             m -= 1;
                     }
+                    if (entry.target.classList.contains('month-title'))
+                        y -= 1;
                 } else if (!entry.isIntersecting) {
                     let diff = Math.abs((cr.y + cr.height) - rr.y);
                     if (cr.y > rr.y || diff > cr.height)
@@ -1001,13 +1047,15 @@ ${cal.html(cls_map)}
     }
     private _selectorHtml() {
         if (this.current_view == DATE_VIEW) {
-            return html`<div class="nav-selector-holder" part="nav-selector-holder">
-<span part="nav-selector nav-selector-month" class="nav-selector" id="month-selector" @click=${this._monthTitleClickEvent}></span>
-<span part="nav-selector nav-selector-year" class="nav-selector" id="year-selector" @click=${this._yearTitleClickEvent}></span>
+            return html`
+<div class="nav-selector-holder" part="nav-selector-holder">
+    <span id="month-selector" @click=${this._monthTitleClickEvent} part="nav-selector nav-selector-month"  class="nav-selector"></span>
+    <span class="nav-selector" id="year-selector" @click=${this._yearTitleClickEvent}  part="nav-selector nav-selector-year"></span>
 </div>`
         } else if (this.current_view == MONTH_VIEW) {
-            return html`<div class="nav-selector-holder">
-<span part="nav-selector nav-selector-year" class="nav-selector" id="year-selector" @click=${this._yearTitleClickEvent}></span>
+            return html`
+<div class="nav-selector-holder">
+    <span id="year-selector" part="nav-selector nav-selector-year" class="nav-selector" @click=${this._yearTitleClickEvent}></span>
 </div>`
         }
         return html``;
@@ -1086,15 +1134,99 @@ ${cal.html(cls_map)}
 </aalam-minput></div>`
         }
         let tm_html = (id:string, d:Date|null) => {
-            return html`<div part="tm-input-box" class="input-box" style="border:0">
-<aalam-minput order=${tm_order.join(",")} id=${id}
-    @change=${this._minputChangedEvent}
-    data-hr=${when(tm_order.indexOf('hr') >= 0, () => data_hr)}
-    data-min=${when(tm_order.indexOf('min') >= 0, () => data_min)}
-    data-sec=${when(tm_order.indexOf('sec') >= 0, () => data_sec)}
-    data-mdn=${when(tm_order.indexOf('hr') >= 0, () => data_mdn)}
-    value=${this._minputVal(d, 'tm')}>
-</aalam-minput></div>`
+            return html`
+<div part="tm-input-box" id="tm-input-box" class="input-box" style="border:0" @click=${(e:MouseEvent) => set_scroller(e, id)}>
+    <aalam-minput order=${tm_order.join(",")} id=${id}
+        @change=${this._minputChangedEvent}
+        data-hr=${when(tm_order.indexOf('hr') >= 0, () => data_hr)}
+        data-min=${when(tm_order.indexOf('min') >= 0, () => data_min)}
+        data-sec=${when(tm_order.indexOf('sec') >= 0, () => data_sec)}
+        data-mdn=${when(tm_order.indexOf('hr') >= 0, () => data_mdn)}
+        value=${this._minputVal(d, 'tm')}>
+    </aalam-minput>
+</div>`
+        }
+        const set_scroller = (event:MouseEvent, id:string) => {
+            let e = event.target as HTMLElement;
+            if(id == 'date1-tm') {
+                this.date1_tm_scrl = this.date1_tm_scrl?false:true;
+                if(this.date1_tm_scrl)
+                    e.classList.add("open");
+                else
+                    e.classList.remove("open");
+            }
+            else if(id == 'date2-tm') {
+                this.date2_tm_scrl = this.date2_tm_scrl?false:true;
+                if(this.date2_tm_scrl)
+                    e.classList.add("open");
+                else
+                    e.classList.remove("open");
+            }
+        }
+        const select_date = (id:string) => {
+            let d = (id == 'date1'?this.date1:this.date2);
+            if(!d)
+                d = set_date(id);
+            return d;
+
+        }
+        const set_date = (id:string) => {
+            if(id == 'date1') {
+                this.date1 = new Date();
+                this.mer1 = (this.date1.getHours()>12?'PM':'AM');
+                return this.date1;
+            } else {
+                if(this.date1 && this.date1 > new Date())
+                    this.date2 = new Date(this.date1);
+                else
+                    this.date2 = new Date();
+                this.mer2 = (this.date2.getHours()>12?'PM':'AM');
+                return this.date2;
+            }
+        }
+        const set_time = (id:string, d:Date, cls:string, val:number, mer?:string) => {
+            if(cls == 'hr')
+                d.setHours(val);
+            else if(cls == 'min')
+                d.setMinutes(val);
+            if (id == 'date1') {
+                this.date1 = new Date(d.getFullYear(), d.getMonth(),
+                d.getDate(), d.getHours(), d.getMinutes(), 0);
+                if(mer)
+                    this.mer1 = mer;
+            }
+            else {
+                this.date2 = new Date(d.getFullYear(), d.getMonth(),
+                d.getDate(), d.getHours(), d.getMinutes(), 59);
+                if(mer)
+                    this.mer2 = mer;
+            }
+        }
+        const scrl_hr = (e:CustomEvent, id:string) => {
+            let val = parseInt(e.detail.val);
+            let d = select_date(id);
+            let mer = (id == 'date1'?this.mer1:this.mer2);
+            if(mer == 'PM' && val < 12)
+               val += 12;
+            else if(mer == 'AM' && val == 12)
+                val -= 12;
+            set_time(id, d, 'hr', val);
+        }
+        const scrl_min = (e:CustomEvent, id:string) => {
+            let d = select_date(id);
+            set_time(id, d, 'min', e.detail.val);
+        }
+        const scrl_mdn = (e:CustomEvent, id:string) => {
+            let d = select_date(id);
+            let val = d?.getHours();
+            if(e.detail.val == 'AM') {
+                if(d?.getHours() >= 12)
+                    val = d.getHours() - 12;
+            } else if(e.detail.val == 'PM') {
+                if(d?.getHours() < 12)
+                    val = d.getHours() + 12;
+            }
+            set_time(id, d, 'hr', val, e.detail.val);
         }
 
         let _html = (label:string, id:string, d:Date|null) => {
@@ -1105,11 +1237,20 @@ ${cal.html(cls_map)}
            () => html`<div class="input-row-time">${
                 tm_html(id + '-tm', d)}</div>`)}
 </div>
+${when(id == 'date1'?this.date1_tm_scrl:this.date2_tm_scrl, () => html`
+<div class="scroller-blk">
+    <div class="scroller-parent">
+        <aalam-scroller id="hour" @change=${(e:CustomEvent) => scrl_hr(e, id)} choices=${this.hr_limits} init="12"></aalam-scroller>
+        <aalam-scroller id="minute" @change=${(e:CustomEvent) => scrl_min(e, id)} choices=${this.min_limits} init="10"></aalam-scroller>
+        <aalam-scroller id="mdn" @change=${(e:CustomEvent) => scrl_mdn(e, id)} choices="AM,PM" init="PM"></aalam-scroller>
+    </div>
+</div>`
+)}
 `;
         }
         if (!this.range) {
-            let label:{[key:string]:string} = {'t': 'Date & Time', 'd': 'Date', 'm': 'Month',
-                         'y': 'Year'};
+            let label:{[key:string]:string} = {
+                't': 'Date & Time', 'd': 'Date', 'm': 'Month', 'y': 'Year'};
             return _html(label[this.type], 'date1', this.date1);
         } else {
             return [_html('From', 'date1', this.date1), _html('To', 'date2', this.date2)];
@@ -1132,7 +1273,6 @@ ${cal.html(cls_map)}
         else if (dec.YYYY)
             this.type = 'y';
         else {
-            console.warn("Given format is not valid, setting to default");
             this.format = "DD/MM/YYYY";
             this.type = 'd';
             dec = {DD: true, MM: true, YYYY: true,
@@ -1149,6 +1289,17 @@ ${cal.html(cls_map)}
         this.format = "DD/MM/YYYY";
         this._calendars = new Calendars;
         this.current_view = DATE_VIEW;
+        this.min_limits = '0';
+        let hr = [];
+        let min = [];
+        for(let i = 1;i <= 12; i++) {
+            hr.push(i);
+        }
+        for(let i = 0; i <= 59; i++) {
+            min.push(i);
+        }
+        this.hr_limits = hr.join(",");
+        this.min_limits = min.join(",");
     }
     override attributeChangedCallback(name:string, old_val:string, new_val:string) {
         super.attributeChangedCallback(name, old_val, new_val);
@@ -1237,7 +1388,8 @@ ${cal.html(cls_map)}
 top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: translate(-50%, -50%);
 }
 .month-this,.year-this {border:1px solid #4E5A63;border-radius:6px;}
-.cal-week {display:table-row;position-relative;height:36px;}
+.cal-week {display:table-row;position:relative;height:36px;
+    --selinwrange:clamp(0, calc(0 - ( var(--gpfrom) - var(--gpweekend))), 1);}
 .cal-day {display:table-cell;width:calc(100% / 7);min-width:36px;text-align:center;
           vertical-align:middle;cursor:pointer;position:relative;}
 .cal-day:not(.cal-selected):not(:empty):hover {background-color:#F2F5F8;}
@@ -1255,8 +1407,17 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
 .cal-headcontainer {display:table;width:100%;padding-right:15px;box-sizing:border-box;}
 .item-oor {pointer-events:none;opacity:0.5;}
 .nav-selector-holder {padding:10px;border-bottom:1px solid #ddd;box-sizing:border-box;}
-.nav-selector[data-m] {margin-right:10px;}
-.nav-selector:not(:empty)::after {content: "\\25BC";font-size:0.8rem;margin-left:10px;}
+.nav-selector:not(:empty)::after {
+    content: "";
+    margin-left:6px;
+    margin-right:10px;
+    display:inline-block;
+    width:16px;
+    height:16px;
+    background-color:currentColor;
+    clip-path:polygon(25.5% 37.3%, 49.9% 62.7%, 75.5% 37.3%);
+    vertical-align:middle;
+}
 .nav-selector {color:#1D6AB3;}
 .cal-title {margin:10px;}
 .cal-title.wide-first-week {margin-bottom:0;transform:translateY(100%);
@@ -1264,7 +1425,7 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
 .scroll-holder {width:100%;height:50px;background:transparent}
 .cal-selected, .year-selected, .month-selected {position:relative;color:white;}
 .year-in-years,.month-in-year {position:relative;}
-.cal-day::after, .year-in-years::after, .month-in-year::after {
+.year-in-years::after, .month-in-year::after {
     content: " ";position:absolute;
     left:0;right:0;top:50%;
     background:rgba(calc((229 * var(--selinrange)) + (242 * var(--hovinrange))),
@@ -1274,6 +1435,19 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
     z-index:-2;}
 .cal-day::after {
     height: calc((var(--selinrange) + var(--hovinrange)) * 30px);transform:translate(0, -50%);}
+.cal-week::after {
+   content: "";position:absolute;
+   left:calc(100% * max(var(--startoff), calc(var(--gpfrom) - var(--gpweekstart) + var(--startoff)))/7);
+   right:calc(100% * (6 - min(var(--endoff), calc(var(--gpto) - var(--gpweekstart) + var(--startoff))))/7);
+   top:50%;
+   background:rgba(calc((229 * var(--selinwrange))),
+                    calc((235 * var(--selinwrange))),
+                    calc((241 * var(--selinwrange))),
+                    calc(var(--selinwrange)));
+    height: calc(var(--selinwrange) * 30px);transform:translate(0, -50%);
+    margin-right: calc((clamp(-1, calc(var(--gpweekend) - var(--gpto)), 0) + 1) * 30px);
+    margin-left: calc((clamp(-1, calc(var(--gpfrom) - var(--gpweekstart)), 0) + 1) * 30px);
+    z-index:-2;}
 .year-in-years::after, .month-in-year::after {
     top:0;height:100%;}
 .month-title, .years-title {margin-top:20px;margin-bottom:10px;}
@@ -1288,7 +1462,7 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
 .cal-selected-to::after {right:50%;}
 .year-selected, .month-selected {background-color:#253648;}
 .break-block {
-    display:grid;
+    display:block;
     margin:20px 0px;
     grid-template-columns: 33% 67%;
     background:rgba(calc((229 * var(--selinrange)) + (242 * var(--hovinrange))),
@@ -1296,14 +1470,14 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
                     calc((241 * var(--selinrange)) + (248 * var(--hovinrange))),
                     calc(var(--selinrange) + var(--hovinrange)));
 }
-.break-block-desc {border-right: 1px solid #ddd;display: flex;align-items: center;justify-content:center;
-    text-align: center;}
+.break-block-desc {
+    display: flex;
+    align-items: center;
+    justify-content:center;
+    text-align: center;
+}
 .ext-bfr, .ext-aft {color:#1D6AB3;position:relative;padding:6px 14px;cursor:pointer}
-.ext-aft {border-top: 1px solid #C9D6E2;}
-.ext-bfr::after, .ext-aft::after {
-    position:absolute;right:14px;top:50%;transform:translateY(-50%);}
-.ext-bfr::after {content: "\\21A1";}
-.ext-aft::after {content: "\\219F";}
+.ext-aft {border-top: px solid #C9D6E2;}
 .input-row {display:flex;}
 .input-row-time {margin-left:auto;}
 .input-box {
@@ -1316,7 +1490,82 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
     background:#fff;padding:0 6px;color:#0F2234;
     transform:translate(0, -50%);
 }
-`
+.scroller-parent {
+    background:transparent;
+    display:inline-flex;
+    position:relative;
+    align-items:center;
+    width:100%;
+    height:170px;
+    padding:10px 14px;
+    &::after {
+        content:'';
+        border:1px solid var(--scrl-bg);
+        border-radius:var(--scrl-br);
+        margin-left:10px;
+        margin-right:10px;
+        height:30px;
+        position:absolute;
+        left:0;
+        right:0;
+        z-index:0;
+        background:var(--scrl-bg);
+        top:50%;
+        transform:translateY(-50%);
+    }
+}
+aalam-scroller {
+    display:inline-flex;
+    border:none;
+    z-index:1;
+    position:relative;
+    align-items:center;
+    width:100%;
+}
+aalam-scroller:first-child {
+    width:50%;
+}
+aalam-scroller::after {
+    content:' ';
+    padding:6px;
+}
+.scroller-blk {
+    display:flex;
+    justify-content:center;
+}
+aalam-scroller::part(scroller-parent) {
+    background:transparent;
+    height:150px;
+    width:calc(100% - 30px);
+}
+aalam-scroller::part(scroller-el) {
+    align-content:center;
+    height:30px;
+    justify-content:right;
+    display:grid;
+}
+aalam-scroller::part(empty-el) {
+    height:30px;
+}
+#hour::after {
+    content:'H';
+}
+#minute::after {
+    content:'M';
+}
+#tm-input-box::after {
+    content:'';
+    display:inline-block;
+    width:16px;
+    height:16px;
+    background-color:currentColor;
+    vertical-align:middle;
+    clip-path:polygon(25.5% 37.3%, 49.9% 62.7%, 75.5% 37.3%);
+}
+.open#tm-input-box::after {
+    clip-path:polygon(49.5% 37.5%, 25.5% 62.7%, 75.5% 62.7%);
+}
+aalam-minput[order="yr"] {width:4em;}`
     }
     override render() {
         let chdr = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -1362,7 +1611,7 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
         }
         this._mut_observer.observe(this.nav_el, {childList: true});
         let els!:NodeList;
-        if (this.type == 'd' || this.type == 'm')
+        if (this.type == 'd' || this.type == 't')
             els = this.nav_el.querySelectorAll(".cal-title");
         else if (this.type == 'm')
             els = this.nav_el.querySelectorAll(".month-title");
