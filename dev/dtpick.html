@@ -25,7 +25,13 @@
             }
             .grid div {width:100%;}
         }
-        aalam-dtpick {height:calc(600px - 4em - 30px);display:block;}
+        .tm-blk > div {
+            display:inline-block;
+            margin:20px;
+            padding:20px;
+            border:1px solid grey;
+        }
+        aalam-dtpick {height:calc(600px - 4em - 30px);display:block;--scrl-bg:rgb(from #125FAC r g b / 0.1);--scrl-br:5px}
     </style>
     <div class="grid" style="margin-bottom:10px;">
         <div><h2>Date</h2><aalam-dtpick format="DD-MM-YYYY" type="d" maxval="20-12-2028" minval="23-08-2013"></aalam-dtpick></div>
