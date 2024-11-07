@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Scroller Demo</title>
+        <script type="module" src="../src/scroller.ts"></script>
+        <style>
+            div {
+                background:transparent;
+                display:inline-flex;
+                position:relative;
+                align-items:center;
+                width:280px;
+                height:170px;
+                padding:10px 14px;
+            }
+            div::after {
+                content:'';
+                border:1px solid #125FAC;
+                margin-left:10px;
+                margin-right:10px;
+                height:30px;
+                position:absolute;
+                left:0;
+                right:0;
+                z-index:0;
+                background:#125FAC;
+                top:50%;
+                transform:translateY(-50%);
+            }
+            aalam-scroller {
+                display:inline-flex;
+                border:none;
+                z-index:1;
+                position:relative;
+                align-items:center;
+                width:100%;
+            }
+            aalam-scroller::after {
+                content:' ';
+                padding:6px;
+            }
+            aalam-scroller::part(scroller-parent) {
+                background:transparent;
+                height:150px;
+                width:calc(100% - 30px);
+            }
+            aalam-scroller::part(scroller-el) {
+                align-content:center;
+                height:30px;
+                justify-content:right;
+                display:grid;
+            }
+            aalam-scroller::part(empty-el) {
+                height:30px;
+            }
+            #hour::after {
+                content:'H';
+            }
+            #minute::after {
+                content:'M';
+            }
+            #second::after {
+                content:'S';
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <aalam-scroller id="hour" choices="1,2,3,4,5,6,7,8,9,10,11,12" init="12"></aalam-scroller>
+            <aalam-scroller id="minute" choices="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21" init="0"></aalam-scroller>
+            <aalam-scroller id="second" choices="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25" init="0"></aalam-scroller>
+            <aalam-scroller id="stand" choices="AM,PM" init="AM"></aalam-scroller>
+        </div>
+    </body>
+    <script>
+        /*let hr = document.querySelector("#hour");
+        console.log('hr : ', hr);
+        hr.addEventListener("change", (detail) => {
+            console.log('custom event clicked', detail);
+            console.log("ix : ", detail.detail.x);
+        });*/
+    </script>
+</html>
