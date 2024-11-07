@@ -4,9 +4,10 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/vite.svg" />
         <style>
-        .modal-body {border-radius:25px;height:100%;box-sizing:border-box;
+        .modal-dialog {height:100%;box-sizing:border-box;
                      padding:15px;min-width:320px;background-color:white;
                      overflow:auto;margin:auto;}
+        aalam-modal::part(modal-dialog) {border-radius:25px;}
         </style>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>Modal Demo</title>
@@ -36,7 +37,7 @@
                 el.hide();
             }
             function inserElement() {
-                let el = document.getElementById('modal-body');
+                let el = document.getElementById('modal-dialog');
                 let new_el = document.createElement('button');
                 new_el.classList.add('close-sel')
                 new_el.innerText = "NEW CLOSE";
@@ -70,8 +71,8 @@
         <button onclick="openl1()"> l1 open </button>
         <div>
             <aalam-modal  guidesel="top:.top-guide, 15;left:#left-guide" 
-                          id="modal-outer" animate="xs:r2l">
-                <div slot="modal-body" class="modal-body">
+                          id="modal-outer" animate="xs:r2l" pos="m:top-center">
+                <div slot="modal-dialog" class="modal-dialog">
                     <div style="height:20px;border-top:3px solid #000;
                                 margin:auto;width:30px" class="top-guide"> 
                     </div>
@@ -93,7 +94,7 @@
         </div>
         <div id="modal-praent1">
             <aalam-modal animate="m:r2l" id="modal-inner">
-                <div slot="modal-body" class="modal-body">
+                <div slot="modal-dialog" class="modal-dialog">
                     <button onclick="closeInner()">close inner</button>
                     <div style="background:green">
                         <h1 style="color:white">inner</h1>
@@ -110,10 +111,10 @@
         <div id="modal-parent2">
             <aalam-modal guidesel="right:.right-guide,edge;left:.left-guide,10;
                                    bottom:.bottom-guide,60;top:.top-guide,5"
-                         pos="xs:left;s:bottom-center;l:top-center;m:top-right;xl:center;"
+                         pos="xs:left;s:bottom-center;l:center;m:top-right;xl:bottom"
                                closesel=".close-sel" id="modal-l1"
                          animation="xs:t2b;m:b2t;l:r2l;xl:l2r">
-                <div slot="modal-body" class="modal-body" id="modal-body">
+                <div slot="modal-dialog" class="modal-dialog" id="modal-dialog">
                     <div class="right-guide" style="background:orange;">
                         <p> class: right-guide, pos: right</p>
                         <div style="background:yellow;height:20px;width:20px;
@@ -165,9 +166,9 @@
                                      closesel=".close-sel"
                                      pos="xs:top;s:center;l:full;xl:center;
                                           m:bottom-center" stack id="modal-l2">
-                            <div slot="modal-body" class="modal-body" 
+                            <div slot="modal-dialog" class="modal-dialog" 
                                  style="padding:3px">
-                                 <div style="padding:10px">
+                                 <div style="padding:22px">
                                      <div style="padding:9px">
                                          <h2>L2 modal</h2>
                                          <button class="close-sel">exit</button>
@@ -195,7 +196,7 @@
                     </div>
                     <div id = "modal-parent4">
                          <aalam-modal pos="l:top" id="modal-l3">
-                              <div slot="modal-body" class="modal-body">
+                              <div slot="modal-dialog" class="modal-dialog">
                                   <div style="padding:9px">
                                       <h2>L3 modal</h2>
                                   </div>
