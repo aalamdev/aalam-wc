@@ -65,7 +65,11 @@
                         data-priority="12">
                         Home
                     </div>
-                    <div id='about' slot="menu-item" class="nav-menu-item"
+                    <div id='about' data-proxy="about" slot="collapsed-item" class="nav-menu-item"
+                        data-priority="2">
+                        About
+                    </div>
+                    <div id='about' data-proxy="about" slot="menu-item" class="nav-menu-item"
                         data-priority="2">
                         About
                     </div>
@@ -89,45 +93,64 @@
                             </aalam-dropdown>
                         </div>
                     </aalam-dropdown>
-                    <div id='contact' slot="menu-item" class="nav-menu-item"
+                    <div id='contact' data-proxy="contact" slot="menu-item" class="nav-menu-item"
+                        data-priority="2">
+                        <input type="text" placeholder="contact"/>
+                    </div>
+                    <div id='contact' data-proxy="contact" slot="collapsed-item" class="nav-menu-item"
                         data-priority="2">
                         Contact
                     </div>
                     <div id='portfolio' slot="menu-item" class="nav-menu-item"
                         data-priority="1">
-                        Portfolio
+                        <input type="text" placeholder="portfolio" />
                     </div>
-                    <div id='projects' slot="menu-item" class="nav-menu-item"
+                    <div id='projects' data-proxy="projects" slot="menu-item" class="nav-menu-item"
                         data-priority="6">
                         Projects
                     </div>
-                    <div id='name' slot="menu-item" class="nav-menu-item"
+                    <div id='projects' data-proxy="projects" slot="collapsed-item" class="nav-menu-item"
+                        data-priority="6">
+                        Projects
+                    </div>
+                    <div id='name' data-proxy="name" slot="menu-item" class="nav-menu-item"
+                        data-priority="7">
+                        <input type="checkbox" value="select"/>name
+                    </div>
+                    <div id='name' data-proxy="name" slot="collapsed-item" class="nav-menu-item"
                         data-priority="7">
                         Name
                     </div>
-                    <div id='class' slot="menu-item" class="nav-menu-item"
+                    <div id='class' data-proxy="class" slot="menu-item" class="nav-menu-item"
+                        data-priority="8">
+                        <h1>Class</h1>
+                    </div>
+                    <div id='class' data-proxy="class" slot="collapsed-item" class="nav-menu-item"
                         data-priority="8">
                         Class
                     </div>
-                    <div id='native' slot="menu-item"
-                        class="nav-menu-item native" data-priority="9">
-                        Native
+                    <div id='address' data-proxy="address" slot="menu-item" class="nav-menu-item"
+                        data-priority="10">
+                        <a>adress</a>
                     </div>
-                    <div id='address' slot="menu-item" class="nav-menu-item"
+                    <div id='address' data-proxy="address" slot="collapsed-item" class="nav-menu-item"
                         data-priority="10">
                         Address
                     </div>
-                    <div id='height' slot="menu-item" class="nav-menu-item"
-                        data-priority="11">
-                        Height
-                    </div>
-                    <div id='logout' slot="menu-item" class="nav-menu-item"
+                    <div id='logout' data-proxy="logout" slot="collapsed-item" class="nav-menu-item"
                         data-priority="1">
                         Logout
                     </div>
-                    <div id='toggle' slot="toggle-item"
-                        class="toggle-menu">More
+                    <div id='logout' data-proxy="logout" slot="menu-item" class="nav-menu-item"
+                        data-priority="1">
+                        Logout
                     </div>
+                    <div id='toggle' slot="toggle-item" class="toggle-menu">More</div>
+                <div id='contact' data-persist slot="collapsed-item" class="nav-menu-item"
+                    data-priority="2">
+                    Persist-element
+                </div>
+                </aalam-navmenu>
         </div>
         <div id='lower-div'></div>
         <div style='padding-top:50px'>
