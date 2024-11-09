@@ -16,6 +16,8 @@ export class AalamNavMenu extends LitElement {
     _container:HTMLElement;
 
     private _sorted_menu:HTMLElement[] = [];
+    private _persist = false;
+    private _slotted_menu_order:HTMLElement[] = [];
     private _slot_order_list:number[] = [];
     private _slot_dirty_changes = false;
     private _sorted_dd:HTMLElement[] = [];
@@ -37,7 +39,10 @@ export class AalamNavMenu extends LitElement {
         super.connectedCallback();
         window.addEventListener('resize', this._resizeListener);
         this.renderRoot.addEventListener('slotchange', (e) => {
-            this._slotChangedEvent(e)});
+            if(!this._slot_dirty_changes) {
+                this._slotChangedEvent(e);
+            }
+        });
     }
     override disconnectedCallback() {
         super.disconnectedCallback();
@@ -52,7 +57,7 @@ export class AalamNavMenu extends LitElement {
             <slot name='toggle-item'></slot>
         </div>
         <div slot='dd-body' part='dd-body'>
-            <slot name="__collapsed_item"></slot>
+            <slot name="collapsed-item"></slot>
         </div>
     </aalam-dropdown>
 </div>`
@@ -64,26 +69,29 @@ export class AalamNavMenu extends LitElement {
     }
     private _slotChangedEvent(e:Event) {
         let name = (e.target as HTMLSlotElement)?.name;
-        if(name == '__collapsed_item') return;
-        else if (name == 'toggle-item') {
+        if(name == 'toggle-item') {
             let dpd = this.renderRoot.querySelector("aalam-dropdown");
             let dd = this.querySelector('[slot=toggle-item]');
             if(!dpd || !dd) return;
+            let per = this.querySelectorAll('[slot=collapsed-item][data-persist]');
+            this._persist = (per.length > 0?true:false);
             dpd.updateComplete.then(() => {
                 this._tgl_width =  dd.getBoundingClientRect().width;
-                this._dd_toggler.style.display = 'none';
+                this._dd_toggler.style.display = (this._persist?null:'none');
                 this._manageCollapsedItems();
             });
-        }
-        if(this._slot_dirty_changes) {
-            this._slot_dirty_changes = false;
-            return;
-        }
-        if(name == 'menu-item') {
+        } else if(name == 'collapsed-item') {
+            let el = this.querySelectorAll(`[slot=collapsed-item][data-proxy]`);
+            el.forEach((ele) => {
+                let c = ele as HTMLElement;
+                c.style.display = (c.style.display==null?null:'none');
+            });
+        } else if(name == 'menu-item') {
             let el:HTMLElement[] = Array.from(
                 this.querySelectorAll('[slot=menu-item]'));
             el.forEach((e) => {
                 let e_width = e.getBoundingClientRect().width;
+                this._slotted_menu_order.push(e);
                 this._slot_order_list.push(e_width);
             });
             this._sorted_menu = el.sort(
@@ -114,17 +122,27 @@ export class AalamNavMenu extends LitElement {
         }
         const add_el_width = () => {
             let ix = Array.prototype.indexOf.call(
-                this.children,
+                this._slotted_menu_order,
                 this._sorted_dd[dd_len() - 1]);
             return this._slot_order_list[ix];
+        }
+        const display_el = (el:HTMLElement, cls:string) => {
+            let px = el.getAttribute('data-proxy');
+            let clps_el = this.querySelector(`[data-proxy=${px}][slot=collapsed-item]`) as HTMLElement;
+            clps_el.style.display = (cls == 'menu'?null:'none');
+            el.style.display = (cls == 'menu'?'none':null);
         }
         let parent_width = par_width();
         let cont_width = c_width();
         if(parent_width <= cont_width) {
-            this._dd_toggler.style.display = 'block';
+            if(!this._persist)
+                this._dd_toggler.style.display = null;
             if(this._sorted_menu.length < 1) return;
             while(parent_width <= cont_width) {
-                change_slot_name(this._sorted_menu[0], '__collapsed_item');
+                if(this._sorted_menu[0].hasAttribute('data-proxy'))
+                    display_el(this._sorted_menu[0], 'menu');
+                else
+                    change_slot_name(this._sorted_menu[0], 'collapsed-item');
                 this._sorted_dd.push(this._sorted_menu[0]);
                 this._sorted_menu.splice(0, 1);
                 if(this._sorted_menu.length < 1) return;
@@ -133,23 +151,27 @@ export class AalamNavMenu extends LitElement {
         } else if(parent_width >= cont_width) {
             let d_len = dd_len();
             if(d_len < 1) {
-                this._dd_toggler.style.display = 'none';
+                if(!this._persist)
+                    this._dd_toggler.style.display = 'none';
                 return;
             }
-            if(d_len == 1)
-                parent_width = par_width() + this._tgl_width;
+            if(d_len == 1 && !this._persist)
+                parent_width += this._tgl_width;
             while(parent_width >= cont_width + add_el_width()) {
-                if(d_len == 1)
-                    this._dd_toggler.style.display = 'none';
-                change_slot_name(this._sorted_dd[dd_len() - 1], 'menu-item');
+                if(this._sorted_dd[dd_len() - 1].hasAttribute('data-proxy'))
+                    display_el(this._sorted_dd[dd_len() - 1], 'dd');
+                else
+                    change_slot_name(this._sorted_dd[dd_len() - 1], 'menu-item');
                 this._sorted_menu.splice(0, 0, this._sorted_dd[d_len - 1]);
                 this._sorted_dd.splice(d_len - 1, 1);
                 d_len = dd_len();
-                if(d_len < 1) return;
-                cont_width = c_width();
-                if(d_len == 1)
+                if(d_len == 1 && !this._persist)
                     parent_width += this._tgl_width;
+                if(d_len < 1) break;
+                cont_width = c_width();
             }
+            if(dd_len() == 0 && !this._persist)
+                this._dd_toggler.style.display = 'none';
         }
     }
 }
