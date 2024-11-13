@@ -273,7 +273,7 @@ ${map(this._items, (item, index) => this._itemHtml(item, index))}
     static override get styles() {
         return css`
 :host {display:inline-block;}
-input,input:focus {border:0;padding:0;outline:0;background:transparent;color:inherit;}
+input,input:focus {border:0;padding:0;outline:0;background:transparent;color:inherit;font-size:inherit;line-height:inherit;}
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;margin: 0;

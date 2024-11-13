@@ -9,6 +9,7 @@ export default defineConfig({
     })],
   build: {
       rollupOptions: {
+          preserveEntrySignatures: 'strict',
           input: {
             'index': path.resolve(__dirname, "src/index.ts"),
             'toggle-switch': path.resolve(__dirname, "src/toggle-switch.ts"),
@@ -28,7 +29,7 @@ export default defineConfig({
             'scroller':path.resolve(__dirname, "src/scroller.ts")
           },
           output: [{
-            format: 'esm',
+            format: 'es',
             entryFileNames: '[name].js'
           }]
       }

@@ -709,6 +709,15 @@ ${cal.html(cls_map)}
                 "value", this._minputVal(this.date1, 'dt'));
             this.date1_el_tm?.setAttribute(
                 "value", this._minputVal(this.date1, 'tm'));
+            if (this.type == 'm') {
+                this.nav_el.style.setProperty(
+                    "--gpfrom",
+                    "" + (this.date1?this._monthGap(this.date1.getMonth() + 1,
+                                                    this.date1.getFullYear()):9999*12));
+            } else if (this.type == 'd' || this.type == 't') {
+                let d1_gap = ModelCalendar.gap(this.date1);
+                this.nav_el.style.setProperty("--gpfrom", "" + d1_gap);
+            }
         }
         if (dt2 != this.date2) {
             this.date2 = dt2;
@@ -716,6 +725,14 @@ ${cal.html(cls_map)}
                 "value", this._minputVal(this.date2, 'dt'));
             this.date2_el_tm?.setAttribute(
                 "value", this._minputVal(this.date2, 'tm'));
+            if (this.type == 'm')
+                this.nav_el.style.setProperty(
+                    "--gpto", "" + (this.date2?this._monthGap(
+                        this.date2.getMonth() + 1, this.date2.getFullYear()):0));
+            else if (this.type == 't' || this.type == 'd') {
+                let d2_gap = ModelCalendar.gap(this.date2);
+                this.nav_el.style.setProperty("--gpto", "" + (d2_gap || 0));
+            }
         }
         let detail: {[key:string]:any};
         let fmt = this.format;
@@ -741,6 +758,7 @@ ${cal.html(cls_map)}
             detail['value'] = `${detail['from']['value']};${detail['to']['value']}`;
             this.value = detail['value'];
         }
+            this.nav_el.style.setProperty("--gphovto", "0")
         this.dispatchEvent(new CustomEvent('change', {
             bubbles: true,
             cancelable: true,
@@ -781,11 +799,6 @@ ${cal.html(cls_map)}
                 setTime(this.date2_el_tm, 23, 59, 59);
             this._setDate(this.date1, sel_dt);
         }
-        let d1_gap = ModelCalendar.gap(this.date1),
-            d2_gap = ModelCalendar.gap(this.date2);
-
-        this.nav_el.style.setProperty("--gpfrom", "" + d1_gap);
-        this.nav_el.style.setProperty("--gpto", "" + (d2_gap || 0));
         this.nav_el.style.setProperty("--gphovto", "0");
     }
     private _monthClickEvent(event:PointerEvent) {
@@ -802,14 +815,7 @@ ${cal.html(cls_map)}
             } else {
                 this._setDate(this.date1, sel_dt);
             }
-            this.nav_el.style.setProperty(
-                "--gpfrom",
-                "" + (this.date1?this._monthGap(this.date1.getMonth() + 1,
-                                                this.date1.getFullYear()):9999*12));
-            this.nav_el.style.setProperty(
-                "--gpto", "" + (this.date2?this._monthGap(
-                    this.date2.getMonth() + 1, this.date2.getFullYear()):0));
-            this.nav_el.style.setProperty("--gphovto", "0")
+            this.nav_el.style.setProperty("--gphovto", "0");
             return ;
         } else {
             let [f, l] = [this._calendars.get(0), this._calendars.get(-1)];
@@ -1054,7 +1060,7 @@ ${cal.html(cls_map)}
 </div>`
         } else if (this.current_view == MONTH_VIEW) {
             return html`
-<div class="nav-selector-holder">
+<div class="nav-selector-holder" part="nav-selector-holder">
     <span id="year-selector" part="nav-selector nav-selector-year" class="nav-selector" @click=${this._yearTitleClickEvent}></span>
 </div>`
         }
@@ -1231,7 +1237,7 @@ ${cal.html(cls_map)}
 
         let _html = (label:string, id:string, d:Date|null) => {
             return html`
-<div class="input-row">
+<div class="input-row ${this.type != 't'?'inline':''}">
     <div class="input-row-date">${dt_html(label, id + '-dt', d)}</div>
     ${when(this.type == 't',
            () => html`<div class="input-row-time">${
@@ -1435,6 +1441,14 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
     z-index:-2;}
 .cal-day::after {
     height: calc((var(--selinrange) + var(--hovinrange)) * 30px);transform:translate(0, -50%);}
+.cal-day::after {
+    content: " ";position:absolute;
+    left:0;right:0;top:50%;
+    background:rgba(calc((242 * var(--hovinrange))),
+                    calc((245 * var(--hovinrange))),
+                    calc((248 * var(--hovinrange))),
+                    calc(var(--hovinrange)));
+    z-index:-2;}
 .cal-week::after {
    content: "";position:absolute;
    left:calc(100% * max(var(--startoff), calc(var(--gpfrom) - var(--gpweekstart) + var(--startoff)))/7);
@@ -1478,17 +1492,20 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
 }
 .ext-bfr, .ext-aft {color:#1D6AB3;position:relative;padding:6px 14px;cursor:pointer}
 .ext-aft {border-top: px solid #C9D6E2;}
-.input-row {display:flex;}
+.input-row:not(.inline) {display:flex;margin-bottom:1.2rem;}
+.input-row:not(.inline):last-child {margin-bottom:0;}
+.input-row.inline {display:inline-flex;}
+.input-row.inline:nth-child(2)::before {content: "-";margin:0 10px;display:inline-flex;align-items:center}
 .input-row-time {margin-left:auto;}
 .input-box {
     border:1px solid #0F2234;padding:12px 12px;position:relative;
-    width:fit-content;margin-bottom:20px;border-radius:4px;
+    width:fit-content;border-radius:4px;
 }
 .input-box::before {
     content: attr(data-label);position:absolute;top:0;left:10px;
     font-size:0.9rem;text-align:center;
     background:#fff;padding:0 6px;color:#0F2234;
-    transform:translate(0, -50%);
+    transform:translate(0, -50%);font-size:inherit;
 }
 .scroller-parent {
     background:transparent;
@@ -1572,7 +1589,9 @@ aalam-minput[order="yr"] {width:4em;}`
         return html`
 <div id="__container">
     <div id="__header">
+        <div style="padding:10px 10px 0 10px;margin-bottom:10px;">
         ${this._inputHtml()}
+        </div>
         ${this._selectorHtml()}
         ${when(this.current_view == DATE_VIEW, () => html`
         <div class="cal-headcontainer">
@@ -1668,3 +1687,4 @@ declare global {
         'aalam-dtpick':AalamDatePickerElement;
     }
 }
+export default AalamDatePickerElement;
