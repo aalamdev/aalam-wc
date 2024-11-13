@@ -355,19 +355,19 @@ describe('aalam-navmenu', () => {
         nav.dispatchEvent(new Event('resize', {bubbles:true}));
         expect(m_slot(nav).length).to.equal(11);
         expect(c_slot(nav).length).to.equal(1);
-        expect(nav._dd_toggler.style.display).to.equal('block');
+        expect(nav._dd_toggler.style.display).to.equal('');
 
         await setViewport({width:rx(), height:y});
         nav.dispatchEvent(new Event('resize', {bubbles:true}));
         expect(m_slot(nav).length).to.equal(10);
         expect(c_slot(nav).length).to.equal(2);
-        expect(nav._dd_toggler.style.display).to.equal('block');
+        expect(nav._dd_toggler.style.display).to.equal('');
 
         await setViewport({width:rx(), height:y});
         nav.dispatchEvent(new Event('resize', {bubbles:true}));
         expect(m_slot(nav).length).to.equal(9);
         expect(c_slot(nav).length).to.equal(3);
-        expect(nav._dd_toggler.style.display).to.equal('block');
+        expect(nav._dd_toggler.style.display).to.equal('');
 
         await setViewport({width:full_x, height:y});
         nav.dispatchEvent(new Event('resize', {bubbles:true}));
@@ -377,7 +377,7 @@ describe('aalam-navmenu', () => {
         await setViewport({width:full_x - 1, height:y});
         nav.dispatchEvent(new Event('resize', {bubbles:true}));
         expect(m_slot(nav).length).to.equal(mn_len - 1);
-        expect(nav._dd_toggler.style.display).to.equal('block');
+        expect(nav._dd_toggler.style.display).to.equal('');
     });
     it('proxy and persist', async () => {
         const el = await fixture(html`
@@ -441,13 +441,13 @@ describe('aalam-navmenu', () => {
         const check_proxy_clp = (el) => {
             let px = el.getAttribute('data-proxy');
             let clp = nav.querySelector(`[data-proxy=${px}][slot=collapsed-item]`);
-            expect(clp.style.display).to.equal('block');
+            expect(clp.style.display).to.equal('');
             expect(el.style.display).to.equal('none');
         }
         const check_proxy_mnu = (el) => {
             let px = el.getAttribute('data-proxy');
             let mnu = nav.querySelector(`[data-proxy=${px}][slot=menu-item]`);
-            expect(mnu.style.display).to.equal('block');
+            expect(mnu.style.display).to.equal('');
             expect(el.style.display).to.equal('none');
         }
         const check_not_proxy = (el) => {
@@ -455,7 +455,7 @@ describe('aalam-navmenu', () => {
             expect(px).to.equal(null);
         }
         const tgl_disp = () => {
-            expect(nav._dd_toggler.style.display).to.equal('block');
+            expect(nav._dd_toggler.style.display).to.equal('');
         }
         const check_persist = () => {
             let c = nav.querySelectorAll('[data-persist][slot=collapsed-item]');
