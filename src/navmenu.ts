@@ -77,15 +77,12 @@ export class AalamNavMenu extends LitElement {
             this._persist = (per.length > 0?true:false);
             dpd.updateComplete.then(() => {
                 this._tgl_width =  dd.getBoundingClientRect().width;
-                this._dd_toggler.style.display = (this._persist?null:'none');
+                this._dd_toggler.style.display = (this._persist?'':'none');
                 this._manageCollapsedItems();
             });
         } else if(name == 'collapsed-item') {
             let el = this.querySelectorAll(`[slot=collapsed-item][data-proxy]`);
-            el.forEach((ele) => {
-                let c = ele as HTMLElement;
-                c.style.display = (c.style.display==null?null:'none');
-            });
+            el.forEach((e) => {(e as HTMLElement).style.display = 'none';});
         } else if(name == 'menu-item') {
             let el:HTMLElement[] = Array.from(
                 this.querySelectorAll('[slot=menu-item]'));
@@ -129,14 +126,14 @@ export class AalamNavMenu extends LitElement {
         const display_el = (el:HTMLElement, cls:string) => {
             let px = el.getAttribute('data-proxy');
             let clps_el = this.querySelector(`[data-proxy=${px}][slot=collapsed-item]`) as HTMLElement;
-            clps_el.style.display = (cls == 'menu'?null:'none');
-            el.style.display = (cls == 'menu'?'none':null);
+            clps_el.style.display = (cls == 'menu'?'':'none');
+            el.style.display = (cls == 'menu'?'none':'');
         }
         let parent_width = par_width();
         let cont_width = c_width();
         if(parent_width <= cont_width) {
             if(!this._persist)
-                this._dd_toggler.style.display = null;
+                this._dd_toggler.style.display = '';
             if(this._sorted_menu.length < 1) return;
             while(parent_width <= cont_width) {
                 if(this._sorted_menu[0].hasAttribute('data-proxy'))
