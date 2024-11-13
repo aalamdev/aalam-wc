@@ -135,7 +135,7 @@ export class AalamDropdown extends LitElement {
 <slot name="dd-toggler"
     @click=${this.mode === "click" ? this._toggleDropdown : null}>
 </slot>
-<div class="dd-container"
+<div class="dd-container" part="dd-container"
     @click="${this._bodyClickedEvent}"
     @animationend=${this._animationEnd}>
     <slot name="dd-body"></slot>
