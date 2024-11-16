@@ -15,7 +15,7 @@ export class AalamDropdown extends LitElement {
     animationDur = 100;
 
     @property({type:String})
-    closesel = "dd-close";
+    closesel = ".dd-close";
 
     @property({type:String})
     boundsel = "";

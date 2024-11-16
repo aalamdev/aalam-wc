@@ -114,7 +114,7 @@ export class AalamScroller extends LitElement {
             return true;
         return false;
     }
-    callback(entries:IntersectionObserverEntry[]) {
+    public callback(entries:IntersectionObserverEntry[]) {
         entries.forEach(entry => {
             if(!entry.isIntersecting) return;
             let crect = entry.rootBounds;

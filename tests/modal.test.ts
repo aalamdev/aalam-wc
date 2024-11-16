@@ -6,7 +6,7 @@ import { sendKeys } from "@web/test-runner-commands";
 import { setViewport } from "@web/test-runner-commands";
 
 const element_bounds = (el:HTMLElement) => {
-    let modal_body = el.querySelector("[slot=modal-body]");
+    let modal_body = el.querySelector("[slot=modal-dialog]");
     let wrp = modal_body.getBoundingClientRect();
     expect(wrp.width).to.be.not.equal(0);
     expect(wrp.height).to.be.not.equal(0);
@@ -15,6 +15,7 @@ const element_bounds = (el:HTMLElement) => {
 }
 
 describe('aalam-modal', () => {
+    const _it = (x, y) => {}
     it('is defined', async () => {
         const el = await fixture(html` <aalam-modal></aalam-modal>`);
         expect(el).to.be.an.instanceof(AalamModal);
@@ -27,7 +28,7 @@ describe('aalam-modal', () => {
         const root = await fixture (html`
 <div id="parent">
     <aalam-modal>
-        <div id="modal-body" slot="modal-body">
+        <div id="modal-body" slot="modal-dialog">
             <div style="height:20px;width:30px;background:grey">
             </div>
             <div style="height:40px;width:20px"></div>
@@ -59,12 +60,12 @@ describe('aalam-modal', () => {
         const el1 = await fixture (html`
 <div id = "parent_holder">
     <aalam-modal id="outer_modal">
-        <div id="parent-slot" slot="modal-body">
+        <div id="parent-slot" slot="modal-dialog">
             <div style="height:20px;width:30px;background:grey">
             </div>
             <div id="child_modal">
                 <aalam-modal id="inner_modal">
-                    <div id="inner-slot" slot="modal-body">
+                    <div id="inner-slot" slot="modal-dialog">
                         <div style="height:20px;width:40px;background:orange">
                         </div>
                     </div>
@@ -73,7 +74,7 @@ describe('aalam-modal', () => {
         </div>
     </aalam-modal>
     <aalam-modal id="stack_modal" stack>
-        <div id="stack-slot" slot="modal-body">
+        <div id="stack-slot" slot="modal-dialog">
             <div style="height:20px;width:40px;background:orange"></div>
         </div>
     </aalam-modal>
@@ -133,7 +134,7 @@ describe('aalam-modal', () => {
 <div id = "parent">
     <button id="open_btn"></button>
     <aalam-modal id="modal" closesel=".closing">
-           <div id="slot" slot="modal-body">
+           <div id="slot" slot="modal-dialog">
                <button id = "close_btn"></button>
                <button id="new_button"></button>
            </div>
@@ -163,9 +164,7 @@ describe('aalam-modal', () => {
         const el1 = await fixture(html`
 <div id="parent">
     <aalam-modal id="modal">
-       
-
- <div slot="modal-body">
+        <div slot="modal-dialog">
             <div style="height:20px;width:40px;background:orange"></div>
         </div>
     </aalam-modal>
@@ -191,7 +190,7 @@ describe('aalam-modal', () => {
         const el2 = await fixture(html `
 <div id="parent">
     <aalam-modal id="modal" noesc>
-        <div slot="modal-body">
+        <div slot="modal-dialog">
             <div style="height:20px;width:40px;background:orange"></div>
         </div>
     </aalam-modal>
@@ -214,7 +213,7 @@ describe('aalam-modal', () => {
         const el1 = await fixture(html`<div>
 <div id="parent">
     <aalam-modal id="modal">
-            <div id="modal_body" slot="modal-body">
+            <div id="modal_body" slot="modal-dialog">
                 <h2 id="c_click">h2 </h2>
                 <div style="height:20px;width:40px;background:orange"></div>
             </div>
@@ -259,9 +258,9 @@ describe('aalam-modal', () => {
         const el1 = await fixture(html `
 <div>
     <div id="parent">
-        <aalam-modal id="modal" height="xs:30vh;s:100vh;l:40vh;
-                                        m:80vh;xl:70vh">
-            <div id="modal-body" slot="modal-body">
+        <aalam-modal id="modal" height="s:30vh;m:100vh;xl:40vh;
+                                        l:80vh;2xl:70vh">
+            <div id="modal-body" slot="modal-dialog">
                 <div style="height:200px;width:250px">
                     <h1>h1</h1>
                 </div>
@@ -293,7 +292,7 @@ describe('aalam-modal', () => {
         const wrap_body_xs = modal_body.getBoundingClientRect();
         expect(wrap_body_xs.height).to.equal(640*0.3);
 
-        await setViewport({width:990, height:640});
+        await setViewport({width:950, height:640});
         const wrap_body_s = modal_body.getBoundingClientRect();
         expect(wrap_body_s.height).to.equal(640);
 
@@ -313,8 +312,8 @@ describe('aalam-modal', () => {
         const el2 = await fixture(html `
 <div>
     <div id="parent">
-        <aalam-modal id="modal" height="xs:auto;l:xry;xl:70vh">
-            <div id="modal-body" slot="modal-body">
+        <aalam-modal id="modal" height="s:auto;xl:xry;2xl:70vh">
+            <div id="modal-body" slot="modal-dialog">
                 <div style="height:200px;width:250px">
                     <h1>h1</h1>
                 </div>
@@ -369,9 +368,9 @@ describe('aalam-modal', () => {
         const el1 = await fixture(html`
 <div>
     <div id="parent">
-        <aalam-modal id="modal" width="xs:80vw;s:70vw;m:20vw;
-                                       l:35vw;xl:120vw">
-            <div id="modal-body" slot="modal-body">
+        <aalam-modal id="modal" width="s:80vw;m:70vw;l:20vw;
+                                       xl:35vw;2xl:120vw">
+            <div id="modal-body" slot="modal-dialog">
                 <div style="height:200px;width:250px">
                     <h1>h1</h1>
                 </div>
@@ -398,9 +397,9 @@ describe('aalam-modal', () => {
         element_bounds(modal);
         expect(modal.parentElement).to.equal(document.body);
 
-        await setViewport({width:640, height:640});
+        await setViewport({width:630, height:640});
         const wrap_body_xs = modal_body.getBoundingClientRect();
-        expect(wrap_body_xs.width).to.equal(640*0.8);
+        expect(wrap_body_xs.width).to.equal(630*0.8);
 
         await setViewport({width:720, height:660});
         const wrap_body_s = modal_body.getBoundingClientRect();
@@ -422,8 +421,8 @@ describe('aalam-modal', () => {
         const el2 = await fixture(html`
 <div>
     <div id="parent">
-        <aalam-modal id="modal" width="xs:auto;l:mvw;xl:120vw">
-            <div id="modal-body" slot="modal-body">
+        <aalam-modal id="modal" width="s:auto;xl:mvw;2xl:120vw">
+            <div id="modal-body" slot="modal-dialog">
                 <div style="height:200px;width:250px">
                     <h1>h1</h1>
                 </div>
@@ -482,9 +481,9 @@ describe('aalam-modal', () => {
        const el1 = await fixture(html`
 <div>
     <div id="parent">
-        <aalam-modal id="modal" pos="xs:top;s:left;m:right;
-                                     l:cener;xl:bottom-left">
-            <div id="modal-body" slot="modal-body" 
+        <aalam-modal id="modal" pos="s:top;m:left;l:right;
+                                     xl:cener;2xl:bottom-left">
+            <div id="modal-body" slot="modal-dialog" 
                  class="modal-body">
                 <div style="height:200px;width:250px;
                             background:green">
@@ -571,9 +570,9 @@ describe('aalam-modal', () => {
        const el2 = await fixture(html`
 <div>
     <div id="parent">
-        <aalam-modal id="modal" pos="xs:top;s:auto;xl:ft" 
+        <aalam-modal id="modal" pos="s:top;m:auto;2xl:ft" 
                      height="m:50vh">
-            <div id="modal-body" slot="modal-body" 
+            <div id="modal-body" slot="modal-dialog" 
                  class="modal-body">
                 <div style="height:200px;width:250px;
                             background:green">
@@ -658,8 +657,8 @@ describe('aalam-modal', () => {
        const el1 = await fixture(html`
 <div>
     <div id="parent">
-        <aalam-modal id="modal" animation="l:t2b;s:r2l;xl:2r;xs:k">
-            <div id="modal-body" slot="modal-body" 
+        <aalam-modal id="modal" animation="xl:t2b;m:r2l;2xl:2r;s:k">
+            <div id="modal-body" slot="modal-dialog" 
                  class="modal-body">
                 <div style="height:200px;width:250px;
                             background:green">
@@ -693,26 +692,26 @@ describe('aalam-modal', () => {
 
        await setViewport({width:600, height:640});
        expect(md[0].ll).to.equal(0);
-       expect(md[0].ul).to.equal(640);
+       expect(md[0].ul).to.equal(639);
        expect(md[0].val).to.equal('b2t');
 
        await setViewport({width:720, height:640});
-       expect(md[1].ll).to.equal(641);
-       expect(md[1].ul).to.equal(1200);
+       expect(md[1].ll).to.equal(640);
+       expect(md[1].ul).to.equal(1199);
        expect(md[1].val).to.equal('r2l');
 
        await setViewport({width:1024, height:640});
-       expect(md[1].ll).to.equal(641);
-       expect(md[1].ul).to.equal(1200);
+       expect(md[1].ll).to.equal(640);
+       expect(md[1].ul).to.equal(1199);
        expect(md[1].val).to.equal('r2l');
 
        await setViewport({width:1400, height:640});
-       expect(md[2].ll).to.equal(1201);
+       expect(md[2].ll).to.equal(1200);
        expect(md[2].ul).to.equal(null);
        expect(md[2].val).to.equal('t2b');
 
        await setViewport({width:1640, height:640});
-       expect(md[2].ll).to.equal(1201);
+       expect(md[2].ll).to.equal(1200);
        expect(md[2].ul).to.equal(null);
        expect(md[2].val).to.equal('t2b');
     });
@@ -721,10 +720,10 @@ describe('aalam-modal', () => {
        const el1 = await fixture(html`
 <div>
     <div id="parent">
-        <aalam-modal id="modal" pos="l:right;xl:top-center;m:bottom" 
+        <aalam-modal id="modal" pos="xl:right;2xl:top-center;l:bottom" 
                      guidesel="right:.right-guide;left:.left-guide;
                                bottom:.bottom-guide;top:.top-guide">
-           <div id="modal-body" slot="modal-body" class="modal-body">
+           <div id="modal-body" slot="modal-dialog" class="modal-body">
                <div class="right-guide" style="background:orange;">
                    <p> class: right-guide, pos: right</p>
                    <div style="background:yellow;height:20px;
@@ -1191,7 +1190,7 @@ describe('aalam-modal', () => {
        const el1 = await fixture(html`<div>
 <div id="parent">
    <aalam-modal id="modal">
-           <div id="modal_body" slot="modal-body">
+           <div id="modal_body" slot="modal-dialog">
                <h2 id="c_click">h2 </h2>
            </div>
    </aalam-modal>
@@ -1271,10 +1270,10 @@ describe('aalam-modal', () => {
 <div>
     <div id="parent">
         <aalam-modal id="modal"
-                     pos="l:top;xl:top-center;m:bottom;s:top;xs:top-right"
+                     pos="l:top;xl:top-center;l:bottom;m:top;s:top-right"
                      guidesel="right:.right-guide,20;left:.left-guide,15;
                                bottom:.bottom-guide,edge;top:.top-guide,15">
-           <div id="modal-body" slot="modal-body" class="modal-body">
+           <div id="modal-body" slot="modal-dialog" class="modal-body">
                <div class="right-guide" style="background:orange;">
                    <p> class: right-guide, pos: right</p>
                    <div style="background:yellow;height:20px;

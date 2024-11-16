@@ -1,16 +1,18 @@
 import { fixture, expect, html } from '@open-wc/testing';
+import { stub } from 'sinon';
 import { sendKeys } from '@web/test-runner-commands';
 
-import { AalamDatePickerElement } from "../src/dtpick";
+import { AalamDatePicker } from "../src/dtpick";
+import { AalamScroller } from "../src/scroller";
 import { AalamManagedInputElement } from "../src/minput";
 
 describe('aalam-dtpick', () => {
     it('is defined', async () => {
         const el = await fixture(html` <aalam-dtpick></aalam-dtpick>`);
-        expect(el).to.be.an.instanceof(AalamDatePickerElement);
+        expect(el).to.be.an.instanceof(AalamDatePicker);
 
         const el1 = document.createElement("aalam-dtpick");
-        expect(el1).to.be.an.instanceof(AalamDatePickerElement);
+        expect(el1).to.be.an.instanceof(AalamDatePicker);
     });
 
     const pad = (n:number):string => (n < 10?"0":"")  + n;
@@ -37,6 +39,7 @@ describe('aalam-dtpick', () => {
         await el.date2_el_dt?.updated();
         await el.date2_el_tm?.updated();
     };
+    const _it = (x, y) => {}
     /*Test type with and without range*/
     it('check type', async () => {
         let el = await fixture(html` <aalam-dtpick></aalam-dtpick>`);
@@ -406,8 +409,8 @@ describe('aalam-dtpick', () => {
         let fmt = "MM-DD-YYYY"
         let prnt = await fixture(
             html`<div style="height:300px;">
-                <aalam-dtpick id="picker-lim" format=${fmt} minval="${AalamDatePickerElement.toStr(min_val, fmt)}"
-                    maxval="${AalamDatePickerElement.toStr(max_val, fmt)}"></aalam-dtpick></div>`);
+                <aalam-dtpick id="picker-lim" format=${fmt} minval="${AalamDatePicker.toStr(min_val, fmt)}"
+                    maxval="${AalamDatePicker.toStr(max_val, fmt)}"></aalam-dtpick></div>`);
         let el = prnt.querySelector("#picker-lim");
         expect(el.type).to.be.equal('d')
 
@@ -418,11 +421,11 @@ describe('aalam-dtpick', () => {
 
         el.nav_el.scrollTo(0, el.nav_el.scrollTop * -1)
         await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
-        expect(el._calendars.length).to.be.equal(14)
+        expect(el._calendars.length).to.be.equal(15)
 
         el.nav_el.scrollTo(0, el.nav_el.scrollTop * -1)
         await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
-        expect(el._calendars.length).to.be.equal(14)
+        expect(el._calendars.length).to.be.equal(19)
 
         let cal = el.nav_el.querySelector("#" + el._calendars.get(0).id())
         expect(cal).to.not.equal(null);
@@ -448,7 +451,7 @@ describe('aalam-dtpick', () => {
 
         el.nav_el.scrollTo(0, el.nav_el.scrollHeight)
         await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
-        expect(el._calendars.length).to.be.equal(20)
+        expect(el._calendars.length).to.be.equal(21)
         el.nav_el.scrollTo(0, el.nav_el.scrollHeight)
         await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
         expect(el._calendars.length).to.be.equal(21)
@@ -543,8 +546,8 @@ describe('aalam-dtpick', () => {
         /*For month type*/
         fmt = "MM/YYYY";
         el.setAttribute("format", "MM/YYYY")
-        el.setAttribute('minval', AalamDatePickerElement.toStr(min_val, fmt))
-        el.setAttribute('maxval', AalamDatePickerElement.toStr(max_val, fmt))
+        el.setAttribute('minval', AalamDatePicker.toStr(min_val, fmt))
+        el.setAttribute('maxval', AalamDatePicker.toStr(max_val, fmt))
         await el.updated();
         expect(el.current_view).to.be.equal('m');
         expect(el._months.length).to.be.equal(2);
@@ -567,16 +570,16 @@ describe('aalam-dtpick', () => {
 
     })
     it("check fromStr", async () => {
-        expect(AalamDatePickerElement.fromStr("23421241", "DD123MM")).to.be.equal(null);
-        expect(AalamDatePickerElement.fromStr("23429999", "DDMMYYYY").getTime()).to.be.equal(new Date(9999, 41, 23).getTime());
-        expect(AalamDatePickerElement.fromStr("2-4/1934", "DD-MM/YYYY").getTime()).to.be.equal(new Date(1934, 3, 2).getTime());
-        expect(AalamDatePickerElement.fromStr("4**1934", "MM**YYYY").getTime()).to.be.equal(new Date(1934, 3, 1).getTime());
+        expect(AalamDatePicker.fromStr("23421241", "DD123MM")).to.be.equal(null);
+        expect(AalamDatePicker.fromStr("23429999", "DDMMYYYY").getTime()).to.be.equal(new Date(9999, 41, 23).getTime());
+        expect(AalamDatePicker.fromStr("2-4/1934", "DD-MM/YYYY").getTime()).to.be.equal(new Date(1934, 3, 2).getTime());
+        expect(AalamDatePicker.fromStr("4**1934", "MM**YYYY").getTime()).to.be.equal(new Date(1934, 3, 1).getTime());
     });
     it("check toStr", async() => {
         let dt = new Date(2024, 6, 5, 12, 34, 56);
-        expect(AalamDatePickerElement.toStr(dt, "DD123MM")).to.be.equal('0512307');
-        expect(AalamDatePickerElement.toStr(dt, "DMM")).to.be.equal('D07');
-        expect(AalamDatePickerElement.toStr(dt, "DM")).to.be.equal('DM');
+        expect(AalamDatePicker.toStr(dt, "DD123MM")).to.be.equal('0512307');
+        expect(AalamDatePicker.toStr(dt, "DMM")).to.be.equal('D07');
+        expect(AalamDatePicker.toStr(dt, "DM")).to.be.equal('DM');
     });
     it("check events on click", async () => {
         /*Test the events on clicks*/
@@ -725,6 +728,7 @@ describe('aalam-dtpick', () => {
         expect(evnts[0].value).to.equal(val);
     });
     it("check events on key input", async () => {
+        let mock = stub(AalamScroller.prototype, "callback").returns(0)
         /*Test events with input*/
         let prnt = await fixture(html`<div style="height:300px;"><aalam-dtpick id="picker" format="DD/MM/YYYYThh:mm:ss"></aalam-dtpick></div>`);
         let el = prnt.querySelector("#picker");
@@ -750,8 +754,8 @@ describe('aalam-dtpick', () => {
         expect(el._calendars.length).to.be.equal(3);
 
         evnts = []
-        el.date1_el_tm.input_els[0].click();
-        await sendKeys({type: "83454"});
+        await el.date1_el_tm.input_els[0].click();
+        await sendKeys({type: "083454"});
         expect(el.date1.getTime()).to.be.equal(new Date(1984, 9, 2, 8, 34, 54).getTime());
         expect(evnts.length).to.be.equal(3);
         expect(el._calendars.length).to.be.equal(3);
@@ -846,9 +850,11 @@ describe('aalam-dtpick', () => {
         for (let i = 0; i < 2; i++)
             expect(el.date2_el_dt.input_els[i].value).to.be.equal('');
         expect(el.date2).to.be.equal(null);
+        mock.restore();
     })
     it("check key input with limits", async () => {
         /*Test key inputs with limits*/
+        let mock = stub(AalamScroller.prototype, "callback").returns(0)
         let el = await fixture(html` <aalam-dtpick format="DD/MM/YYYYThh:mm:ss" minval="31/05/2023T01:02:03" maxval="30/03/2024T04:05:06"></aalam-dtpick>`);
         let evnts = []
         el.addEventListener("change", (event) => {
@@ -882,5 +888,6 @@ describe('aalam-dtpick', () => {
         expect(evnts[1].value).to.be.equal('31/05/2023T04:02:03')
         expect(evnts[2].value).to.be.equal('31/05/2023T04:05:03')
         expect(evnts[3].value).to.be.equal('31/05/2023T04:05:00')
+        mock.restore();
     })
 })

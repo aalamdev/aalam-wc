@@ -3,7 +3,7 @@ import {customElement, state,property} from 'lit/decorators.js';
 import {query} from 'lit/decorators/query.js';
 import {map} from 'lit/directives/map.js';
 import {styleMap} from 'lit/directives/style-map.js';
-import {animationCSS, animate_defs, getResponsiveValues, parseAttrVal}
+import {animationCSS, animate_defs, getResponsiveValues, parseAttrVal, screen_limits}
     from "./utils";
 
 const active_modals:Array<object|null> = [];
@@ -30,21 +30,21 @@ const position_defs:{[key:string]:{[key:string]:string|number}} = {
 @customElement('aalam-modal')
 export class AalamModal extends LitElement {
     DEFAULT_VALUES:{ [key:string]: any } = {
-        bgcolor: "rgba(0,0,0,0.6)",
-        pos:     "xs:bottom;m:top-center",
-        height:  "xs:50vh;m:auto",
-        width:   "xs:100%;m:50vw",
-        animation: "xs:b2t",
-        position_breakpoints : [{cond:"(min-width:0px) and (max-width:992px)",
-                                 val:"bottom", ll:0, ul:992},
-                                {cond: "(min-width:992px)", val: "top-center",
-                                 ll:993}],
-        height_breakpoints : [{cond: "(min-width:0px) and (max-width:992px)",
+        bgcolor: "var(--mdl-bg, rgba(0,0,0,0.6))",
+        pos:     "s:bottom;l:top-center",
+        height:  "s:50vh;l:auto",
+        width:   "s:100%;l:50vw",
+        animation: "s:b2t;l:fade",
+        position_breakpoints : [{cond:`(min-width:0px) and (max-width:${screen_limits['m'][1]}px)`,
+                                 val:"bottom", ll:0, ul:screen_limits['m'][1]},
+                                {cond: `(min-width:${screen_limits['l'][0]}px)`, val: "top-center",
+                                 ll:screen_limits['l'][0]}],
+        height_breakpoints : [{cond: `(min-width:0px) and (max-width:${screen_limits['m'][1]}px)`,
                                val: "50vh"},
-                             {cond: "(min-width:992px)", val: "auto"}],
-        width_breakpoints : [{cond: "(min-width:0px) and (max-width:992px)",
+                             {cond: `(min-width:${screen_limits['l'][0]}px)`, val: "auto"}],
+        width_breakpoints : [{cond: `(min-width:0px) and (max-width:${screen_limits['m'][1]}px)`,
                               val: "100%"},
-                             {cond: "(min-width:992px)", val: "50vw"}],
+                             {cond: `(min-width:${screen_limits['l'][0]}px)`, val: "50vw"}],
         animate_breakpoints : [{cond: "(min-width:0px)", val: "b2t",
                                 ul:null, ll:0}]
     }
@@ -79,7 +79,7 @@ export class AalamModal extends LitElement {
     animation = this.DEFAULT_VALUES.animation;
 
     @property({type:String, attribute:true})
-    closesel = '';
+    closesel = '.mdl-close';
 
     @state()
     animationDur = 300;
@@ -232,6 +232,10 @@ ${this._animateStyles()}
         if(!this._actualparent)
             this._actualparent = this.parentElement;
         this._open = this.open = true;
+        this.dispatchEvent(new CustomEvent('open', {
+            bubbles: true,
+            cancelable: true,
+        }))
         active_modals.push(this);
         document.body.appendChild(this);
     }
@@ -247,6 +251,11 @@ ${this._animateStyles()}
         }
         else
             this.open = false;
+
+        this.dispatchEvent(new CustomEvent('close', {
+            bubbles: true,
+            cancelable: true,
+        }))
         if (this.animationDur == 0)
             this._animationEndEvent();
     }
@@ -474,7 +483,6 @@ ${this._animateStyles()}
             let addn_cont_def = null;
             let wrapper_def = null;
             let mc_style = null;
-            let bt = null;
             if(bp.val.endsWith("center")) {
                 mc_style = "display:flex !important;justify-content:center";
                 if(bp.val == 'center') {
@@ -482,14 +490,9 @@ ${this._animateStyles()}
                     addn_cont_def = "align-items:flex-start";
                 }
             }
-            if(bp.val.startsWith('bottom'))
-                bt = "border-bottom-left-radius:0px !important;border-bottom-right-radius:0px !important";
-            else if(bp.val.startsWith('top'))
-                bt = "border-top-left-radius:0px !important;border-top-right-radius:0px !important";
             ret.push(`
 @media screen and ${bp.cond} {.__resp_pos {${dir(position_defs[bp.val])}}
 ${wrapper_def?`.__modal-wrapper {${wrapper_def}}`:''}
-${bt?`.__modal-wrapper {${bt}}`:``}
 .__modal-container {overflow:auto;${addn_cont_def};${mc_style}}}`);
         }
         return html`<style>${map(ret, (r) => html`${r}`)}</style>`
@@ -524,3 +527,4 @@ declare global {
         "aalam-modal":AalamModal;
     }
 }
+export default AalamModal;

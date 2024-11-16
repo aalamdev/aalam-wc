@@ -3,7 +3,7 @@ import {when} from 'lit/directives/when.js';
 import {map} from 'lit/directives/map.js';
 import {range} from 'lit/directives/range.js';
 import {customElement, property, state, query} from 'lit/decorators.js';
-import {SortedArray} from "./utils";
+import {screen_limits, SortedArray} from "./utils";
 import {AalamManagedInputElement} from "./minput";
 import "./scroller";
 import "./minput";
@@ -153,7 +153,7 @@ class Calendars {
 }
 
 @customElement('aalam-dtpick')
-export class AalamDatePickerElement extends LitElement {
+export class AalamDatePicker extends LitElement {
     @property({type: Boolean, attribute: true, reflect: true})
     range:boolean = false;
 
@@ -716,7 +716,7 @@ ${cal.html(cls_map)}
                                                     this.date1.getFullYear()):9999*12));
             } else if (this.type == 'd' || this.type == 't') {
                 let d1_gap = ModelCalendar.gap(this.date1);
-                this.nav_el.style.setProperty("--gpfrom", "" + d1_gap);
+                this.nav_el?.style.setProperty("--gpfrom", "" + d1_gap);
             }
         }
         if (dt2 != this.date2) {
@@ -738,7 +738,7 @@ ${cal.html(cls_map)}
         let fmt = this.format;
         let dobj = (d:Date):{[key:string]:string|Date} => {
             return {'date': new Date(d),
-                    'value': AalamDatePickerElement.toStr(d, fmt)}}
+                    'value': AalamDatePicker.toStr(d, fmt)}}
         if (!this.range) {
             if (!this.date1)
                 return;
@@ -747,9 +747,9 @@ ${cal.html(cls_map)}
         } else {
             if (!this.date1 || !this.date2) {
                 this.value = `${
-                    AalamDatePickerElement.toStr(this.date1, fmt)
+                    AalamDatePicker.toStr(this.date1, fmt)
                     || ''};${
-                    AalamDatePickerElement.toStr(this.date2, fmt)
+                    AalamDatePicker.toStr(this.date2, fmt)
                     || ''}`
                 return;
             }
@@ -758,7 +758,7 @@ ${cal.html(cls_map)}
             detail['value'] = `${detail['from']['value']};${detail['to']['value']}`;
             this.value = detail['value'];
         }
-            this.nav_el.style.setProperty("--gphovto", "0")
+        this.nav_el?.style.setProperty("--gphovto", "0")
         this.dispatchEvent(new CustomEvent('change', {
             bubbles: true,
             cancelable: true,
@@ -1236,6 +1236,9 @@ ${cal.html(cls_map)}
         }
 
         let _html = (label:string, id:string, d:Date|null) => {
+            let hrs = d?.getHours() || 12;
+            hrs = hrs > 12?(hrs - 12):hrs;
+            let mdn = d?(d.getHours() > 12?'PM':'AM'):(id == 'date1'?'AM':'PM');
             return html`
 <div class="input-row ${this.type != 't'?'inline':''}">
     <div class="input-row-date">${dt_html(label, id + '-dt', d)}</div>
@@ -1246,9 +1249,9 @@ ${cal.html(cls_map)}
 ${when(id == 'date1'?this.date1_tm_scrl:this.date2_tm_scrl, () => html`
 <div class="scroller-blk">
     <div class="scroller-parent">
-        <aalam-scroller id="hour" @change=${(e:CustomEvent) => scrl_hr(e, id)} choices=${this.hr_limits} init="12"></aalam-scroller>
-        <aalam-scroller id="minute" @change=${(e:CustomEvent) => scrl_min(e, id)} choices=${this.min_limits} init="10"></aalam-scroller>
-        <aalam-scroller id="mdn" @change=${(e:CustomEvent) => scrl_mdn(e, id)} choices="AM,PM" init="PM"></aalam-scroller>
+        <aalam-scroller id="hour" @change=${(e:CustomEvent) => scrl_hr(e, id)} choices=${this.hr_limits} init=${hrs}></aalam-scroller>
+        <aalam-scroller id="minute" @change=${(e:CustomEvent) => scrl_min(e, id)} choices=${this.min_limits} init=${d?.getMinutes() || (id == 'date1'?0:59)}></aalam-scroller>
+        <aalam-scroller id="mdn" @change=${(e:CustomEvent) => scrl_mdn(e, id)} choices="AM,PM" init=${mdn}></aalam-scroller>
     </div>
 </div>`
 )}
@@ -1312,7 +1315,7 @@ ${when(id == 'date1'?this.date1_tm_scrl:this.date2_tm_scrl, () => html`
         if (name == 'minval') {
             if (this.type == 't' && new_val.indexOf('T') < 0)
                 new_val += 'T00:00:00';
-            this._min_dt = AalamDatePickerElement.fromStr(
+            this._min_dt = AalamDatePicker.fromStr(
                 new_val, this.format);
             let d1 = this.date1,
                 d2 = this.date2;
@@ -1324,7 +1327,7 @@ ${when(id == 'date1'?this.date1_tm_scrl:this.date2_tm_scrl, () => html`
         } else if (name == 'maxval') {
             if (this.type == 't' && new_val.indexOf('T') < 0)
                 new_val += 'T00:00:00';
-            this._max_dt = AalamDatePickerElement.fromStr(
+            this._max_dt = AalamDatePicker.fromStr(
                 new_val, this.format)
             let d1 = this.date1,
                 d2 = this.date2;
@@ -1338,17 +1341,17 @@ ${when(id == 'date1'?this.date1_tm_scrl:this.date2_tm_scrl, () => html`
             if (!old_val)
                 old_val = "DD/MM/YYYY";
         } else if (name == 'value') {
-            let min = this.minval?AalamDatePickerElement.fromStr(
+            let min = this.minval?AalamDatePicker.fromStr(
                 this.minval, this.format):null;
-            let max = this.maxval?AalamDatePickerElement.fromStr(
+            let max = this.maxval?AalamDatePicker.fromStr(
                 this.maxval, this.format):null;
             let chk = (d:Date) => ((!min || d >= min) && (!max || d <= max));
             if (this.range) {
                 let tmp = new_val.split(";");
                 if (tmp.length != 2)
                     return;
-                let [d1, d2] = [AalamDatePickerElement.fromStr(tmp[0], this.format),
-                                AalamDatePickerElement.fromStr(tmp[1], this.format)];
+                let [d1, d2] = [AalamDatePicker.fromStr(tmp[0], this.format),
+                                AalamDatePicker.fromStr(tmp[1], this.format)];
                 if ((tmp[0] && !d1) || (tmp[1] && !d2)) 
                     return
                 if (d1 && !chk(d1))
@@ -1357,7 +1360,7 @@ ${when(id == 'date1'?this.date1_tm_scrl:this.date2_tm_scrl, () => html`
                     d2 = null;
                 this._setDate(d1, d2);
            } else {
-                let d = AalamDatePickerElement.fromStr(new_val, this.format);
+                let d = AalamDatePicker.fromStr(new_val, this.format);
                 if (new_val && !d)
                     return;
                 if (d && !chk(d))
@@ -1385,8 +1388,8 @@ ${when(id == 'date1'?this.date1_tm_scrl:this.date2_tm_scrl, () => html`
     }
     static override get styles() {
         return css`
-@media (max-width:992px) {:host {--gridgap: 10px;}}
-@media (min-width:992px) {:host {--gridgap: 15px;}}
+@media (max-width:${screen_limits['m'][1]}px) {:host {--gridgap: 10px;}}
+@media (min-width:${screen_limits['l'][0]}px) {:host {--gridgap: 15px;}}
 #__container {height:100%;display:flex;flex-direction:column;}
 #__nav {height: 100%;overflow:auto;}
 .cal-month {display:table;width:100%;}
@@ -1684,7 +1687,7 @@ aalam-minput[order="yr"] {width:4em;}`
 
 declare global {
     interface HTMLElementTagNameMap {
-        'aalam-dtpick':AalamDatePickerElement;
+        'aalam-dtpick':AalamDatePicker;
     }
 }
-export default AalamDatePickerElement;
+export default AalamDatePicker;

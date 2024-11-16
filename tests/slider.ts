@@ -35,7 +35,7 @@ describe('aalam-slider', () => {
         expect(el1).to.be.an.instanceof(AalamSliderElement);
     });
     it('check loop', async() => {
-        const el = await fixture(html`<aalam-slider loop gap="xs:10px;m:30px">
+        const el = await fixture(html`<aalam-slider loop gap="s:10px;l:30px">
         <div slot="slide-item" style="width:33.33%;height:100px;"></div>
         <div slot="slide-item" style="width:50%;height:100px;"></div>
         <div slot="slide-item" style="width:25%;height:100px;"></div>
@@ -95,7 +95,7 @@ describe('aalam-slider', () => {
     /*sets with and without loop*/
     it('check sets', async() => {
         // el1 all equal width - 2 sets
-        const el1 = await fixture(html`<aalam-slider gap="xs:8px;m:30px" sets>
+        const el1 = await fixture(html`<aalam-slider gap="s:8px;l:30px" sets>
         <div slot="slide-item" style="width:25%;height:100px;"></div>
         <div slot="slide-item" style="width:25%;height:100px;"></div>
         <div slot="slide-item" style="width:25%;height:100px;"></div>
@@ -132,7 +132,7 @@ describe('aalam-slider', () => {
         expect([0,1,2,3]).to.have.deep.members(getItemsInView(el1).sort());
 
         //el2 unequal width - 3 sets
-        const el2 = await fixture(html`<aalam-slider gap="xs:10px;m:30px" sets>
+        const el2 = await fixture(html`<aalam-slider gap="s:10px;l:30px" sets>
         <div slot="slide-item" style="width:25%;height:100px;"></div>
         <div slot="slide-item" style="width:33.33%;height:100px;"></div>
         <div slot="slide-item" style="width:50%;height:100px;"></div>
@@ -192,7 +192,7 @@ describe('aalam-slider', () => {
 
     /*center with and without loop, with and without sets*/
     it('check center', async() => {
-        const el1 = await fixture(html`<aalam-slider gap="xs:9px;m:18px" center>
+        const el1 = await fixture(html`<aalam-slider gap="s:9px;l:18px" center>
         <div slot="slide-item" style="width:25%;height:100px;"></div>
         <div slot="slide-item" style="width:50%;height:100px;"></div>
         <div slot="slide-item" style="width:50%;height:100px;"></div>
@@ -297,7 +297,7 @@ describe('aalam-slider', () => {
 
     /*autoplay scenarios*/
     it('check autoplay', async() => {
-        const el = await fixture(html`<aalam-slider loop gap="xs:10px;m:30px">
+        const el = await fixture(html`<aalam-slider loop gap="s:10px;l:30px">
         <div slot="slide-item" style="width:33.33%;height:100px;"></div>
         <div slot="slide-item" style="width:50%;height:100px;"></div>
         <div slot="slide-item" style="width:25%;height:100px;"></div>
@@ -341,7 +341,7 @@ describe('aalam-slider', () => {
 
     /*Nav guide scenarios with changing sets to true and false*/
     it('check navguides', async() => {
-        const el1 = await fixture(html`<aalam-slider loop gap="xs:10px;m:30px">
+        const el1 = await fixture(html`<aalam-slider loop gap="s:10px;l:30px">
         <div slot="slide-item" style="width:33.33%;height:100px;"></div>
         <div slot="slide-item" style="width:50%;height:100px;"></div>
         <div slot="slide-item" style="width:25%;height:100px;"></div>
@@ -366,7 +366,7 @@ describe('aalam-slider', () => {
         expect(guides.indexOf(el1.guide_items[0])).to.equal(0);
         expect(guides.indexOf(el1.guide_items[1])).to.equal(-1);
 
-        const el2 = await fixture(html`<aalam-slider loop gap="xs:10px;m:30px">
+        const el2 = await fixture(html`<aalam-slider loop gap="s:10px;l:30px">
         <div slot="slide-item" style="width:33.33%;height:100px;"></div>
         <div slot="slide-item" style="width:50%;height:100px;"></div>
         <div slot="slide-item" style="width:25%;height:100px;"></div>
@@ -391,7 +391,7 @@ describe('aalam-slider', () => {
 
     /*swipe on finite sets and check the end. and on loop to check it goes round and round*/
     it('check swipe', async() => {
-        const el = await fixture(html`<aalam-slider gap="xs:10px;m:30px">
+        const el = await fixture(html`<aalam-slider gap="s:10px;l:30px">
         <div slot="slide-item" style="width:33.33%;height:100px;"></div>
         <div slot="slide-item" style="width:50%;height:100px;"></div>
         <div slot="slide-item" style="width:25%;height:100px;"></div>
@@ -445,7 +445,7 @@ describe('aalam-slider', () => {
 
     /*check events and data attributes*/
     it('check events', async() => {
-        const el = await fixture(html`<aalam-slider gap="xs:10px;m:30px">
+        const el = await fixture(html`<aalam-slider gap="s:10px;l:30px">
         <div slot="slide-item" style="width:33.33%;height:100px;"></div>
         <div slot="slide-item" style="width:50%;height:100px;"></div>
         <div slot="slide-item" style="width:25%;height:100px;"></div>

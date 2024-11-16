@@ -1,10 +1,10 @@
-export const screen_size = ['xs', 's', 'm', 'l', 'xl'];
+export const screen_size = ['s', 'm', 'l', 'xl', '2xl'];
 export const screen_limits:{[key:string]:Array<number|null>} = {
-    'xs': [0,    640],
-    's':  [641,  992],
-    'm':  [993,  1200],
-    'l':  [1201, 1600],
-    'xl': [1601, null]
+    's':  [0,    639],
+    'm':  [640,  959],
+    'l':  [959,  1199],
+    'xl':  [1200, 1599],
+    '2xl': [1600, null]
 };
 const animateTransform = (x:string, y:string):{[key:string]:Object} => {
     return {open: {from: `transform:translate(${x}, ${y});opacity:0`,
@@ -84,6 +84,8 @@ export function getResponsiveValues(val_str:string,
             break;
     }
     for (let s of screen_size) {
+        if (!(s in screen_limits))
+            console.error("******** - s ", s, screen_limits);
         let [ll, ul] = screen_limits[s]
         let prev_ret = ret.length?ret[ret.length - 1]:null;
         if (val_obj[s]) {

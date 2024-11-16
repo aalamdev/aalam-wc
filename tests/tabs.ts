@@ -114,7 +114,7 @@ describe('aalam-tabs', () => {
     it('row-column-accordion', async () => {
         const el = await fixture (`
             <div id='parent'>
-                <aalam-tabs fashion="xs:accordion;m:row;xl:column">
+                <aalam-tabs fashion="s:accordion;l:row;2xl:column">
                     <div slot="tab-title" id="t1">title1</div>
                     <div slot="tab-body" id='b1'>body1</div>
                     <div slot='tab-title' class='tab-active'
@@ -168,7 +168,7 @@ describe('aalam-tabs', () => {
         await setViewport({width:600, height:640});
         const el2 = await fixture (`
             <div id='parent'>
-                <aalam-tabs fashion="xs:accordion;m:row;xl:column">
+                <aalam-tabs fashion="s:accordion;l:row;2xl:column">
                     <div slot="tab-title" id="t1">title1</div>
                     <div slot="tab-body" id='b1'>body1</div>
                     <div slot='tab-title' id='t2'>title2</div>
@@ -224,7 +224,7 @@ describe('aalam-tabs', () => {
         await setViewport({width:1601, height:640});
         const el3 = await fixture (`
             <div id='parent'>
-                <aalam-tabs fashion="xs:accordion;m:row;xl:column">
+                <aalam-tabs fashion="s:accordion;l:row;2xl:column">
                     <div slot="tab-title" id="t1">title1</div>
                     <div slot="tab-body" id='b1'>body1</div>
                     <div slot='tab-title' id='t2'>title2</div>
@@ -270,7 +270,7 @@ describe('aalam-tabs', () => {
         const el = await fixture (`
             <div id='parent'>
                 <aalam-tabs animation="show:r2l;hide:t2b"
-                            fashion="xs:accordion;m:row;xl:column">
+                            fashion="s:accordion;l:row;2xl:column">
                     <div slot="tab-title" id="t1">title1</div>
                     <div slot="tab-body" id='b1'>body1</div>
                     <div slot='tab-title' id='t2'>title2</div>
@@ -344,7 +344,7 @@ describe('aalam-tabs', () => {
     it('check-events', async () => {
         const el = await fixture (`
             <div id='parent'>
-                <aalam-tabs fashion="xs:accordion;m:row;xl:column">
+                <aalam-tabs fashion="s:accordion;l:row;2xl:column">
                     <div slot="tab-title" id="t1">title1</div>
                     <div slot="tab-body" id='b1'>body1</div>
                     <div slot='tab-title' id='t2'>title2</div>
