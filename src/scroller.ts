@@ -29,6 +29,10 @@ export class AalamScroller extends LitElement {
         super.attributeChangedCallback(name, old_val, new_val);
         if (name == 'choices')
             this._choices = this.choices.split(",");
+        else if (name == 'init') {
+            if (this.divs)
+                this._scrollToInit();
+        }
     }
     override connectedCallback() {
         super.connectedCallback();
@@ -87,6 +91,11 @@ export class AalamScroller extends LitElement {
 }
 .child > div.active {font-size:14px;opacity:1;}`
     }
+    private _scrollToInit() {
+        let ix = this._choices.indexOf(this.init);
+        if (ix < 0) return;
+        this.child.scrollTop = this.divs[ix].offsetTop;
+    }
     override firstUpdated() {
         if(!this.child)
             return;
@@ -104,9 +113,7 @@ export class AalamScroller extends LitElement {
             this.observer.observe(target);
         })
         if(this.init == null) return;
-        let ix = this._choices.indexOf(this.init);
-        if (ix < 0) return;
-        this.child.scrollTop = this.divs[ix].offsetTop;
+        this._scrollToInit();
     }
     isClose(n1:number, n2:number) {
         let diff = (n1 - n2);
