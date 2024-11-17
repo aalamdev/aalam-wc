@@ -122,7 +122,7 @@ export class AalamModal extends LitElement {
             this._height_breakpoints = getResponsiveValues(
                 new_val, this.DEFAULT_VALUES.height, (v:string) => {
                     try {
-                        CSSStyleValue.parse("height", v);
+                        CSS.supports("height", v);
                         return true;
                     } catch (err:any) {}
                         return false;
@@ -131,10 +131,10 @@ export class AalamModal extends LitElement {
             this._width_breakpoints = getResponsiveValues(
                 new_val, this.DEFAULT_VALUES.width, (v:string) => {
                     try {
-                        CSSStyleValue.parse("width", v);
+                        CSS.supports("width", v);
                         return true;
                     } catch (err:any) {}
-                        return false;
+                    return false;
                 });
         } else if(name == 'pos') {
             this._position_breakpoints = getResponsiveValues(
@@ -499,6 +499,7 @@ ${wrapper_def?`.__modal-wrapper {${wrapper_def}}`:''}
     }
     private _hwStyles(cls:string, bps:Array<{[key:string]:string}>) {
         let ret = []
+
         for (let bp of bps) {
             if (bp.val != 'auto')
                 ret.push(`

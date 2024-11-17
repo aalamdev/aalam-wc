@@ -1388,8 +1388,8 @@ ${when(id == 'date1'?this.date1_tm_scrl:this.date2_tm_scrl, () => html`
     }
     static override get styles() {
         return css`
-@media (max-width:${screen_limits['m'][1]}px) {:host {--gridgap: 10px;}}
-@media (min-width:${screen_limits['l'][0]}px) {:host {--gridgap: 15px;}}
+@media (max-width:${screen_limits['m'][1] || 10000}px) {:host {--gridgap: 10px;}}
+@media (min-width:${screen_limits['l'][0] || 0}px) {:host {--gridgap: 15px;}}
 #__container {height:100%;display:flex;flex-direction:column;}
 #__nav {height: 100%;overflow:auto;}
 .cal-month {display:table;width:100%;}

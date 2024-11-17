@@ -62,8 +62,9 @@ export function parseAttrVal(val:string, validator?:Function):{
         if (sem_ix < 0)
             sem_ix = val.length;
         let res = val.substr(col_ix, sem_ix - col_ix).trim();
-        if (!validator || validator(res))
+        if (!validator || validator(res)) {
             val_obj[key.trim()] = res;
+        }
         pos = sem_ix + 1;
     }
     return val_obj;
@@ -84,8 +85,6 @@ export function getResponsiveValues(val_str:string,
             break;
     }
     for (let s of screen_size) {
-        if (!(s in screen_limits))
-            console.error("******** - s ", s, screen_limits);
         let [ll, ul] = screen_limits[s]
         let prev_ret = ret.length?ret[ret.length - 1]:null;
         if (val_obj[s]) {

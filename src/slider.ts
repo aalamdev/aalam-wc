@@ -132,7 +132,7 @@ export class AalamSliderElement extends LitElement {
                                                 {xs:"0px"},
                                                 (v:string) => {
                 try {
-                    CSSStyleValue.parse("padding-left", v);
+                    CSS.supports("padding-left", v);
                     return true;
                 } catch (err:any) {}
                 return false;

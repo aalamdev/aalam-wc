@@ -38,7 +38,7 @@ export class AalamSwitchElement extends LitElement {
 
     private _parseCSS(k:string, v:string) {
         try {
-            CSSStyleValue.parse(k, v);
+            CSS.supports(k, v);
         } catch (err:any) {
             /*Some browsers doesnt support parse function*/
             return err['name'] != "TypeError";

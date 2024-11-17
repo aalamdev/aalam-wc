@@ -83,7 +83,7 @@ export class AalamTabs extends LitElement {
         } else if (name == "colsize") {
             this._column_size = parseAttrVal(new_val, (v:string) => {
                 try {
-                    CSSStyleValue.parse("grid-template-columns", v)
+                    CSS.supports("grid-template-columns", v)
                     return true;
                 } catch (err:any) {}
                     return false;
