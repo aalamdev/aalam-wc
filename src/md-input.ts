@@ -33,6 +33,9 @@ export class AalamMdInput extends LitElement {
     @state()
     private _num_trailing_icons:number;
 
+    @state()
+    private _helper_text_slotted:boolean;
+
     @query('#_container')
     _container:HTMLElement;
 
@@ -82,7 +85,7 @@ export class AalamMdInput extends LitElement {
 ${when(this.mode == 'normal', () => html`<slot name="normal-label">
     <label>${this.label}</label>
 </slot>`)}
-<div id="_container" class="mode-${this.mode}"
+<div id="_container" part="container" class="mode-${this.mode}"
     @click=${this._clickEvent}
     style="--attrcolor:${this.color}">
     <div class="${!this._num_leading_icons?'hide':''}">
@@ -102,22 +105,25 @@ ${when(this.mode == 'normal', () => html`<slot name="normal-label">
             html`<span id="_suffix">${this.suffix}</span>`)}
         ${when(this.mode != 'normal', () => html`<span id="_label">${this.label}</span>`)}
     </div>
-    <div class="${!this._num_trailing_icons?'hide':''}">
+    <div class="${(this._num_trailing_icons || (!this._helper_text_slotted && this.charcount))?'':'hide'}">
         <slot name="trailing-icon"></slot>
+        ${when(this.charcount && !this._helper_text_slotted && !this._num_trailing_icons, () => html`<span id='_display-counter' part="charcount"></span>`)}
     </div>
 </div>
 <div id="_helper-text">
     <slot name="helper-text"></slot>
+    ${when(this._num_trailing_icons || this._helper_text_slotted, () => html`
     <span id='_display-counter' part="charcount"></span>
+    `)}
 </div>`
     }
     static override get styles() {
         return css`
+var(--attrcolor);}
 :host {position:relative;display:block;width:100%}
 #_container {
     position:relative;display:flex;align-items:center;
     gap:5px;padding-left:5px;padding-right:5px}
-#_container.mode-normal {padding-left:0;padding-right:0;}
 #_input-container {
     position:relative;padding-top:calc(0.75em + 7px);padding-bottom:3px;
     gap:5px;padding-right:5px;
@@ -127,7 +133,7 @@ ${when(this.mode == 'normal', () => html`<slot name="normal-label">
     position:absolute;top:50%;left:0;
     transition:transform 0.2s ease;transform:translateY(-50%)}
 #_prefix, #_suffix {opacity:0}
-#_input-span {flex:1}
+#_input-span {flex:1;display:inline-flex;}
 #_helper-text {display:flex;padding-left:5px}
 #_display-counter {display:flex;margin-left:auto}
 ::slotted([slot=input]), #_input-box {
@@ -143,6 +149,8 @@ ${when(this.mode == 'normal', () => html`<slot name="normal-label">
 .mode-filled.focused {border-bottom:solid 2px var(--attrcolor)}
 .mode-filled.focusout {border-bottom:transparent !important}
 .mode-filled.focusout {backdrop-filter:brightness(0.90)}
+
+#_container.mode-normal {border:1px solid var(--attrcolor);}
 
 #_container.mode-outline.focused {
     border:solid 2px var(--attrcolor)}
@@ -186,6 +194,8 @@ ${when(this.mode == 'normal', () => html`<slot name="normal-label">
             this._setTransX();
         } else if (name == 'trailing-icon') {
             this._num_trailing_icons = this._trailing_icon_slot.length;
+        } else if (name == 'helper-text') {
+            this._helper_text_slotted = true;
         }
     }
     private _clickEvent() {
