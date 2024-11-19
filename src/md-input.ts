@@ -1,5 +1,5 @@
 import {LitElement, html, css} from 'lit';
-import {customElement, property, query, queryAssignedElements}
+import {state, customElement, property, query, queryAssignedElements}
     from 'lit/decorators.js';
 import {when} from 'lit/directives/when.js';
 
@@ -27,6 +27,12 @@ export class AalamMdInput extends LitElement {
     @property({type:Number, attribute:true})
     charcount = '';
 
+    @state()
+    private _num_leading_icons:number;
+
+    @state()
+    private _num_trailing_icons:number;
+
     @query('#_container')
     _container:HTMLElement;
 
@@ -38,6 +44,12 @@ export class AalamMdInput extends LitElement {
 
     @queryAssignedElements({ slot: 'input' })
     _input_slot:Array<HTMLInputElement>;
+
+    @queryAssignedElements({ slot: 'leading-icon' })
+    _leading_icon_slot:Array<HTMLInputElement>;
+
+    @queryAssignedElements({ slot: 'trailing-icon' })
+    _trailing_icon_slot:Array<HTMLInputElement>;
 
     private _input_element:HTMLInputElement;
 
@@ -52,7 +64,7 @@ export class AalamMdInput extends LitElement {
         else if(name == 'charcount')
             this._charCounter();
         else if(name == 'mode')
-            if(this.mode != 'outline' && this.mode != 'filled') {
+            if(this.mode != 'outline' && this.mode != 'filled' && this.mode != 'normal') {
                 this.mode = 'filled';
             }
     }
@@ -67,13 +79,16 @@ export class AalamMdInput extends LitElement {
     }
     override render() {
         return html`
+${when(this.mode == 'normal', () => html`<slot name="normal-label">
+    <label>${this.label}</label>
+</slot>`)}
 <div id="_container" class="mode-${this.mode}"
     @click=${this._clickEvent}
     style="--attrcolor:${this.color}">
-    <div>
+    <div class="${!this._num_leading_icons?'hide':''}">
         <slot name="leading-icon"></slot>
     </div>
-    <div id="_input-container">
+    <div id="_input-container" class="mode-${this.mode}">
         ${when(this.prefix, () =>
             html`<span id="_prefix">${this.prefix}</span>`)}
         <span id="_input-span" @input=${this._charCounter}>
@@ -85,15 +100,15 @@ export class AalamMdInput extends LitElement {
         </span>
         ${when(this.suffix, () =>
             html`<span id="_suffix">${this.suffix}</span>`)}
-        <span id="_label">${this.label}</span>
+        ${when(this.mode != 'normal', () => html`<span id="_label">${this.label}</span>`)}
     </div>
-    <div>
+    <div class="${!this._num_trailing_icons?'hide':''}">
         <slot name="trailing-icon"></slot>
     </div>
 </div>
 <div id="_helper-text">
     <slot name="helper-text"></slot>
-    <span id='_display-counter'></span>
+    <span id='_display-counter' part="charcount"></span>
 </div>`
     }
     static override get styles() {
@@ -102,10 +117,12 @@ export class AalamMdInput extends LitElement {
 #_container {
     position:relative;display:flex;align-items:center;
     gap:5px;padding-left:5px;padding-right:5px}
+#_container.mode-normal {padding-left:0;padding-right:0;}
 #_input-container {
     position:relative;padding-top:calc(0.75em + 7px);padding-bottom:3px;
     gap:5px;padding-right:5px;
     display:flex;align-items:center;flex:1}
+#_input-container.mode-normal {padding-top:0;padding-bottom:0;}
 #_label {
     position:absolute;top:50%;left:0;
     transition:transform 0.2s ease;transform:translateY(-50%)}
@@ -117,7 +134,7 @@ export class AalamMdInput extends LitElement {
     background:transparent;outline:none;
     border:none;width:100%;padding:0px;font-size:1em}
 .focused #_prefix, .focused #_suffix {opacity:1}
-
+.hide {display:none;}
 .mode-filled {backdrop-filter:brightness(0.90)}
 .mode-filled:hover {backdrop-filter:brightness(0.80)}
 .mode-filled.focused {backdrop-filter:brightness(0.70)}
@@ -127,12 +144,12 @@ export class AalamMdInput extends LitElement {
 .mode-filled.focusout {border-bottom:transparent !important}
 .mode-filled.focusout {backdrop-filter:brightness(0.90)}
 
-.mode-outline.focused {
+#_container.mode-outline.focused {
     border:solid 2px var(--attrcolor)}
-.mode-outline.focused #_input-container {
+#_container.mode-outline.focused #_input-container {
     padding:calc((0.75em + 10px)/2);padding-left:0px;padding-right:5px}
-.mode-outline, .mode-outline.focusout {border:solid 2px grey}
-.mode-outline.focused #_label {
+#_container.mode-outline, .mode-outline.focusout {border:solid 2px grey}
+#_container.mode-outline.focused #_label {
     padding:4px;background:white;
     transform:translateY(-130%)
         translateX(calc(var(--tx)*-1px)) scale(0.75)}`
@@ -164,8 +181,12 @@ export class AalamMdInput extends LitElement {
                 this._focusEvent()});
             this._input_element.addEventListener("blur", () => {
                 this._blurEvent()});
-        } else if(name == 'leading-icon')
+        } else if(name == 'leading-icon') {
+            this._num_leading_icons = this._leading_icon_slot.length;
             this._setTransX();
+        } else if (name == 'trailing-icon') {
+            this._num_trailing_icons = this._trailing_icon_slot.length;
+        }
     }
     private _clickEvent() {
         if(this.disabled)
