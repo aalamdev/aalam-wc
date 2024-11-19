@@ -82,7 +82,7 @@ export class AalamSwitchElement extends LitElement {
         .switch-container {height:${this.height};width:${this.width};
                            background-color:${this.offColor};
                            box-sizing:content-box;border-radius:${this.height};position:relative;cursor:pointer;}
-        .switch-dial > svg {height:calc(${this.height} - 6px);width:calc(${this.height} - 6px);}
+        .switch-dial > svg {height:calc(${this.height} - 6px);width:calc(${this.height} - 6px);vertical-align:text-top;}
         :host([status='on']) .switch-container {background-color:${this.onColor};}
         </style>
         <div class="switch-container" part="switch-container"  @click=${this._onClick}>
