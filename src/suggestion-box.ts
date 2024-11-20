@@ -168,7 +168,7 @@ export class AalamSuggestionBox extends LitElement {
     }
 
     private _inputFocusEvent() {
-        this.show_container = ( this.empty_slot.length || this.filtered_list.length > 0 && (this.input_el as HTMLInputElement)?.value.length >= this.minchar );
+        this.show_container = (this.empty_slot.length > 0 || this.filtered_list.length > 0 && (this.input_el as HTMLInputElement)?.value.length >= this.minchar );
         this.index = -1;
     }
 
