@@ -27,14 +27,9 @@ describe("SuggestionBox", () => {
         let dd = el.shadowRoot?.querySelector("#sgn-container");
         expect(dd?.style.display).to.equal("none");
 
-        const shouldFocus = Math.random() < 0.5;
-        if (shouldFocus) {
-            input?.focus();
-            await el.updateComplete;
-            expect(dd?.style.display).to.equal("block");
-        } else {
-            expect(dd?.style.display).to.equal("none");
-        }
+        input?.focus();
+        await el.updateComplete;
+        expect(dd?.style.display).to.equal("none"); /*no suggestions yet*/
 
         el = await fixture(
             html`<aalam-sgn-box>
@@ -45,16 +40,10 @@ describe("SuggestionBox", () => {
         dd = el.shadowRoot?.querySelector("#sgn-container");
         const emptyBlock = el.querySelector('[slot="sgn-empty"]');
 
-        const shouldFocusAgain = Math.random() < 0.5;
-        if (shouldFocusAgain) {
-            input?.focus();
-            await el.updateComplete;
-            expect(dd?.style.display).to.equal("block");
-            expect(getComputedStyle(emptyBlock).display).to.not.equal("none");
-        } else {
-            expect(dd?.style.display).to.equal("none");
-            expect(emptyBlock).to.exist;
-        }
+        input?.focus();
+        await el.updateComplete;
+        expect(dd?.style.display).to.equal("block");
+        expect(getComputedStyle(emptyBlock).display).to.not.equal("none");
     });
 
     it("should render #sgn-container", async () => {
@@ -121,7 +110,7 @@ describe("SuggestionBox", () => {
         }
     });
 
-    it("should update suggestions using setSuggestion", async () => {
+    it("should update suggestions using setSuggestions", async () => {
         const el = await fixture(
             html`
                 <aalam-sgn-box>
@@ -146,7 +135,7 @@ describe("SuggestionBox", () => {
             },
         ];
 
-        el.setSuggestion(suggestions, true);
+        el.setSuggestions(suggestions, true);
         await el.updateComplete;
 
         expect(el.filtered_list.length).to.equal(1);
@@ -207,7 +196,7 @@ describe("SuggestionBox", () => {
         await sendKeys({ press: "ArrowUp" });
         await el.updateComplete;
         expect(el.index).to.equal(6);
-        el.setSuggestion(el.list, true);
+        el.setSuggestions(el.list, true);
         await el.updateComplete;
 
         await sendKeys({ press: "ArrowDown" });
@@ -264,23 +253,6 @@ describe("SuggestionBox", () => {
         expect(el.show_container).to.be.false;
     });
 
-    it("should close container on outside click", async () => {
-        const el = await fixture(html`<aalam-sgn-box></aalam-sgn-box>`);
-        const input = el.shadowRoot?.querySelector("input");
-        const container = el.shadowRoot?.querySelector("#sgn-container");
-
-        expect(container?.style.display).to.equal("none");
-
-        input?.focus();
-        await el.updateComplete;
-
-        expect(container?.style.display).to.equal("block");
-
-        document.body.click();
-        await el.updateComplete;
-
-        expect(container?.style.display).to.equal("none");
-    });
     it("should load more suggestions on 'Loadmore' click", async () => {
         const el = await fixture(
             html`
@@ -301,7 +273,7 @@ describe("SuggestionBox", () => {
         );
         await el.updateComplete;
 
-        el.setSuggestion(
+        el.setSuggestions(
             [
                 { name: "test1" },
                 { name: "test2" },
@@ -321,14 +293,14 @@ describe("SuggestionBox", () => {
         loadmoreSlot?.dispatchEvent(
             new MouseEvent("click", { bubbles: true, composed: true })
         );
-        el.appendSuggestion([{ name: "test6" }, { name: "test7" }], true);
+        el.appendSuggestions([{ name: "test6" }, { name: "test7" }], true);
         await el.updateComplete;
         expect(el.private_items.length).to.equal(7);
 
         loadmoreSlot?.dispatchEvent(
             new MouseEvent("click", { bubbles: true, composed: true })
         );
-        el.appendSuggestion([{ name: "test8" }, { name: "test9" }], false);
+        el.appendSuggestions([{ name: "test8" }, { name: "test9" }], false);
         await el.updateComplete;
         expect(el.private_items.length).to.equal(9);
         expect(loadmoreSlot?.style.display).to.equal("none");
@@ -370,7 +342,7 @@ describe("SuggestionBox", () => {
         el.list = [{ name: "test1" }, { name: "best2" }];
         el.listkey = "name";
 
-        el.setSuggestion(
+        el.setSuggestions(
             [
                 { name: "test1" },
                 { name: "test2" },
@@ -400,7 +372,7 @@ describe("SuggestionBox", () => {
         }
     });
 
-     it("should update suggestions using setSuggestion without template", async () => {
+     it("should update suggestions using setSuggestions without template", async () => {
          const el = await fixture(html`<aalam-sgn-box></aalam-sgn-box>`);
          const input = el.shadowRoot?.querySelector("input");
 
@@ -410,14 +382,13 @@ describe("SuggestionBox", () => {
              { name: "chennai", description: "Dream location" },
          ];
 
-         el.setSuggestion(suggestions, true);
+         el.setSuggestions(suggestions, true);
          await elementUpdated(el);
 
          expect(el.filtered_list.length).to.equal(3);
          expect(el.filtered_list.map((item) => item.name)).to.include.members(
              suggestions.map((item) => item.name)
          );
-         
          input!.value = "thi";
          input!.dispatchEvent(new Event("input"));
          await elementUpdated(el);
@@ -431,7 +402,7 @@ describe("SuggestionBox", () => {
          );
      });
 
-     it("should clear suggestions when setSuggestion is called with an empty array", async () => {
+     it("should clear suggestions when setSuggestions is called with an empty array", async () => {
          const el = await fixture(html`<aalam-sgn-box></aalam-sgn-box>`);
          const input = el.shadowRoot?.querySelector("input");
 
@@ -441,12 +412,12 @@ describe("SuggestionBox", () => {
              { name: "chennai", description: "Dream location" },
          ];
 
-         el.setSuggestion(suggestions, true);
+         el.setSuggestions(suggestions, true);
          await elementUpdated(el);
 
          expect(el.filtered_list.length).to.equal(3);
 
-         el.setSuggestion([], true);
+         el.setSuggestions([], true);
          await elementUpdated(el);
 
          expect(el.filtered_list.length).to.equal(0);

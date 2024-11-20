@@ -3,7 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { queryAssignedElements } from "lit/decorators.js";
 
 @customElement("aalam-sgn-box")
-export class SuggestionBox extends LitElement {
+export class AalamSuggestionBox extends LitElement {
     @queryAssignedElements({ slot: "sgn-item-template" })
     template_slots: Array<HTMLElement>;
 
@@ -12,6 +12,9 @@ export class SuggestionBox extends LitElement {
 
     @queryAssignedElements({ slot: "sgn-loadmore" })
     loadmore_slot: Array<HTMLElement>;
+
+    @queryAssignedElements({ slot: "sgn-empty" })
+    empty_slot: Array<HTMLElement>;
 
     @property({ type: Array<Object> })
     list: Array<{ [key: string]: any } | string> = [];
@@ -82,7 +85,7 @@ export class SuggestionBox extends LitElement {
                     </slot>
                 </div>
                 <slot name="sgn-item-template" @slotchange=${this._slotChanged} style="display:none"></slot>
-                <div id="sgn-container" part="sgn-container" style="display:${this.show_container ? "block" : "none"};position:absolute; ">
+                <div id="sgn-container" part="sgn-container" style="display:${this.show_container ? "block" : "none"};position:absolute;left:0;right:0">
                     <div style="display:${this.show_empty ? "block" : "none"}">
                         <slot id="sgn-empty" name="sgn-empty"></slot>
                     </div>
@@ -165,10 +168,7 @@ export class SuggestionBox extends LitElement {
     }
 
     private _inputFocusEvent() {
-        this.show_container = true;
-        if ( this.filtered_list.length > 0 && (this.input_el as HTMLInputElement)?.value.length >= this.minchar ) {
-            this.show_container = true;
-        }
+        this.show_container = ( this.empty_slot.length || this.filtered_list.length > 0 && (this.input_el as HTMLInputElement)?.value.length >= this.minchar );
         this.index = -1;
     }
 
@@ -271,7 +271,7 @@ export class SuggestionBox extends LitElement {
                     this.filtered_list = this.list.filter((item) =>
                         this._isMatching(item, inputValue)
                     );
-                    this.setSuggestion(this.filtered_list, false);
+                    this.setSuggestions(this.filtered_list, false);
                 } else {
                     this.show_empty = true;
                 }
@@ -279,13 +279,14 @@ export class SuggestionBox extends LitElement {
             const input = new CustomEvent("input", {
                 bubbles: true,
                 composed: true,
+                detail: {list: this.filtered_list, value: inputValue}
             });
             this.dispatchEvent(input);
         } else {
             this.filtered_list = [];
             this.show_empty = true;
             this.show_nomatch = false;
-            this.setSuggestion(this.filtered_list, false);
+            this.setSuggestions(this.filtered_list, false);
         }
     }
 
@@ -372,7 +373,7 @@ export class SuggestionBox extends LitElement {
 
         this.dispatchEvent(
             new CustomEvent("select", {
-                detail: selectedValue,
+                detail: this.result[index],
                 bubbles: true,
                 cancelable: false,
                 composed: true,
@@ -414,7 +415,7 @@ export class SuggestionBox extends LitElement {
         );
         return name.replace(re, `<strong class="sgn-highlight">$1</strong>`);
     }
-    setSuggestion( suggestions: Array<{ [key: string]: string } | string>, has_more: boolean) {
+    public setSuggestions ( suggestions: Array<{ [key: string]: string } | string>, has_more: boolean) {
         if (suggestions.length === 0) this.show_nomatch = true;
         this.result = [...suggestions];
         this.index = -1;
@@ -440,19 +441,18 @@ export class SuggestionBox extends LitElement {
     }
 
     private _loadmoreEntry(event: Event) {
+        event.stopPropagation();
+        event.preventDefault();
         const loadmore = new CustomEvent("loadmore", {
             bubbles: true,
+            detail: {last: this.result[this.result.length - 1]}
         });
-        if (true) {
-            this.has_more = false;
-        }
+        this.has_more = false;
         this.loadmore_slot[0].classList.remove(`${this.activecls}`);
-
         this.dispatchEvent(loadmore);
-        event.stopPropagation();
     }
 
-    appendSuggestion( suggestions: Array<{ [key: string]: string }>, has_more: boolean = false ) {
+    public appendSuggestions( suggestions: Array<{ [key: string]: string }>, has_more: boolean = false ) {
         this.result = [...this.result];
         this.result.push(...suggestions);
         this.has_more = has_more;
@@ -487,6 +487,7 @@ export class SuggestionBox extends LitElement {
 
 declare global {
     interface HTMLElementTagNameMap {
-        'aalam-sgn-box': SuggestionBox;
+        'aalam-sgn-box': AalamSuggestionBox;
     }
 }
+export default AalamSuggestionBox;
