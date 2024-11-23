@@ -76,13 +76,13 @@ export class AalamSwitchElement extends LitElement {
     override render() {
         return html`
         <style>
-        :host {display:inline-block;}
+        :host {display:inline-block;vertical;vertical-align:middle;}
         .switch-dial {position:absolute;top:3px;bottom:3px;left:3px;right:calc(100% - ${this.height} - 3px);transition:all 0.1s ease;}
         :host([status='on']) .switch-dial {right:3px;left:calc(100% - ${this.height} + 3px);}
         .switch-container {height:${this.height};width:${this.width};
                            background-color:${this.offColor};
                            box-sizing:content-box;border-radius:${this.height};position:relative;cursor:pointer;}
-        .switch-dial > svg {height:calc(${this.height} - 6px);width:calc(${this.height} - 6px);vertical-align:text-top;}
+        .switch-dial > svg {height:calc(${this.height} - 6px);width:calc(${this.height} - 6px);vertical-align:super;}
         :host([status='on']) .switch-container {background-color:${this.onColor};}
         </style>
         <div class="switch-container" part="switch-container"  @click=${this._onClick}>
