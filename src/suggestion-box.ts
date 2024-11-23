@@ -65,7 +65,7 @@ export class AalamSuggestionBox extends LitElement {
     screeny: number = 0;
 
     private _templateContent: string = "";
-
+    private _actual_inp_value:string;
     private _outClickListener = this.windowClickEvent.bind(this);
 
     override connectedCallback() {
@@ -80,7 +80,7 @@ export class AalamSuggestionBox extends LitElement {
         return html`
             <div style="position:relative">
                 <div  part="sgn-input" @focusin=${this._inputFocusEvent} @keydown=${this.keyDownInputEvent} >
-                    <slot name="sgn-input" id="sgn-input" @input=${this._inputEvent} @click=${this._inputSelectEvent} >
+                    <slot name="sgn-input" id="sgn-input" @input=${this._inputEvent} @click=${this._inputClickEvent} @select=${this._inputSelectEvent}>
                         <input part="sgn-input" type="text" />
                     </slot>
                 </div>
@@ -163,8 +163,12 @@ export class AalamSuggestionBox extends LitElement {
         }
     }
 
-    private _inputSelectEvent() {
+    private _inputClickEvent() {
         this.index = -1;
+    }
+
+    private _inputSelectEvent(event:Event) {
+        event.stopPropagation();
     }
 
     private _inputFocusEvent() {
@@ -228,7 +232,7 @@ export class AalamSuggestionBox extends LitElement {
             case "ArrowUp":
                 e.preventDefault();
                 this.index =
-                    this.index <= 0
+                    this.index < 0
                         ? resultLength - 1 + (this.has_more ? 1 : 0)
                         : this.index - 1;
                 this._setActive(resultLength);
@@ -237,6 +241,8 @@ export class AalamSuggestionBox extends LitElement {
             case "ArrowDown":
                 this.index =
                     (this.index + 1) % (resultLength + (this.has_more ? 1 : 0));
+                if (this.index < this.prevIndex)
+                    this.index = -1;
                 this._setActive(resultLength);
 
                 break;
@@ -253,10 +259,12 @@ export class AalamSuggestionBox extends LitElement {
 
     private _inputEvent(e: any) {
         e.stopPropagation();
+        let min_char = Number(this.minchar);
+
         this.index = -1;
         this.input_el = e.target;
-        let min_char = Number(this.minchar);
-        const inputValue = (this.input_el as HTMLInputElement)?.value;
+        this._actual_inp_value = (this.input_el as HTMLInputElement)?.value;
+
         if ((this.input_el as HTMLInputElement).value !== "") {
             this.show_nomatch = false;
         }
@@ -265,21 +273,23 @@ export class AalamSuggestionBox extends LitElement {
             previousMatchElement.remove();
         }
 
-        if (inputValue.length >= min_char) {
+        if (this._actual_inp_value.length >= min_char) {
             if (Array.isArray(this.list)) {
-                if (inputValue) {
+                if (this._actual_inp_value) {
                     this.filtered_list = this.list.filter((item) =>
-                        this._isMatching(item, inputValue)
+                        this._isMatching(item, this._actual_inp_value)
                     );
                     this.setSuggestions(this.filtered_list, false);
                 } else {
                     this.show_empty = true;
+                    if (this._actual_inp_value.length == 0)
+                        this.show_container = this.empty_slot.length > 0;
                 }
             }
             const input = new CustomEvent("input", {
                 bubbles: true,
                 composed: true,
-                detail: {list: this.filtered_list, value: inputValue}
+                detail: {list: this.filtered_list, value: this._actual_inp_value}
             });
             this.dispatchEvent(input);
         } else {
@@ -287,24 +297,29 @@ export class AalamSuggestionBox extends LitElement {
             this.show_empty = true;
             this.show_nomatch = false;
             this.setSuggestions(this.filtered_list, false);
+            if (this._actual_inp_value.length == 0)
+                this.show_container = this.empty_slot.length > 0;
         }
     }
 
     private _isMatching(item: any, value: string): boolean {
+        let _search = (x:string, y:string) => {
+            return x.replace(/[ ./]/g, '').search(new RegExp(y.replace(/[ ./]/g, ''), 'i')) != -1;
+        }
         if (typeof item === "string") {
-            return item.includes(value);
+            return _search(item, value);
         } else if (typeof item === "object") {
             if (
                 this.listkey &&
                 item.hasOwnProperty(this.listkey) &&
                 typeof item[this.listkey] === "string"
             ) {
-                return item[this.listkey].includes(value);
+                return _search(item[this.listkey], value);
             } else {
                 for (let key in item) {
                     if (
                         typeof item[key] === "string" &&
-                        item[key].includes(value)
+                        _search(item[key], value)
                     ) {
                         return true;
                     }
@@ -317,12 +332,16 @@ export class AalamSuggestionBox extends LitElement {
 
     private _setActive(resultLength: number) {
         if (this.index < resultLength) {
-            if (typeof this.result[this.index] == "string") {
-                (this.input_el as HTMLInputElement).value =
-                    this.result[this.index];
+            if (this.index < 0) {
+                (this.input_el as HTMLInputElement).value = this._actual_inp_value;
             } else {
-                (this.input_el as HTMLInputElement).value =
-                    this.result[this.index][this.listkey];
+                if (typeof this.result[this.index] == "string") {
+                    (this.input_el as HTMLInputElement).value =
+                        this.result[this.index];
+                } else {
+                    (this.input_el as HTMLInputElement).value =
+                        this.result[this.index][this.listkey];
+                }
             }
         }
 
@@ -341,7 +360,7 @@ export class AalamSuggestionBox extends LitElement {
             }
         } else if (this.index === resultLength && this.has_more) {
             this.loadmore_slot[0]?.classList.add(`${this.activecls}`);
-            (this.input_el as HTMLInputElement).value = "";
+            (this.input_el as HTMLInputElement).value = this._actual_inp_value;
         }
 
         this.prevIndex = this.index;

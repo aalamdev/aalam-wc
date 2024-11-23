@@ -184,7 +184,7 @@ describe("SuggestionBox", () => {
         }
         await sendKeys({ press: "ArrowDown" });
         await el.updateComplete;
-        expect(el.index).to.equal(0);
+        expect(el.index).to.equal(-1);
         for (let i = 0; i < 7; i++) {
             await sendKeys({ press: "ArrowUp" });
             await el.updateComplete;
@@ -201,7 +201,7 @@ describe("SuggestionBox", () => {
 
         await sendKeys({ press: "ArrowDown" });
         await el.updateComplete;
-        expect(el.index).to.equal(0);
+        expect(el.index).to.equal(-1);
 
         const container = el.shadowRoot?.querySelector("#sgn-container");
         const loadMoreElement = el?.querySelector("[slot='sgn-loadmore']");
