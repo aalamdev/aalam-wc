@@ -7,7 +7,7 @@ import {animationCSS, animate_defs, getResponsiveValues, parseAttrVal, screen_li
     from "./utils";
 
 const active_modals:Array<object|null> = [];
-const DEFAULT_MODAL_ZINDEX = '1';
+const DEFAULT_MODAL_ZINDEX = 10000;
 const position_defs:{[key:string]:{[key:string]:string|number}} = {
     bottom: {bottom:0, right:0, left:0, position:"absolute",
              "max-height":"100vh"},
@@ -108,6 +108,7 @@ export class AalamModal extends LitElement {
     private _wrp_init_bounds:DOMRect|null;
     private _cur_pos:string|null;
     private _clamp_values:{[key:string]:number|null} = {};
+    private _body_overflow:string|null;
 
     constructor() {
         super();
@@ -224,9 +225,9 @@ ${this._animateStyles()}
         }
         else
             this._setWrapperBoundsNull();
-        this.style.zIndex = DEFAULT_MODAL_ZINDEX;
+        this.style.zIndex = "" + DEFAULT_MODAL_ZINDEX;
         if(this.stack)
-            this.style.zIndex = DEFAULT_MODAL_ZINDEX + active_modals.length;
+            this.style.zIndex = "" + (DEFAULT_MODAL_ZINDEX + active_modals.length);
         else
             active_modals.forEach((m:any) => m.hide());
         if(!this._actualparent)
@@ -238,6 +239,8 @@ ${this._animateStyles()}
         }))
         active_modals.push(this);
         document.body.appendChild(this);
+        this._body_overflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
     }
     hide(delay?:number) {
         this._clearTimer();
@@ -311,6 +314,8 @@ ${this._animateStyles()}
         this._open = this.open;
         if (!this._open) {
             this._actualparent?.appendChild(this);
+            document.body.style.overflow = <string>this._body_overflow;
+            this._body_overflow = null;
             let ix = active_modals.indexOf(this);
             if (ix >= 0)
                 active_modals.splice(ix, 1);
