@@ -105,8 +105,8 @@ export class AalamTabs extends LitElement {
             }
             return html`
 <div style=${this._internal_fashion=='column'?styleMap(fashionColumn):''}>
-    <div part="tab-title-holder">
-        <div part="tab-title" style="display:flex;flex-direction:${this._internal_fashion}">
+    <div part="tab-title-holder tab-title-holder-${this._internal_fashion}">
+        <div part="tab-title tab-title-${this._internal_fashion}" style="display:flex;flex-direction:${this._internal_fashion}">
             <slot name="tab-title" @click=${this._titleClicked}></slot>
         </div>
     </div>
@@ -118,6 +118,7 @@ export class AalamTabs extends LitElement {
     }
     override connectedCallback() {
         super.connectedCallback();
+        this.setAttribute('data-fashion', this._internal_fashion);
         this.renderRoot.addEventListener("slotchange", (e) => {
                                          this._slotChangedEvent(e)});
         window.addEventListener("resize", this._resizeListener);
@@ -135,6 +136,14 @@ export class AalamTabs extends LitElement {
         this._openActive();
         if (this._cur_ix == null)
             this.show(0);
+    }
+    private _queryTitles(fashion?:string) {
+        fashion = fashion || this._internal_fashion;
+        return this.querySelectorAll(fashion == 'accordion'?':scope > [slot=acc] > [slot=tab-title]':':scope > [slot=tab-title]');
+    }
+    private _queryBody(fashion?:string) {
+        fashion = fashion || this._internal_fashion;
+        return this.querySelectorAll(fashion == 'accordion'?':scope > [slot=acc] > [slot=tab-body]':':scope > [slot=tab-body]');
     }
     private _nodeInserted(mutations:MutationRecord[]) {
         let num_added_nodes = 0;
@@ -159,15 +168,19 @@ export class AalamTabs extends LitElement {
         } else if (name == 'acc') {
             for(let i of nodes) {
                 if (i != (nodes[this._cur_ix])) {
-                    (i.children[1] as HTMLElement).style.display = 'none';
-                    i.children[0].classList.remove(this.activecls);
-                    i.children[1].classList.remove(this.activecls);
+                    if (i.children.length > 1) {
+                        (i.children[1] as HTMLElement).style.display = 'none';
+                        i.children[1].classList.remove(this.activecls);
+                    }
+                    if (i.children.length > 0) {
+                        i.children[0]?.classList.remove(this.activecls);
+                    }
                 }
             }
         }
     }
     private _openActive() {
-        let val = this.querySelectorAll("[slot=tab-title]");
+        let val = this._queryTitles();
         for(let i = 0;i < val.length; i++) {
             if (val[i].classList.contains(this.activecls)) {
                 this.show(i);
@@ -184,11 +197,12 @@ export class AalamTabs extends LitElement {
         return '';
     }
     private _changeFashionStyle(val:string) {
-        this._internal_fashion = val;
+        this.setAttribute('data-fashion', val);
         if (val == 'accordion')
             this._showAccordion();
         else
             this._showRC();
+        this._internal_fashion = val;
     }
     private _resizeEvent() {
         let val = this._checkFashion();
@@ -198,8 +212,8 @@ export class AalamTabs extends LitElement {
         }
     }
     private _showAccordion() {
-        let title = this.querySelectorAll(":scope > [slot=tab-title]");
-        let body = this.querySelectorAll(":scope > [slot=tab-body]");
+        let title = this._queryTitles('row');
+        let body = this._queryBody('row');
         for (let i = 0;i < Math.min(title.length, body.length); i++) {
             let div = document.createElement("div");
             div.slot = "acc";
@@ -209,19 +223,20 @@ export class AalamTabs extends LitElement {
         }
     }
     private _showRC() {
-        let acc = this.querySelectorAll("[slot=acc]");
+        let acc = this.querySelectorAll(":scope > [slot=acc]");
         for(let j of acc) {
             this.appendChild(j.children[1]);
             this.appendChild(j.children[0]);
             j.remove();
         }
-        let styles = this.querySelectorAll("style");
+        let styles = this.querySelectorAll(":scope > style");
         for (let s of styles)
             s.remove();
     }
     private _titleClicked(e:Event) {
-        let title = this.querySelectorAll("[slot=tab-title]");
+        let title = this._queryTitles();
         let el = e.target as HTMLElement;
+        if (el.closest('aalam-tabs') != this) return;
         while(el) {
             if (el.slot == "tab-title") {
                 let ix = Array.prototype.indexOf.call(title, el);
@@ -236,7 +251,9 @@ export class AalamTabs extends LitElement {
     }
     private _transitionEndEvent(e:Event) {
         let el = e.target as HTMLElement;
-        if (el.hasAttribute("data-anim"))
+        if (el.closest('aalam-tabs') != this)
+            return;
+        if (!el.classList.contains(this.activecls))
             el.style.display = 'none';
         el.style.transition = '';
         el.style.transform = '';
@@ -245,22 +262,22 @@ export class AalamTabs extends LitElement {
         el.style.transitionDuration = '';
         el.style.transitionTimingFunction = '';
         el.style.transition = '';
-        return;
     }
     private _setTransition(val:string, prop:string) {
         if (this._animation_styles[val])
             return trans_defs[this._animation_styles[val]][val][prop];
     }
     private _show(ix:number, prev_ix:number) {
-        let title = this.querySelectorAll("[slot=tab-title]");
-        let body = this.querySelectorAll("[slot=tab-body]");
+        let title = this._queryTitles();
+        let body = this._queryBody();
         let bix = body[ix] as HTMLElement;
         if (prev_ix != null) {
             let bpix = body[prev_ix] as HTMLElement;
+            bpix?.classList.remove(this.activecls);
+            title[prev_ix]?.classList.remove(this.activecls);
             if (this._animation_styles.close) {
                 let val = `${this._animation_styles.close == 'fade'?
                                   `opacity`:`transform`}`;
-                bpix.setAttribute("data-anim", '');
                 bpix.style.transitionProperty = val;
                 bpix.style.setProperty(
                     val, `${this._setTransition('close', 'start')}`);
@@ -273,8 +290,6 @@ export class AalamTabs extends LitElement {
                 });
             } else
                 bpix.style.display = 'none';
-            bpix?.classList.remove(this.activecls);
-            title[prev_ix]?.classList.remove(this.activecls);
             this.dispatchEvent(
                 new CustomEvent("hide", {detail:{ix}}));
         }
@@ -295,8 +310,6 @@ export class AalamTabs extends LitElement {
                     val,`${this._setTransition('open', 'end')}`);
             })
         }
-        if (this._animation_styles.close)
-            bix.removeAttribute("data-anim");
         this.dispatchEvent(
             new CustomEvent("show", {detail:{ix}}));
     }
@@ -304,8 +317,7 @@ export class AalamTabs extends LitElement {
         if (this._cur_ix == ix && this._cur_ix != null)
             return
         this._show(ix, this._cur_ix);
-        if (this._cur_ix != ix)
-            this._cur_ix = ix;
+        this._cur_ix = ix;
         this.dispatchEvent(
             new CustomEvent("change", {detail:{ix}}));
     }

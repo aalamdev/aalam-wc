@@ -66,5 +66,62 @@
             </aalam-tabs>
         </div>
         <button onclick="addNewTab()">New tab item</button>
+
+        <div class="parentDiv">
+            <aalam-tabs class="tab1 sty" animation="show:l2r;hide:r2l" id="tabwintab"
+                        fashion="xs:clumn;s:row;l:column;xl:column">
+                <button slot="tab-title" class="title-tab">title 1</button>
+                <div class="bdy tab-active bdy1" slot="tab-body">
+                    <aalam-tabs class="tab1 sty" animation="show:fade;hide:fade"
+                                fashion="xs:clumn;s:row;l:column;xl:accordion" id="twt1">
+                        <button slot="tab-title" class="title-tab">title 1.t1</button>
+                        <div class="bdy tab-active" slot="tab-body">body 1</div>
+
+                        <button slot="tab-title" class="tab-active title-tab">title 1.t2
+                        </button>
+                        <div class="bdy tab-active" slot="tab-body">body 2</div>
+
+                        <button slot="tab-title" class="title-tab tab-active">title 1.t3
+                        </button>
+                        <div class="bdy" slot="tab-body">body 3</div>
+                    </aalam-tabs>
+                </div>
+
+                <button slot="tab-title" class="tab-active title-tab">title 2</button>
+                <div class="bdy tab-active bdy2" slot="tab-body">
+                    <aalam-tabs class="tab1 sty" animation="show:fade;hide:fade"
+                                fashion="s:row;l:column;xl:accordion" id="twt2">
+                        <button slot="tab-title" class="title-tab">title 2.t1</button>
+                        <div class="bdy tab-active" slot="tab-body">body 1</div>
+
+                        <button slot="tab-title" class="tab-active title-tab">title 2.t2
+                        </button>
+                        <div class="bdy tab-active" slot="tab-body">body 2</div>
+
+                        <button slot="tab-title" class="title-tab tab-active">title 2.t3
+                        </button>
+                        <div class="bdy" slot="tab-body">body 3</div>
+                    </aalam-tabs>
+                </div>
+
+                <button slot="tab-title" class="title-tab tab-active">title 3</button>
+                <div class="bdy" slot="tab-body">
+                    <aalam-tabs class="tab1 sty bdy3" animation="show:fade;hide:fade"
+                                fashion="s:row;l:column;xl:accordion" id="twt3">
+                        <button slot="tab-title" class="title-tab">title 3.t1</button>
+                        <div class="bdy tab-active" slot="tab-body">body 1</div>
+
+                        <button slot="tab-title" class="tab-active title-tab">title 3.t2
+                        </button>
+                        <div class="bdy tab-active" slot="tab-body">body 2</div>
+
+                        <button slot="tab-title" class="title-tab tab-active">title 3.t3
+                        </button>
+                        <div class="bdy" slot="tab-body">body 3</div>
+                    </aalam-tabs>
+                </div>
+            </aalam-tabs>
+        </div>
+        <button onclick="addNewTab()">New tab item</button>
     </body>
 <html>

@@ -5,8 +5,8 @@ import {setViewport} from "@web/test-runner-commands";
 
 describe('aalam-tabs', () => {
     const validate_el = (el:HTMLElement, ix:number) => {
-        let title = el.querySelectorAll("[slot=tab-title]");
-        let body = el.querySelectorAll("[slot=tab-body]");
+        let title = el._queryTitles();
+        let body = el._queryBody();
         let count = 0;
         if(body[ix].style.display == 'block')
             count++;
@@ -20,15 +20,15 @@ describe('aalam-tabs', () => {
             return false;
     }
     const validate_prev = (el:HTMLElement, prev_ix:number) => {
-        let title = el.querySelectorAll("[slot=tab-title]");
-        let body = el.querySelectorAll("[slot=tab-body]");
+        let title = el._queryTitles();
+        let body = el._queryBody();
         expect(body[prev_ix].style.display).to.equal('none');
         expect(body[prev_ix].classList.contains(el.activecls)).to.equal(false);
         expect(title[prev_ix].classList.contains(el.activecls)).to.equal(false);
     }
     const validate_RC = (el:HTMLElement, count:number) => {
-        let title = el.querySelectorAll("[slot=tab-title]");
-        let body = el.querySelectorAll("[slot=tab-body]");
+        let title = el._queryTitles();
+        let body = el._queryBody();
         expect(title.length).to.equal(count);
         expect(body.length).to.equal(count);
     }
@@ -57,11 +57,21 @@ describe('aalam-tabs', () => {
         expect(el1).to.be.an.instanceof(AalamTabs);
     });
     it('show', async () => {
-        const el = await fixture (`
-            <div id='parent'>
+        const tabs = await fixture (`
                 <aalam-tabs>
                     <div slot="tab-title" id="t1">title1</div>
-                    <div slot="tab-body" id='b1'>body1</div>
+                    <div slot="tab-body" id='b1'>
+                        <aalam-tabs>
+                            <div slot="tab-title" id="t1-t1">title1</div>
+                            <div slot="tab-body" id='t1-b1'>body1</div>
+                            <div slot='tab-title' id='t1-t2'>title2</div>
+                            <div slot='tab-body' id='t1-b2'>body2</div>
+                            <div slot="tab-title" id="t1-t3">title3</div>
+                            <div slot="tab-body" id='t1-b3'>body3</div>
+                            <div slot='tab-title' id='t1-t4'>title4</div>
+                            <div slot='tab-body' id='t1-b4'>body4</div>
+                        </aalam-tabs>
+                    </div>
                     <div slot='tab-title' id='t2'>title2</div>
                     <div slot='tab-body' id='b2'>body2</div>
                     <div slot="tab-title" id="t3">title3</div>
@@ -69,9 +79,7 @@ describe('aalam-tabs', () => {
                     <div slot='tab-title' id='t4'>title4</div>
                     <div slot='tab-body' id='b4'>body4</div>
                 </aalam-tabs>
-            </div>
         `);
-        let tabs = el.querySelector("aalam-tabs");
         expect(validate_el(tabs, 0)).to.equal(true);
         expect(tabs._internal_fashion).to.equal('row');
         validate_RC(tabs, 4);
