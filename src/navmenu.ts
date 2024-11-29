@@ -171,6 +171,15 @@ export class AalamNavMenu extends LitElement {
                 this._dd_toggler.style.display = 'none';
         }
     }
+    public getCollapsedEls() {
+        let ret:Element[] = [];
+        this.querySelectorAll(`[slot=collapsed-item]`).forEach((el) => {
+            if ((el as HTMLElement).style.display == 'none')
+                return;
+            ret.push(el);
+        })
+        return ret;
+    }
 }
 
 customElements.define("aalam-navmenu", AalamNavMenu)
@@ -180,3 +189,4 @@ declare global {
         'aalam-navmenu': AalamNavMenu;
     }
 }
+export default AalamNavMenu;
