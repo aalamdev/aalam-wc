@@ -124,4 +124,16 @@
         </div>
         <button onclick="addNewTab()">New tab item</button>
     </body>
+    <script>
+        document.body.addEventListener('contextmenu', function(event) {
+            let el = event.target
+            el = el.slot == 'tab-title'?el:el.closest('[slot=tab-title]');
+            if (!el)
+                return;
+
+            event.stopPropagation();
+            event.preventDefault();
+            el.classList.add('tab-active');
+        })
+    </script>
 <html>

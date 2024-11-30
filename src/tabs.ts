@@ -48,7 +48,7 @@ export class AalamTabs extends LitElement {
 
     private _cur_ix:number;
     private _resizeListener = this._resizeEvent.bind(this);
-    private _node_insert_listener = this._nodeInserted.bind(this);
+    private _mutation_listener = this.__mutationListener.bind(this);
     private _animation_styles:{[key:string]:string} = {};
     private _column_size:{[key:string]:string} = {title:'30%', body:'70%'};
     private _fashion_style:Array<ResponsiveVal> =
@@ -122,8 +122,8 @@ export class AalamTabs extends LitElement {
         this.renderRoot.addEventListener("slotchange", (e) => {
                                          this._slotChangedEvent(e)});
         window.addEventListener("resize", this._resizeListener);
-        this._observer = new MutationObserver(this._node_insert_listener);
-        this._observer.observe(this, { childList: true, subtree : true});
+        this._observer = new MutationObserver(this._mutation_listener);
+        this._observer.observe(this, { attributes:true, childList: true, subtree : true});
 
     }
     override disconnectedCallback() {
@@ -145,10 +145,18 @@ export class AalamTabs extends LitElement {
         fashion = fashion || this._internal_fashion;
         return this.querySelectorAll(fashion == 'accordion'?':scope > [slot=acc] > [slot=tab-body]':':scope > [slot=tab-body]');
     }
-    private _nodeInserted(mutations:MutationRecord[]) {
+    private __mutationListener(mutations:MutationRecord[]) {
         let num_added_nodes = 0;
-        for (let record of mutations)
+        for (let record of mutations) {
             num_added_nodes += record.addedNodes.length;
+            if (record.attributeName == 'class') {
+                if (record.target.slot == 'tab-title' && record.target.classList.contains(this.activecls)) {
+                    let ix = [...this._queryTitles()].indexOf(record.target)
+                    if (ix >= 0 && this._cur_ix != ix)
+                        this.show(ix);
+                }
+            }
+        }
         if (this._internal_fashion == 'accordion' && num_added_nodes > 0)
             this._showAccordion();
     }
@@ -251,10 +259,11 @@ export class AalamTabs extends LitElement {
     }
     private _transitionEndEvent(e:Event) {
         let el = e.target as HTMLElement;
-        if (el.closest('aalam-tabs') != this)
+        if (el.closest('aalam-tabs') != this || el.slot != 'tab-body')
             return;
-        if (!el.classList.contains(this.activecls))
+        if (!el.classList.contains(this.activecls)) {
             el.style.display = 'none';
+        }
         el.style.transition = '';
         el.style.transform = '';
         el.style.opacity = '';
@@ -290,6 +299,7 @@ export class AalamTabs extends LitElement {
                 });
             } else
                 bpix.style.display = 'none';
+
             this.dispatchEvent(
                 new CustomEvent("hide", {detail:{ix}}));
         }
