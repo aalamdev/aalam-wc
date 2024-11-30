@@ -31,16 +31,28 @@ export class AalamAccordion extends LitElement {
     private items!: Element[];
 
     private processedItems = new Set<HTMLElement>();
+    private _mutation_listener = this.__mutationListener.bind(this);
+    private _observer:MutationObserver;
 
+    override connectedCallback() {
+        super.connectedCallback();
+        this._observer = new MutationObserver(this._mutation_listener);
+        this._observer.observe(this, { attributes:true, childList: true, subtree: true});
+
+    }
+    override disconnectedCallback() {
+        if (this._observer) {
+            this._observer.disconnect();
+        }
+    }
     override render() {
         return html`<slot @slotchange=${this.handleSlotChange} @transitionend=${this._handleTransitionEnd} ></slot>`;
     }
 
     private _handleTransitionEnd(event: any) {
         const body = event.target;
-        if (body.style.height == "0px") {
+        if (body.style.height == "0px")
             body.style.display = "none";
-        }
         body.style.height = "";
         body.style.overflow = "";
         body.style.transitionProperty = "";
@@ -62,7 +74,18 @@ export class AalamAccordion extends LitElement {
             this._openItem(this.items[0], 0);
         }
     }
-
+    private __mutationListener(mutations:MutationRecord[]) {
+        for (let record of mutations) {
+            if (record.attributeName == 'class' && record.target) {
+                if (record.target.parentElement == this) {
+                    let ix = this.items.indexOf(record.target);
+                    if (ix < 0)
+                        continue;
+                    this._toggle(ix, !record.target.classList.contains(this.activecls));
+                }
+            }
+        }
+    }
     private handleSlotChange(e: Event) {
         const slot = e.target as HTMLSlotElement;
         const newItems = slot.assignedElements({
@@ -112,7 +135,10 @@ export class AalamAccordion extends LitElement {
     }
 
     private _openItem(item: Element, index: number, animate: boolean = true) {
-        item.classList.add(this.activecls);
+        if (!item.classList.contains(this.activecls)) {
+            /*Checking to accomodate the mutation changes*/
+            item.classList.add(this.activecls);
+        }
         const body = item.querySelector(this.bodysel) as HTMLElement;
         if (body) {
             body.style.display = "block";
@@ -147,7 +173,8 @@ export class AalamAccordion extends LitElement {
         if (isOpen && this.nocloseall && this.openItems.length === 1 && this.openItems[0] == item) {
             return;
         }
-        item.classList.remove(this.activecls);
+        if (isOpen)
+            item.classList.remove(this.activecls);
         const body = item.querySelector(this.bodysel) as HTMLElement;
         if (body) {
             if (animate && this.animationDur !== 0) {
@@ -162,20 +189,17 @@ export class AalamAccordion extends LitElement {
                 requestAnimationFrame(() => {
                     body.style.height = "0px";
                 });
-            } else {
+            } else
                 body.style.display = "none";
-            }
         }
         this.openItems = this.openItems.filter((openItem) => openItem !== item);
         this.dispatchEvent(
             new CustomEvent("itemcollapsed", { detail: { index } })
         );
     }
-
-    private toggle(index: number) {
+    private _toggle(index:number, isOpen?:boolean) {
         const item = this.items[index];
         if (!item) return;
-        const isOpen = item.classList.contains(this.activecls);
         if (isOpen) {
             this._closeItem(item, index);
         } else {
@@ -184,6 +208,11 @@ export class AalamAccordion extends LitElement {
             }
             this._openItem(item, index);
         }
+    }
+    public toggle(index: number) {
+        const item = this.items[index];
+        if (!item) return;
+        this._toggle(index, item.classList.contains(this.activecls));
     }
 }
 

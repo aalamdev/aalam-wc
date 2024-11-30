@@ -4,6 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <script type="module" src="/src/accordion.ts"></script>
+        <script type="module" src="/src/tabs.ts"></script>
         <title>Accordion Example</title>
         <style>
             .aalam-accordion {
@@ -156,6 +157,27 @@
                     </p>
                 </div>
             </div>
+
+            <div class="container ac">
+                <div class="acc-title">
+                    Tab content
+                </div>
+                <div class="acc-body">
+                    <aalam-tabs class="tab1 sty bdy3" animation="show:fade;hide:fade"
+                                fashion="s:row;l:column;xl:accordion" id="twt3">
+                        <button slot="tab-title" class="title-tab">title 3.t1</button>
+                        <div class="bdy tab-active" slot="tab-body">body 1</div>
+
+                        <button slot="tab-title" class="tab-active title-tab">title 3.t2
+                        </button>
+                        <div class="bdy tab-active" slot="tab-body">body 2</div>
+
+                        <button slot="tab-title" class="title-tab tab-active">title 3.t3
+                        </button>
+                        <div class="bdy" slot="tab-body">body 3</div>
+                    </aalam-tabs>
+                </div>
+            </div>
         </aalam-accordion>
         <div>
             <label>
@@ -185,6 +207,20 @@
                     accordion.removeAttribute("nomultiple");
                 }
             });
+            accordion.addEventListener("contextmenu", function(event) {
+                console.log("Rightclick event received");
+                let el = event.target.closest('.acc-title');
+                if (el == null) return;
+
+                el = el.parentElement;
+                event.stopPropagation();
+                event.preventDefault();
+
+                if (el.classList.contains('ac'))
+                    el.classList.remove('ac');
+                else
+                    el.classList.add('ac');
+            })
         </script>
     </body>
 </html>
