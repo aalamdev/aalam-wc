@@ -78,10 +78,10 @@ export class AalamAccordion extends LitElement {
         for (let record of mutations) {
             if (record.attributeName == 'class' && record.target) {
                 if (record.target.parentElement == this) {
-                    let ix = this.items.indexOf(record.target);
+                    let ix = this.items.indexOf(<Element>record.target);
                     if (ix < 0)
                         continue;
-                    this._toggle(ix, !record.target.classList.contains(this.activecls));
+                    this._toggle(ix, !(<Element>record.target).classList.contains(this.activecls));
                 }
             }
         }
@@ -135,6 +135,8 @@ export class AalamAccordion extends LitElement {
     }
 
     private _openItem(item: Element, index: number, animate: boolean = true) {
+        let rect = this.getBoundingClientRect();
+
         if (!item.classList.contains(this.activecls)) {
             /*Checking to accomodate the mutation changes*/
             item.classList.add(this.activecls);
@@ -143,7 +145,7 @@ export class AalamAccordion extends LitElement {
         if (body) {
             body.style.display = "block";
 
-            if (animate && this.animationDur !== 0) {
+            if (animate && this.animationDur !== 0 && rect.width > 0) {
                 body.style.overflow = "hidden";
                 body.style.height = "0px";
                 var openheight = body.scrollHeight + "px";
@@ -169,6 +171,8 @@ export class AalamAccordion extends LitElement {
     }
 
     private _closeItem(item: Element, index: number, animate: boolean = true) {
+        let rect = this.getBoundingClientRect();
+
         const isOpen = item.classList.contains(this.activecls);
         if (isOpen && this.nocloseall && this.openItems.length === 1 && this.openItems[0] == item) {
             return;
@@ -177,7 +181,7 @@ export class AalamAccordion extends LitElement {
             item.classList.remove(this.activecls);
         const body = item.querySelector(this.bodysel) as HTMLElement;
         if (body) {
-            if (animate && this.animationDur !== 0) {
+            if (animate && this.animationDur !== 0 && rect.width > 0) {
                 body.style.height = body.scrollHeight + "px";
                 var closeheight = body.scrollHeight + "px";
                 body.style.height = closeheight;
