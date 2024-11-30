@@ -150,8 +150,9 @@ export class AalamTabs extends LitElement {
         for (let record of mutations) {
             num_added_nodes += record.addedNodes.length;
             if (record.attributeName == 'class') {
-                if (record.target.slot == 'tab-title' && record.target.classList.contains(this.activecls)) {
-                    let ix = [...this._queryTitles()].indexOf(record.target)
+                let el = <Element>record.target;
+                if (el.slot == 'tab-title' && el.classList.contains(this.activecls)) {
+                    let ix = [...this._queryTitles()].indexOf(el)
                     if (ix >= 0 && this._cur_ix != ix)
                         this.show(ix);
                 }
@@ -279,12 +280,14 @@ export class AalamTabs extends LitElement {
     private _show(ix:number, prev_ix:number) {
         let title = this._queryTitles();
         let body = this._queryBody();
+        /*When the element is not show, we need not wait for the transition end event*/
+        let rect = this.getBoundingClientRect();
         let bix = body[ix] as HTMLElement;
         if (prev_ix != null) {
             let bpix = body[prev_ix] as HTMLElement;
             bpix?.classList.remove(this.activecls);
             title[prev_ix]?.classList.remove(this.activecls);
-            if (this._animation_styles.close) {
+            if (this._animation_styles.close && rect.width > 0) {
                 let val = `${this._animation_styles.close == 'fade'?
                                   `opacity`:`transform`}`;
                 bpix.style.transitionProperty = val;
@@ -307,7 +310,7 @@ export class AalamTabs extends LitElement {
         bix?.classList.add(this.activecls);
         if (bix)
             bix.style.display = 'block';
-        if (this._animation_styles.open) {
+        if (this._animation_styles.open && rect.width > 0) {
             let val = `${this._animation_styles.open == 'fade'?
                              `opacity`:`transform`}`;
             bix.style.transitionProperty = val;
