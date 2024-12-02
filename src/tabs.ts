@@ -125,7 +125,7 @@ export class AalamTabs extends LitElement {
                         ${this._column_size.title} ${this._column_size.body}`
                 }
             } else if (this._internal_fashion == 'overlay') {
-                body_style_map = {position: 'absolute', display: 'none', top: 0, left: 0};
+                body_style_map = {position: 'fixed', display: 'none', top: 0, left: 0};
             }
             let body_click_fn = (this._internal_fashion == 'overlay'?this._bodyClicked:null)
             let flex_dir = (this._internal_fashion == 'row'?'row':'column')
@@ -207,9 +207,10 @@ export class AalamTabs extends LitElement {
 
         if (!ref_el) return;
 
-        let ref_bounds = ref_el.getBoundingClientRect();
         this._cleanup = autoUpdate(ref_el, this._tab_body_hldr_el, () => {
+            console.log("autoupdate callback");
             computePosition(ref_el, this._tab_body_hldr_el, {
+                strategy: 'fixed',
                 placement: 'bottom-start',
                 middleware: [
                 offset(({rects}) => {
@@ -217,6 +218,7 @@ export class AalamTabs extends LitElement {
                 })
                 ],
             }).then((data) => {
+                let ref_bounds = ref_el.getBoundingClientRect();
                 let {x, y} = data;
                 Object.assign(this._tab_body_hldr_el.style, {
                     left: `${x}px`,
@@ -277,10 +279,27 @@ export class AalamTabs extends LitElement {
     }
     private _changeFashionStyle(val:string) {
         this.setAttribute('data-fashion', val);
+        if (this._tab_body_hldr_el) {
+            Object.assign(this._tab_body_hldr_el.style, {
+                left: "",
+                top: "",
+                width: "",
+                height: "",
+                overflow: "",
+                display: ""
+            });
+        }
         if (val == 'accordion')
             this._showAccordion();
-        else
+        else {
             this._showRC();
+            if (val == 'overlay') {
+                this._cur_ix = null;
+                let body = this._queryBody()
+                for (let b of body)
+                    (b as HTMLElement).style.display = "none";
+            }
+        }
         this._internal_fashion = val;
     }
     private _resizeEvent() {
@@ -288,6 +307,8 @@ export class AalamTabs extends LitElement {
         if (this._internal_fashion != val) {
             this._changeFashionStyle(val);
             this._openActive();
+            if (this._cur_ix == null && this._internal_fashion != 'overlay')
+                this.show(0);
         }
     }
     private _showAccordion() {
