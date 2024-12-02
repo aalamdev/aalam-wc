@@ -69,7 +69,8 @@ export class AalamTabs extends LitElement {
     private _column_size:{[key:string]:string} = {title:'30%', body:'70%'};
     private _fashion_style:Array<ResponsiveVal> =
                 [{ll: 0, ul: null, val: "row", cond: "(min-width:0px)"}];
-    private _observer:MutationObserver;
+    private _mut_observer:MutationObserver;
+    private _int_observer:IntersectionObserver;
     private _cleanup: (() => void) | null = null;
 
     constructor() {
@@ -148,13 +149,24 @@ export class AalamTabs extends LitElement {
         this.renderRoot.addEventListener("slotchange", (e) => {
                                          this._slotChangedEvent(e)});
         window.addEventListener("resize", this._resizeListener);
-        this._observer = new MutationObserver(this._mutation_listener);
-        this._observer.observe(this, { attributes:true, childList: true, subtree : true});
+        this._mut_observer = new MutationObserver(this._mutation_listener);
+        this._mut_observer.observe(this, { attributes:true, childList: true, subtree : true});
+        this._int_observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if(!entry.isIntersecting && this._internal_fashion == 'overlay') {
+                        this._cleanupOverlay();
+                    }
+                });
+            })
+        this._int_observer.observe(this);
     }
     override disconnectedCallback() {
         window.removeEventListener("resize", this._resizeListener);
-        if (this._observer) {
-            this._observer.disconnect();
+        if (this._mut_observer) {
+            this._mut_observer.disconnect();
+        }
+        if (this._int_observer) {
+            this._int_observer.disconnect();
         }
         if (this._cleanup) {
             this._cleanup();
@@ -199,16 +211,19 @@ export class AalamTabs extends LitElement {
             this._showAccordion();
     }
     private _setupOverlay() {
-        if (this._cleanup)
+        if (this._cleanup) {
             this._cleanup();
+            this._cleanup = null;
+        }
 
         const ref_el = (this.olboundsel?(document.querySelector(`${this.olboundsel}`) as HTMLElement):null) ||
                 this._tab_title_hldr_el as HTMLElement;
 
-        if (!ref_el) return;
+        if (!ref_el) {
+            return;
+        }
 
         this._cleanup = autoUpdate(ref_el, this._tab_body_hldr_el, () => {
-            console.log("autoupdate callback");
             computePosition(ref_el, this._tab_body_hldr_el, {
                 strategy: 'fixed',
                 placement: 'bottom-start',
@@ -229,7 +244,15 @@ export class AalamTabs extends LitElement {
                 });
             });
         });
+    }
+    private _cleanupOverlay() {
+        if (this._cur_ix == null)
+            return;
 
+        let title = this._queryTitles();
+        let body = this._queryBody();
+        this._hideBody(this._cur_ix, <HTMLElement>body[this._cur_ix], <HTMLElement>title[this._cur_ix], true, <DOMRect>{width:0});
+        this._cur_ix = null;
     }
     private _slotChangedEvent(event:Event) {
         if (!event.target)
@@ -337,6 +360,8 @@ export class AalamTabs extends LitElement {
         let title = this._queryTitles();
         let el = e.target as HTMLElement;
         if (el.closest('aalam-tabs') != this) return;
+        if (this._internal_fashion == 'overlay' && !this._cleanup)
+            this._setupOverlay();
         while(el) {
             if (el.slot == "tab-title") {
                 let ix = Array.prototype.indexOf.call(title, el);
@@ -405,14 +430,16 @@ export class AalamTabs extends LitElement {
             let val = `${this._animation_styles.close == 'fade'?
                               `opacity`:`transform`}`;
             bpix.style.transitionProperty = val;
-            bpix.style.setProperty(
-                val, `${this._setTransition('close', 'start')}`);
             bpix.style.transitionDuration =
                 `${this.animationDur}ms`;
             bpix.style.transitionTimingFunction = 'ease';
             requestAnimationFrame( () => {
                 bpix.style.setProperty(
-                    val, `${this._setTransition('close', 'end')}`);
+                    val, `${this._setTransition('close', 'start')}`);
+                requestAnimationFrame( () => {
+                    bpix.style.setProperty(
+                        val, `${this._setTransition('close', 'end')}`);
+                });
             });
         } else {
             bpix.style.display = 'none';
@@ -453,13 +480,15 @@ export class AalamTabs extends LitElement {
                 bix = this._tab_body_hldr_el;
             }
             bix.style.transitionProperty = val;
-            bix.style.setProperty(
-                val, `${this._setTransition('open', 'start')}`);
             bix.style.transitionDuration = `${this.animationDur}ms`;
             bix.style.transitionTimingFunction = 'ease';
             requestAnimationFrame( () => {
                 bix.style.setProperty(
-                    val,`${this._setTransition('open', 'end')}`);
+                    val, `${this._setTransition('open', 'start')}`);
+                requestAnimationFrame( () => {
+                    bix.style.setProperty(
+                        val,`${this._setTransition('open', 'end')}`);
+                })
             })
         }
         this.dispatchEvent(

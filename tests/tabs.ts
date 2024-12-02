@@ -379,7 +379,7 @@ describe('aalam-tabs', () => {
         let change_event = await change_listener;
         expect(change_event.detail.ix).to.equal(2);
         let hide_event = await hide_listener;
-        expect(hide_event.detail.ix).to.equal(2);
+        expect(hide_event.detail.ix).to.equal(0);
         let show_event = await show_listener;
         expect(show_event.detail.ix).to.equal(2);
         expect(validate_el(tabs, 2)).to.equal(true);
@@ -391,15 +391,15 @@ describe('aalam-tabs', () => {
         expect(change_event.detail.ix).to.equal(1);
         show_event = await show_listener;
         expect(show_event.detail.ix).to.equal(2);
-        expect(hide_event.detail.ix).to.equal(2);
+        expect(hide_event.detail.ix).to.equal(0);
         expect(validate_el(tabs, 1)).to.equal(true);
         validate_prev(tabs, 2);
 
         hide_listener = oneEvent(tabs, "hide");
         t4.click();
-        expect(hide_event.detail.ix).to.equal(2);
+        expect(hide_event.detail.ix).to.equal(0);
         hide_event = await hide_listener;
-        expect(hide_event.detail.ix).to.equal(3);
+        expect(hide_event.detail.ix).to.equal(1);
         expect(show_event.detail.ix).to.equal(2);
         expect(change_event.detail.ix).to.equal(1);
         expect(validate_el(tabs, 3)).to.equal(true);

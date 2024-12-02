@@ -11,9 +11,13 @@
             aalam-tabs[data-fashion=overlay]::part(tab-body-holder) {
                 background:white;
             }
+            aalam-modal::part(modal-dialog) {
+                background-color:white;
+            }
         </style>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>Tabs Demo</title>
+        <script type="module" src="../src/modal.ts"></script>
         <script type="module" src="../src/tabs.ts"></script>
     </head>
     <body>
@@ -128,6 +132,27 @@
             </aalam-tabs>
         </div>
         <button onclick="addNewTab()">New tab item</button>
+
+        <aalam-modal id="modal">
+            <div slot="modal-dialog">
+                <aalam-tabs class="tab1 sty" colsize="title:40%;body:60%" id="tabwmodal"
+                            animation="b2t" fashion="s:overlay;m:column">
+                    <div id="tabslot" slot="tab-title" class="title-tab">title1
+                    </div>
+                    <div class="bdy" slot="tab-body">
+                        <a class="tab-close">&lArr;</a> body1
+                    </div>
+
+                    <div slot="tab-title" class="title-tab tab-active">title2</div>
+                    <div slot="tab-body" class="bdy"><a class="tab-close">&lArr;</a>  body2</div>
+
+                    <div slot="tab-title" class="title-tab tab-active">title3</div>
+                    <div slot="tab-body" class="bdy"> <a class="tab-close">&lArr;</a>   body3</div>
+                </aalam-tabs>
+            </div>
+        </aalam-modal>
+
+        <button onclick="openModal()">Show Tab in a modal</button>
     </body>
     <script>
         document.body.addEventListener('contextmenu', function(event) {
@@ -140,5 +165,9 @@
             event.preventDefault();
             el.classList.add('tab-active');
         })
+        function openModal() {
+            let el = document.getElementById('modal')
+            el.show();
+        }
     </script>
 <html>
