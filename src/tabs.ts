@@ -1,7 +1,9 @@
 import {LitElement, html} from 'lit';
-import {customElement, state, property} from 'lit/decorators.js';
+import {customElement, state, property, query} from 'lit/decorators.js';
 import {ResponsiveVal,
         getResponsiveValues, parseAttrVal} from "./utils";
+import {computePosition, autoUpdate, offset}
+    from "@floating-ui/dom";
 import {styleMap} from 'lit/directives/style-map.js';
 
 const _transAnimate = (x:string, y:string):{[key:string]:object} => {
@@ -26,6 +28,7 @@ export class AalamTabs extends LitElement {
         activecls: 'tab-active',
         fashion: 'xs:row',
         colsize: "title:30%;body:70%",
+        olclosesel: '.tab-close'
     }
 
     @property({type:String, attribute:true})
@@ -43,10 +46,23 @@ export class AalamTabs extends LitElement {
     @property({type:String, attribute:true})
     colsize = this.DEFAULT_VALUES.colsize;
 
+    @property({type:String, attribute:true})
+    olboundsel:String;
+
+    @property({type:String, attribute:true})
+    olclosesel = this.DEFAULT_VALUES.olclosesel;
+
     @state()
     _internal_fashion:string = 'row';
 
-    private _cur_ix:number;
+    @query('[part=tab-body-holder]')
+    _tab_body_hldr_el:HTMLElement;
+
+    @query('#tab-title-holder')
+    _tab_title_hldr_el:HTMLElement;
+
+    private _cur_ix:number|null;
+    private _transient_el:HTMLElement| null;
     private _resizeListener = this._resizeEvent.bind(this);
     private _mutation_listener = this.__mutationListener.bind(this);
     private _animation_styles:{[key:string]:string} = {};
@@ -54,6 +70,7 @@ export class AalamTabs extends LitElement {
     private _fashion_style:Array<ResponsiveVal> =
                 [{ll: 0, ul: null, val: "row", cond: "(min-width:0px)"}];
     private _observer:MutationObserver;
+    private _cleanup: (() => void) | null = null;
 
     constructor() {
         super();
@@ -73,9 +90,10 @@ export class AalamTabs extends LitElement {
                     close:this._animation_styles?.hide};
             }
         } else if (name == 'fashion') {
+            let valids = ['row', 'column', 'accordion', 'overlay'];
             this._fashion_style = getResponsiveValues(
                 new_val, this.DEFAULT_VALUES.fashion, (v:string) => {
-                    return (v == 'row' || v == 'column' || v == 'accordion');
+                    return valids.indexOf(v) >= 0;
                 });
             let val = this._checkFashion();
             if (val != this._internal_fashion)
@@ -98,19 +116,27 @@ export class AalamTabs extends LitElement {
     <slot name='acc'></slot>
 </div>`
         } else {
-            let fashionColumn:any = {
-                display: 'grid',
-                'grid-template-columns': `
-                    ${this._column_size.title} ${this._column_size.body}`
+            let title_style_map:{[key:string]:string} = {};
+            let body_style_map:{[key:string]:string|number} = {'display': 'block'};
+            if (this._internal_fashion == 'column') {
+                title_style_map = {
+                    display: 'grid',
+                    'grid-template-columns': `
+                        ${this._column_size.title} ${this._column_size.body}`
+                }
+            } else if (this._internal_fashion == 'overlay') {
+                body_style_map = {position: 'absolute', display: 'none', top: 0, left: 0};
             }
+            let body_click_fn = (this._internal_fashion == 'overlay'?this._bodyClicked:null)
+            let flex_dir = (this._internal_fashion == 'row'?'row':'column')
             return html`
-<div style=${this._internal_fashion=='column'?styleMap(fashionColumn):''}>
-    <div part="tab-title-holder tab-title-holder-${this._internal_fashion}">
-        <div part="tab-title tab-title-${this._internal_fashion}" style="display:flex;flex-direction:${this._internal_fashion}">
+<div style=${styleMap(title_style_map)}>
+    <div part="tab-title-holder tab-title-holder-${this._internal_fashion}" id="tab-title-holder">
+        <div part="tab-title tab-title-${this._internal_fashion}" style="display:flex;flex-direction:${flex_dir}">
             <slot name="tab-title" @click=${this._titleClicked}></slot>
         </div>
     </div>
-    <div @transitionend=${this._transitionEndEvent}>
+    <div style=${styleMap(body_style_map)} @transitionend=${this._transitionEndEvent} part="tab-body-holder" @click=${body_click_fn}>
         <slot name="tab-body"></slot>
     </div>
 </div>`
@@ -124,18 +150,29 @@ export class AalamTabs extends LitElement {
         window.addEventListener("resize", this._resizeListener);
         this._observer = new MutationObserver(this._mutation_listener);
         this._observer.observe(this, { attributes:true, childList: true, subtree : true});
-
     }
     override disconnectedCallback() {
         window.removeEventListener("resize", this._resizeListener);
         if (this._observer) {
             this._observer.disconnect();
         }
+        if (this._cleanup) {
+            this._cleanup();
+            this._cleanup = null;
+        }
     }
     override firstUpdated() {
         this._openActive();
-        if (this._cur_ix == null)
+        if (this._cur_ix == null && this._internal_fashion != 'overlay')
             this.show(0);
+    }
+    override updated() {
+        if (this._internal_fashion == 'overlay' && !this._cleanup)
+            this._setupOverlay();
+        else if (this._internal_fashion != 'overlay' && this._cleanup) {
+            this._cleanup();
+            this._cleanup = null;
+        }
     }
     private _queryTitles(fashion?:string) {
         fashion = fashion || this._internal_fashion;
@@ -161,6 +198,37 @@ export class AalamTabs extends LitElement {
         if (this._internal_fashion == 'accordion' && num_added_nodes > 0)
             this._showAccordion();
     }
+    private _setupOverlay() {
+        if (this._cleanup)
+            this._cleanup();
+
+        const ref_el = (this.olboundsel?(document.querySelector(`${this.olboundsel}`) as HTMLElement):null) ||
+                this._tab_title_hldr_el as HTMLElement;
+
+        if (!ref_el) return;
+
+        let ref_bounds = ref_el.getBoundingClientRect();
+        this._cleanup = autoUpdate(ref_el, this._tab_body_hldr_el, () => {
+            computePosition(ref_el, this._tab_body_hldr_el, {
+                placement: 'bottom-start',
+                middleware: [
+                offset(({rects}) => {
+                  return -rects.reference.height;
+                })
+                ],
+            }).then((data) => {
+                let {x, y} = data;
+                Object.assign(this._tab_body_hldr_el.style, {
+                    left: `${x}px`,
+                    top: `${y}px`,
+                    width: `${ref_bounds.width}px`,
+                    height: `${ref_bounds.height}px`,
+                    overflow: "auto"
+                });
+            });
+        });
+
+    }
     private _slotChangedEvent(event:Event) {
         if (!event.target)
             return;
@@ -168,7 +236,7 @@ export class AalamTabs extends LitElement {
         let name = (event.target as HTMLSlotElement)?.name;
         if (name == 'tab-body' || name == 'tab-title') {
             for(let i of nodes) {
-                if (i != (nodes[this._cur_ix])) {
+                if (this._cur_ix == null || i != (nodes[<number>this._cur_ix])) {
                     if (name == 'tab-body')
                         (i as HTMLElement).style.display = 'none';
                     i.classList.remove(this.activecls);
@@ -176,7 +244,7 @@ export class AalamTabs extends LitElement {
             }
         } else if (name == 'acc') {
             for(let i of nodes) {
-                if (i != (nodes[this._cur_ix])) {
+                if (this._cur_ix != null && i != (nodes[<number>this._cur_ix])) {
                     if (i.children.length > 1) {
                         (i.children[1] as HTMLElement).style.display = 'none';
                         i.children[1].classList.remove(this.activecls);
@@ -189,6 +257,8 @@ export class AalamTabs extends LitElement {
         }
     }
     private _openActive() {
+        if (this._internal_fashion == 'overlay')
+            return;
         let val = this._queryTitles();
         for(let i = 0;i < val.length; i++) {
             if (val[i].classList.contains(this.activecls)) {
@@ -258,11 +328,29 @@ export class AalamTabs extends LitElement {
             }
         }
     }
+    private _bodyClicked(e:Event) {
+        let el = e.target as HTMLElement;
+        let _sel = el.matches(this.olclosesel)?el:el.closest(this.olclosesel);
+        if (!_sel || el.closest('aalam-tabs') != this)
+            return;
+        let title = this._queryTitles();
+        let body = this._queryBody();
+        if (this._cur_ix != null)
+            this._hideBody(this._cur_ix, <HTMLElement>body[this._cur_ix], <HTMLElement>title[this._cur_ix], true);
+        this._cur_ix = null;
+    }
     private _transitionEndEvent(e:Event) {
         let el = e.target as HTMLElement;
-        if (el.closest('aalam-tabs') != this || el.slot != 'tab-body')
+
+        if ((el.closest('aalam-tabs') != this || el.slot != 'tab-body') && !el.part.contains('tab-body-holder'))
             return;
-        if (!el.classList.contains(this.activecls)) {
+
+        if ((el.slot == 'tab-body' && !el.classList.contains(this.activecls)) ||
+            (el.part.contains('tab-body-holder') && this._cur_ix == null)) {
+            if (this._transient_el) {
+                this._transient_el.style.display = 'none';
+                this._transient_el = null;
+            }
             el.style.display = 'none';
         }
         el.style.transition = '';
@@ -277,42 +365,72 @@ export class AalamTabs extends LitElement {
         if (this._animation_styles[val])
             return trans_defs[this._animation_styles[val]][val][prop];
     }
-    private _show(ix:number, prev_ix:number) {
+    private _hideBody(ix:number|null, bpix:HTMLElement, tpix:HTMLElement, is_overlay:boolean, rect?:DOMRect) {
+        bpix.classList.remove(this.activecls);
+        tpix.classList.remove(this.activecls);
+        if (!rect)
+            rect = this.getBoundingClientRect();
+
+        if (is_overlay) {
+            this._transient_el = bpix;
+            bpix = this._tab_body_hldr_el;
+            if (this.olboundsel) {
+                let ref = <HTMLElement>document.querySelector(<string>this.olboundsel);
+                if (ref)
+                    ref.style.overflow = "auto";
+            }
+        }
+        if (this._animation_styles.close && rect.width > 0) {
+            let val = `${this._animation_styles.close == 'fade'?
+                              `opacity`:`transform`}`;
+            bpix.style.transitionProperty = val;
+            bpix.style.setProperty(
+                val, `${this._setTransition('close', 'start')}`);
+            bpix.style.transitionDuration =
+                `${this.animationDur}ms`;
+            bpix.style.transitionTimingFunction = 'ease';
+            requestAnimationFrame( () => {
+                bpix.style.setProperty(
+                    val, `${this._setTransition('close', 'end')}`);
+            });
+        } else {
+            bpix.style.display = 'none';
+            if (this._transient_el) {
+                this._transient_el.style.display = 'none';
+                this._transient_el = null;
+            }
+        }
+        this.dispatchEvent(
+            new CustomEvent("hide", {detail:{ix}}));
+    }
+    private _show(ix:number, prev_ix:number|null) {
         let title = this._queryTitles();
         let body = this._queryBody();
         /*When the element is not show, we need not wait for the transition end event*/
         let rect = this.getBoundingClientRect();
         let bix = body[ix] as HTMLElement;
         if (prev_ix != null) {
-            let bpix = body[prev_ix] as HTMLElement;
-            bpix?.classList.remove(this.activecls);
-            title[prev_ix]?.classList.remove(this.activecls);
-            if (this._animation_styles.close && rect.width > 0) {
-                let val = `${this._animation_styles.close == 'fade'?
-                                  `opacity`:`transform`}`;
-                bpix.style.transitionProperty = val;
-                bpix.style.setProperty(
-                    val, `${this._setTransition('close', 'start')}`);
-                bpix.style.transitionDuration =
-                    `${this.animationDur}ms`;
-                bpix.style.transitionTimingFunction = 'ease';
-                requestAnimationFrame( () => {
-                    bpix.style.setProperty(
-                        val, `${this._setTransition('close', 'end')}`);
-                });
-            } else
-                bpix.style.display = 'none';
-
-            this.dispatchEvent(
-                new CustomEvent("hide", {detail:{ix}}));
+            this._hideBody(prev_ix, <HTMLElement>body[prev_ix], <HTMLElement>title[prev_ix], false, rect)
         }
         title[ix]?.classList.add(this.activecls);
         bix?.classList.add(this.activecls);
+        this._cur_ix = ix;
         if (bix)
             bix.style.display = 'block';
+        if (this._internal_fashion == 'overlay') {
+            this._tab_body_hldr_el.style.display = 'block';
+            if (this.olboundsel) {
+                let ref = <HTMLElement>document.querySelector(<string>this.olboundsel);
+                if (ref)
+                    ref.style.overflow = "hidden";
+            }
+        }
         if (this._animation_styles.open && rect.width > 0) {
             let val = `${this._animation_styles.open == 'fade'?
                              `opacity`:`transform`}`;
+            if (this._internal_fashion == 'overlay') {
+                bix = this._tab_body_hldr_el;
+            }
             bix.style.transitionProperty = val;
             bix.style.setProperty(
                 val, `${this._setTransition('open', 'start')}`);
@@ -330,7 +448,6 @@ export class AalamTabs extends LitElement {
         if (this._cur_ix == ix && this._cur_ix != null)
             return
         this._show(ix, this._cur_ix);
-        this._cur_ix = ix;
         this.dispatchEvent(
             new CustomEvent("change", {detail:{ix}}));
     }
