@@ -702,6 +702,17 @@ ${cal.html(cls_map)}
         let st_ref = +yr - (+yr % YEARS_SPAN)
         this._update_scroll = `y${st_ref}`;
     }
+    private _setupCSSVar(varname:string, dt:Date | null) {
+        if (this.type == 'm') {
+            this.nav_el?.style.setProperty(
+                varname,
+                "" + (dt?this._monthGap(dt.getMonth() + 1,
+                                        dt.getFullYear()):(varname == '--gpfrom'?9999*12:0)));
+        } else if (this.type == 'd' || this.type == 't') {
+            let d_gap = ModelCalendar.gap(dt);
+            this.nav_el?.style.setProperty(varname, "" + d_gap);
+        }
+    }
     private _setDate(dt1:Date|null, dt2:Date|null) {
         if (dt1 != this.date1) {
             this.date1 = dt1;
@@ -709,15 +720,7 @@ ${cal.html(cls_map)}
                 "value", this._minputVal(this.date1, 'dt'));
             this.date1_el_tm?.setAttribute(
                 "value", this._minputVal(this.date1, 'tm'));
-            if (this.type == 'm') {
-                this.nav_el.style.setProperty(
-                    "--gpfrom",
-                    "" + (this.date1?this._monthGap(this.date1.getMonth() + 1,
-                                                    this.date1.getFullYear()):9999*12));
-            } else if (this.type == 'd' || this.type == 't') {
-                let d1_gap = ModelCalendar.gap(this.date1);
-                this.nav_el?.style.setProperty("--gpfrom", "" + d1_gap);
-            }
+            this._setupCSSVar('--gpfrom', this.date1);
         }
         if (dt2 != this.date2) {
             this.date2 = dt2;
@@ -725,14 +728,7 @@ ${cal.html(cls_map)}
                 "value", this._minputVal(this.date2, 'dt'));
             this.date2_el_tm?.setAttribute(
                 "value", this._minputVal(this.date2, 'tm'));
-            if (this.type == 'm')
-                this.nav_el.style.setProperty(
-                    "--gpto", "" + (this.date2?this._monthGap(
-                        this.date2.getMonth() + 1, this.date2.getFullYear()):0));
-            else if (this.type == 't' || this.type == 'd') {
-                let d2_gap = ModelCalendar.gap(this.date2);
-                this.nav_el.style.setProperty("--gpto", "" + (d2_gap || 0));
-            }
+            this._setupCSSVar('--gpto', this.date2);
         }
         let detail: {[key:string]:any};
         let fmt = this.format;
@@ -1618,8 +1614,14 @@ aalam-minput[order="yr"] {width:4em;}`
 </div>`
     }
     override firstUpdated() {
-        this.nav_el.style.setProperty('--gpfrom', "0");
-        this.nav_el.style.setProperty('--gpto', "0");
+        if (!this.date1)
+            this.nav_el.style.setProperty('--gpfrom', "0");
+        else
+            this._setupCSSVar('--gpfrom', this.date1);
+        if (!this.date2)
+            this.nav_el.style.setProperty('--gpto', "0");
+        else
+            this._setupCSSVar('--gpto', this.date2);
         this.nav_el.style.setProperty('--gphovto', "0");
 
         if (!this._intr_observer)  {
