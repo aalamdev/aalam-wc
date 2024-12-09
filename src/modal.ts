@@ -306,7 +306,8 @@ ${this._animateStyles()}
     private _wrapperClickedEvent(event:Event) {
         event.stopPropagation();
         if(this.closesel && (
-            event.target as HTMLElement).matches(this.closesel))
+            event.target as HTMLElement).matches(this.closesel) ||
+            ((event.target as HTMLElement).closest(this.closesel)?.closest('aalam-modal') == this))
             this.hide();
         return;
     }
