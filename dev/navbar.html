@@ -1,0 +1,81 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <style>
+            .parentDiv {margin-left:10px;border:2px solid blue; margin-bottom:20px}
+            .title-tab {padding:4px;text-decoration:underline}
+            button.title-tab {text-decoration:none}
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>NavBar </title>
+        <script type="module" src="../src/navbar.ts"></script>
+        <script type="module" src="../src/dropdown.ts"></script>
+        <script type="module" src="../src/accordion.ts"></script>
+    </head>
+
+    <body>
+        <aalam-navbar cutoffwidth="1200" mode="overlay" >
+            <template data-type='back'>
+                <svg  height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+            </template>
+            <template data-type="close">
+                <svg><path d=""/></svg>
+            </template>
+            <template data-type="menu">
+                <svg><path d=""/></svg>
+            </template>
+         
+            <nav class="aalam-navbar">
+                <a attr="nm:back;pos:left;">
+                    <img src="back.png" alt="menu" style="width: 40%; height: auto; margin: auto;">
+                </a>
+                <a attr="nm:close;pos:left;">
+                    <img src="close.png" alt="menu" style="width: 35%; height: auto; margin: auto;">
+                </a>
+                <a  attr="nm:home">Home</a>
+                <a attr="nm:menu;pos:right;" >
+                    <img src="menu.png" alt="menu" style="width: 15%; height: auto; margin: auto;">
+                </a>                      
+                <a attr="nm:abt">About us</a>
+                <aalam-dropdown mode="hover" pos="right">
+                    <a slot="dd-toggler" attr="nm:dd1;mode:overlay">DD 1</a>
+                    <div slot="dd-body">
+                        <ol>
+                            <li><a attr="nm:dd1o1;pnt:dd1;">DD1 Opt 1</a></li>
+                            <li>
+                                <aalam-dropdown mode="hover" pos="right">
+                                    <a slot="dd-toggler" attr="nm:dd1o2;pnt:dd1;">DD1 -> DD2</a>
+                                    <div slot="dd-body">
+                                        <a attr="nm:dd1ddo1;pnt:dd1o2">DD1 => DD2 -> O1</a>
+                                        <a attr="nm:dd1ddo2;pnt:dd1o2">DD1 => DD2 -> O2</a>
+                                        <a attr="nm:dd1ddo3;pnt:dd1o2">DD1 => DD2 -> O3</a>
+                                    </div>
+                                </aalam-dropdown>
+                            </li>
+                            <li>
+                                <aalam-dropdown mode="hover" pos="right">
+                                    <a slot="dd-toggler" attr="nm:dd1o3;pnt:dd1">DD1 -> DD3</a>
+                                    <div slot="dd-body">
+                                        <a attr="nm:dd2ddo1;pnt:dd1o3">DD1 => DD3 -> O1</a>
+                                        <a attr="nm:dd2ddo2;pnt:dd1o3">DD1 => DD3 -> O2</a>
+                                        <a attr="nm:dd2ddo3;pnt:dd1o3">DD1 => DD3 -> O3</a>
+                                    </div>
+                                </aalam-dropdown>
+                            </li>
+                        </ol>
+                    </div>
+                </aalam-dropdown>
+                <aalam-dropdown mode="hover" pos="right">
+                    <a slot="dd-toggler" attr="nm:dd2;pos:right">DD 2</a>
+                    <div slot="dd-body">
+                        <ul>
+                            <li><a attr="nm:dd2o1;pnt:dd2">DD1 Opt 1</a></li>
+                        </ul>
+                    </div>
+                </aalam-dropdown>
+            </nav>
+        </aalam-navbar>
+    </body>
+    </html>
