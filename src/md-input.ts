@@ -27,6 +27,9 @@ export class AalamMdInput extends LitElement {
     @property({type:Number, attribute:true})
     charcount = '';
 
+    @property({type:String, attribute:true})
+    value = '';
+
     @state()
     private _num_leading_icons:number;
 
@@ -66,10 +69,18 @@ export class AalamMdInput extends LitElement {
             this._disableInput();
         else if(name == 'charcount')
             this._charCounter();
-        else if(name == 'mode')
+        else if(name == 'mode') {
             if(this.mode != 'outline' && this.mode != 'filled' && this.mode != 'normal') {
                 this.mode = 'filled';
             }
+        } else if (name == 'value') {
+            if (this._input_slot.length == 0) {
+                if (this._input_box)
+                    this._input_box.value = new_val;
+            }
+            if (new_val?.length)
+                this.__updateFocus();
+        }
     }
     override connectedCallback() {
         super.connectedCallback();
@@ -94,7 +105,7 @@ ${when(this.mode == 'normal', () => html`<slot name="normal-label">
     <div id="_input-container" class="mode-${this.mode}">
         ${when(this.prefix, () =>
             html`<span id="_prefix">${this.prefix}</span>`)}
-        <span id="_input-span" @input=${this._charCounter}>
+        <span id="_input-span" @change=${this._charCounter}>
             <slot name="input">
                 <input id="_input-box" type="text"
                     @focus=${this._focusEvent}
@@ -103,7 +114,7 @@ ${when(this.mode == 'normal', () => html`<slot name="normal-label">
         </span>
         ${when(this.suffix, () =>
             html`<span id="_suffix">${this.suffix}</span>`)}
-        ${when(this.mode != 'normal', () => html`<span id="_label">${this.label}</span>`)}
+        ${when(this.mode != 'normal', () => html`<span id="_label" part="label">${this.label}</span>`)}
     </div>
     <div class="${(this._num_trailing_icons || (!this._helper_text_slotted && this.charcount))?'':'hide'}">
         <slot name="trailing-icon"></slot>
@@ -159,8 +170,8 @@ var(--attrcolor);}
 #_container.mode-outline, .mode-outline.focusout {border:solid 2px grey}
 #_container.mode-outline.focused #_label {
     padding:4px;background:white;
-    transform:translateY(-130%)
-        translateX(calc(var(--tx)*-1px)) scale(0.75)}`
+    transform-origin:left;
+    transform:translateY(-130%) translateX(calc(var(--tx, 0)*-1px)) scale(0.75)}`
     }
     override firstUpdated() {
         if(this._input_slot[0])
@@ -203,11 +214,14 @@ var(--attrcolor);}
             return;
         this._input_element.focus();
     }
+    private __updateFocus() {
+        this._container.classList.add('focused');
+        this._container.classList.remove('focusout');
+    }
     private _focusEvent() {
         if(this.disabled)
             return
-        this._container.classList.add('focused');
-        this._container.classList.remove('focusout');
+        this.__updateFocus();
     }
     private _blurEvent() {
         if(!this._input_element.value)
