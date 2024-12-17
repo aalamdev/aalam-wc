@@ -145,8 +145,7 @@ export class AalamDropdown extends LitElement {
         return css`
 :host {position: relative;display: inline-block;}
 ::slotted([slot="dd-toggler"]) {cursor: pointer;}
-.dd-container {display:none;border: 1px solid #ddd;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.dd-container {display:none;
     position: absolute;z-index:var(--z-index);width: max-content;}
 :host::before {
     content: " ";

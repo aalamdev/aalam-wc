@@ -131,7 +131,7 @@ export class AalamTabs extends LitElement {
             let body_click_fn = (this._internal_fashion == 'overlay'?this._bodyClicked:null)
             let flex_dir = (this._internal_fashion == 'row'?'row':'column')
             return html`
-<div style=${styleMap(title_style_map)}>
+<div style=${styleMap(title_style_map)} part="tab-root">
     <div part="tab-title-holder tab-title-holder-${this._internal_fashion}" id="tab-title-holder">
         <div part="tab-title tab-title-${this._internal_fashion}" style="display:flex;flex-direction:${flex_dir}">
             <slot name="tab-title" @click=${this._titleClicked}></slot>
