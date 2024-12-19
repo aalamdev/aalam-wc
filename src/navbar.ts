@@ -1,4 +1,4 @@
-import { LitElement,  } from "lit";
+import { LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import "./accordion";
 
@@ -6,22 +6,19 @@ interface NodeType {
   elementName: string;
   children: NodeType[];
 }
-
 @customElement("aalam-navbar")
 export class AalamNavbar extends LitElement {
   @property({ type: String }) attr = "";
   @property({ type: String }) mode = "saccordion";
   @property({ type: Number }) cutoffwidth = 0;
   @property({ type: String }) togglesel = "nav-menu";
-  @property({ type: String }) pos = "left";
+  @property({ type: String }) pos = "right";
   @property({ type: String }) canvascls = "canvas-body";
-  @property({ type: Number }) padding = 10;
 
-  
   noParentAnchors: NodeType[] = [];
   noParentContianer: HTMLAnchorElement[] = [];
   parentContainer: { [key: string]: HTMLAnchorElement[] } = {};
-  anchorElements: NodeListOf<HTMLAnchorElement>;
+  anchorElements: HTMLAnchorElement[];
   menu: HTMLElement;
   menuElement: HTMLAnchorElement;
   closeElement: HTMLAnchorElement;
@@ -29,18 +26,28 @@ export class AalamNavbar extends LitElement {
   currentPath: HTMLAnchorElement[] = [];
   change: boolean = false;
   overlayContainer: { [key: string]: HTMLElement[] } = {};
-  
-  
+  activeClickOutsideListener: ((event: MouseEvent) => void) | null = null;
+  navbar: HTMLElement;
+
+  override createRenderRoot() {
+    return this;
+  }
   override firstUpdated() {
-    this.anchorElements = this.querySelectorAll(
-      "a"
+    this.navbar = document.querySelector("aalam-navbar") as HTMLElement;
+
+    const original = this.querySelectorAll(
+      this.attr ? `[${this.attr}]` : "a"
     ) as NodeListOf<HTMLAnchorElement>;
+    this.anchorElements = Array.from(original).map(
+      (anchor) => anchor.cloneNode(true) as HTMLAnchorElement
+    );
+
     const lengthOfInput = this.anchorElements.length;
 
     let i = 0;
     while (i < lengthOfInput) {
       const anchor = this.anchorElements[i];
-      const attrValue = anchor.getAttribute("attr") || "";
+      const attrValue = anchor.getAttribute(this.attr) || "";
       const attributes = this.parseAttributes(attrValue);
       const attrName = attributes.nm;
 
@@ -54,62 +61,56 @@ export class AalamNavbar extends LitElement {
         }
         this.parentContainer[attributes.pnt].push(anchor);
       }
-      if (attributes.nm == "menu") this.menuElement = anchor;
-      else if (attributes.nm == "back") this.backElement = anchor;
-      else if (attributes.nm == "close") this.closeElement = anchor;
       i++;
     }
-
-    this.parentContainer["menu"] = this.noParentContianer;
+    let len =this.navbar.offsetWidth;
+    const toggle = this.querySelector(this.togglesel);
+    if (toggle) {
+      const originalMenu = toggle as HTMLAnchorElement;
+      len-=originalMenu.offsetWidth;
+      this.menuElement = originalMenu.cloneNode(true) as HTMLAnchorElement;
+      originalMenu.style.display = "none";
+      document.body.appendChild(this.menuElement);
+    }
 
     this.menuElement.style.display = "block";
     this.menuElement.style.width = "100%";
     this.menuElement.style.background = "blue";
-    document.body.appendChild(this.menuElement);
-    //console.log(this.closeElement);
-    if (this.cutoffwidth === 0) {
-      this.cutoffwidth = this.getNavbarLength();
-    }
-    this.backElement.id = "back";
-    this.closeElement.id = "close";
-
 
     let temps = document.getElementsByTagName("template");
 
-Array.from(temps).forEach(template => {
-  const newElementIMG = template.content.querySelector("img");
-  const newElementSVG = template.content.querySelector("svg");
-  if (template.getAttribute('data-type') === "back") {
-    const imgElement = this.backElement.querySelector('img');
-    if (imgElement) {
-      if (newElementIMG) {
-        imgElement.replaceWith(newElementIMG.cloneNode(true) as HTMLImageElement);
-      } else if (newElementSVG) {
-        imgElement.replaceWith(newElementSVG.cloneNode(true) as SVGElement);
+    Array.from(temps).forEach((template) => {
+      if (template.getAttribute("data-type") === "back") {
+        const newContent = template.content.cloneNode(true) as DocumentFragment;
+        this.backElement = document.createElement("a");
+        this.backElement.appendChild(newContent.cloneNode(true));
+      } else if (template.getAttribute("data-type") === "close") {
+        const newContent = template.content.cloneNode(true) as DocumentFragment;
+        this.closeElement = document.createElement("a");
+        this.closeElement.appendChild(newContent.cloneNode(true));
       }
-    } 
-  }
-  
-});
+    });
 
-    
-
-    
+    this.backElement.id = "back";
+    this.closeElement.id = "close";
+    this.parentContainer["menu"] = this.noParentContianer;
+    if (this.cutoffwidth === 0) {
+      this.cutoffwidth = len;
+    }
 
     window.addEventListener("resize", this.updateNavbar.bind(this));
     this.updateNavbar();
 
-    
-
     this.menuElement.onclick = this.handleMenu.bind(this);
     this.closeElement.onclick = this.handleClose.bind(this);
 
+    this.menu = document.createElement("div");
     if (this.mode == "overlay") {
-      this.menu = this.overlayNode();
+      this.menu.appendChild(this.overlayNode());
     } else if (this.mode == "saccordion") {
-      this.menu = this.saccordionCreator();
+      this.menu.appendChild(this.accordionCreator());
     } else {
-      this.menu = this.maccordionCreator();
+      this.menu.appendChild(this.accordionCreator("menu", false));
     }
     this.menu.style.display = "none";
     document.body.appendChild(this.menu);
@@ -121,6 +122,7 @@ Array.from(temps).forEach(template => {
           if (this.currentPath.length > 0) {
             const previousAnchor =
               this.currentPath[this.currentPath.length - 1];
+
             const attributes = this.parseAttributes(
               previousAnchor.getAttribute("attr") || ""
             );
@@ -141,21 +143,21 @@ Array.from(temps).forEach(template => {
     ele.forEach((element) => {
       (element as HTMLAnchorElement).onclick = () => this.handleBack();
     });
-   // console.log(this.backElement);
-    
-    
 
-
-
+    this.menu.classList.add(this.canvascls);
   }
 
   overlayNode(parentName: string = "menu"): HTMLElement {
-    // console.log('hi');
     const dive = document.createElement("div");
+    if (parentName == "menu") {
+      const div = document.createElement("div");
+      div.appendChild(this.closeElement);
+      dive.appendChild(div);
+    }
     this.parentContainer[parentName].forEach((child) => {
       const div = document.createElement("div");
       div.appendChild(child);
-      dive.appendChild(div)
+      dive.appendChild(div);
       const attributes = this.parseAttributes(child.getAttribute("attr") || "");
       this.overlayCreator(attributes.nm);
     });
@@ -165,15 +167,16 @@ Array.from(temps).forEach(template => {
 
   overlayCreator(anchorName: string): void {
     const children = this.parentContainer[anchorName];
-    //console.log(children);
 
     const closeCloned = this.closeElement.cloneNode(true) as HTMLAnchorElement;
     closeCloned.style.display = "block";
 
     const backCloned = this.backElement.cloneNode(true) as HTMLAnchorElement;
-    if(anchorName=='menu')backCloned.style.display = "none";
-    else backCloned.style.display = "block";
-
+    if (anchorName == "menu") backCloned.style.display = "none";
+    else {
+      backCloned.style.display = "block";
+    }
+    const anchorE = this.getAnchorElement(anchorName);
     const overlay = document.createElement("div");
     if (children) {
       overlay.id = `overlay-dropdown-${anchorName}`;
@@ -182,76 +185,100 @@ Array.from(temps).forEach(template => {
       overlay.style.left = "0";
       overlay.style.width = "100%";
       overlay.style.height = "100%";
-      overlay.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+      overlay.style.backgroundColor = "rgba(0, 0, 0, 1)";
       overlay.style.zIndex = "1000";
       overlay.style.display = "flex";
       overlay.style.flexDirection = "column";
-      overlay.style.alignItems = "flex-start";
-      overlay.style.padding = "10px";
 
-      const parentName = document.createElement("span");
-      parentName.textContent = anchorName;
-      parentName.style.color = "white";
+      const parentName = document.createElement("h3");
+      if (anchorE) parentName.textContent = anchorE.innerHTML;
       parentName.style.marginRight = "10px";
 
-      const dropdown = document.createElement("div");
-      dropdown.style.backgroundColor = "white";
-      dropdown.style.padding = "10px";
-      dropdown.style.border = "1px solid #ccc";
-      dropdown.style.display = "flex";
-      dropdown.style.flexDirection = "column";
-      dropdown.style.width = "100%";
+      const header = document.createElement("div");
+      header.style.padding = "10px";
+      header.style.color = "#ffffff";
+      header.style.display = "flex";
+      header.style.width = "100%";
 
-      dropdown.appendChild(closeCloned);
-      dropdown.appendChild(backCloned);
-      dropdown.appendChild(parentName);
+      header.appendChild(backCloned);
+
+      header.appendChild(parentName);
+      header.appendChild(closeCloned);
+      overlay.appendChild(header);
+
+      const dbox = document.createElement("div");
 
       const anchor = this.getAnchorElement(anchorName);
       if (anchor) {
         const attributes = this.parseAttributes(
           anchor.getAttribute("attr") || ""
         );
-        //console.log(attributes);
         if (attributes.mode == "overlay") {
-          //console.log('hi');
-          dropdown.appendChild(this.overlayNode(attributes.nm));
+          dbox.appendChild(this.overlayNode(attributes.nm));
         } else if (attributes.mode == "maccordion") {
-          dropdown.appendChild(this.maccordionCreator(attributes.nm));
+          dbox.appendChild(this.accordionCreator(attributes.nm, false));
         } else {
-          dropdown.appendChild(this.saccordionCreator(attributes.nm));
+          dbox.appendChild(this.accordionCreator(attributes.nm));
         }
       }
-
-      overlay.appendChild(dropdown);
+      overlay.appendChild(dbox);
       overlay.style.display = "none";
-      this.overlayContainer[anchorName] = [overlay, dropdown];
-      document.body.appendChild(overlay);
+      this.overlayContainer[anchorName] = [overlay];
+      if (this.menu) this.menu.appendChild(overlay);
 
-      const handleClickOutside = (event: MouseEvent) => {
-        if (!dropdown.contains(event.target as Node)) {
-          const len = this.currentPath.length;
-          if (len) {
-            const anchor = this.currentPath[len - 1];
-            const attributes = this.parseAttributes(
-              anchor.getAttribute("attr") || ""
-            );
-            this.overlayContainer[attributes.nm][0].style.display = "none";
-          }
-          this.currentPath = [];
+      const clickOutsideListener = (event: MouseEvent) => {
+        if (dbox.contains(event.target as Node)) {
+          document.removeEventListener("click", clickOutsideListener);
+        } else if (!overlay.contains(event.target as Node)) {
+          this.handleClose();
+          document.removeEventListener("click", clickOutsideListener);
         }
       };
 
-      overlay.addEventListener("click", handleClickOutside);
+      if (anchorE) {
+        anchorE.addEventListener("click", (event) => {
+          event.stopPropagation();
+
+          if (this.activeClickOutsideListener) {
+            document.removeEventListener(
+              "click",
+              this.activeClickOutsideListener
+            );
+          }
+
+          document.addEventListener("click", clickOutsideListener);
+          this.activeClickOutsideListener = clickOutsideListener;
+        });
+      }
+
+      closeCloned.addEventListener("click", () => {
+        this.handleClose();
+        if (this.activeClickOutsideListener) {
+          document.removeEventListener(
+            "click",
+            this.activeClickOutsideListener
+          );
+        }
+        this.activeClickOutsideListener = null;
+      });
     }
   }
 
-  saccordionCreator(parentName: string = "menu"): HTMLElement {
+  accordionCreator(
+    parentName: string = "menu",
+    noMultiple: boolean = true
+  ): HTMLElement {
     const saccordion = document.createElement("aalam-accordion");
-    saccordion.nomultiple = true;
-
-    //const parent = this.getAnchorElement(parentName);
+    saccordion.nomultiple = noMultiple;
     const children = this.parentContainer[parentName];
-
+    if (parentName == "menu") {
+      const div = document.createElement("div");
+      const divp = document.createElement("div");
+      divp.className = "acc-title";
+      divp.appendChild(this.closeElement);
+      div.appendChild(divp);
+      saccordion.appendChild(div);
+    }
     if (children)
       children.forEach((child) => {
         const div = document.createElement("div");
@@ -271,11 +298,11 @@ Array.from(temps).forEach(template => {
 
         if (this.parentContainer[childName]) {
           if (mod == "saccordion") {
-            divc.appendChild(this.saccordionCreator(childName));
+            divc.appendChild(this.accordionCreator(childName));
           } else if (mod == "overlay") {
             divc.appendChild(this.overlayNode(childName));
           } else {
-            divc.appendChild(this.maccordionCreator(childName));
+            divc.appendChild(this.accordionCreator(childName, false));
           }
         }
 
@@ -284,46 +311,6 @@ Array.from(temps).forEach(template => {
         saccordion.appendChild(div);
       });
     return saccordion;
-  }
-
-  maccordionCreator(parentName: string = "menu"): HTMLElement {
-    const maccordion = document.createElement("aalam-accordion");
-    //maccordion.nomultiple = false;
-
-    //const parent = this.getAnchorElement(parentName);
-    const children = this.parentContainer[parentName];
-
-    if (children)
-      children.forEach((child) => {
-        const div = document.createElement("div");
-        const attributes = this.parseAttributes(
-          child.getAttribute("attr") || ""
-        );
-        const mod = attributes.mode || "saccordion";
-        const childName = attributes.nm;
-
-        const divp = document.createElement("div");
-        const divc = document.createElement("div");
-
-        divp.className = "acc-title";
-        divc.className = "acc-body";
-
-        divp.appendChild(child);
-        if (this.parentContainer[childName]) {
-          if (mod == "saccordion") {
-            divc.appendChild(this.saccordionCreator(childName));
-          } else if (mod == "overlay") {
-            divc.appendChild(this.overlayNode(childName));
-          } else {
-            divc.appendChild(this.maccordionCreator(childName));
-          }
-        }
-
-        div.appendChild(divp);
-        div.appendChild(divc);
-        maccordion.appendChild(div);
-      });
-    return maccordion;
   }
 
   parseAttributes(attrString: string | null): { [key: string]: string } {
@@ -341,32 +328,25 @@ Array.from(temps).forEach(template => {
 
     return attrObject;
   }
-
-  getNavbarLength(): number {
-    let len = 0;
-    this.noParentAnchors.forEach((anchor) => {
-      const anchorElement = this.getAnchorElement(anchor.elementName);
-      if (anchorElement) {
-        len += anchorElement.offsetWidth;
-      }
-    });
-    return len;
-  }
+  
   updateNavbar() {
     if (window.innerWidth < this.cutoffwidth) {
       if (!this.change) {
-        this.menuElement.style.display = "block";
-        this.change = true;
+        this.navbar.style.display = "none";
       }
-      
-    } else {
+
+      this.menuElement.style.display = "block";
+      this.change = true;
       this.anchorElements.forEach((anchor) => {
-        anchor.style.display = "none";
-        if (this.change) {
-          window.location.reload();
-          this.change = false;
-        }
+        anchor.style.display = "block";
       });
+    } else {
+      if (this.change) {
+        this.handleClose();
+        this.change = false;
+      }
+      this.menuElement.style.display = "none";
+      this.navbar.style.display = "block";
     }
   }
 
@@ -387,11 +367,12 @@ Array.from(temps).forEach(template => {
     else this.menu.style.display = "block";
   }
   handleClose() {
-    console.log("close");
-    //const clickedAnchor = event.currentTarget as HTMLAnchorElement;
     this.menu.style.display = "none";
     this.menuElement.style.display = "block";
     const len = this.currentPath.length;
+    if (this.activeClickOutsideListener) {
+      document.removeEventListener("click", this.activeClickOutsideListener);
+    }
     if (len) {
       const anchor = this.currentPath[len - 1];
       const attributes = this.parseAttributes(
@@ -402,31 +383,20 @@ Array.from(temps).forEach(template => {
     this.currentPath = [];
   }
   handleBack() {
-    const currentAnchor = this.currentPath[this.currentPath.length-1];
-    const currentAnchorName = this.parseAttributes(currentAnchor.getAttribute("attr") || "").nm;
-    this.overlayContainer[currentAnchorName][0].style.display="none";
+    const currentAnchor = this.currentPath[this.currentPath.length - 1];
+    const currentAnchorName = this.parseAttributes(
+      currentAnchor.getAttribute("attr") || ""
+    ).nm;
+    this.overlayContainer[currentAnchorName][0].style.display = "none";
     this.currentPath.pop();
 
-    const cAnchor = this.currentPath[this.currentPath.length-1];
-    const cAnchorName = this.parseAttributes(cAnchor.getAttribute("attr") || "").nm;
-    this.overlayContainer[cAnchorName][0].style.display="block";
-
-
-  }
-  appendBody() {
-    const navBar = document.createElement("div");
-
-    navBar.style.justifyContent = "space-between";
-    navBar.style.width = "100%";
-
-    this.noParentAnchors.forEach((anchor) => {
-      const anchorElement = this.getAnchorElement(anchor.elementName);
-      //const dive = document.createElement("div");
-
-      if (anchorElement) navBar.appendChild(anchorElement);
-    });
-
-    document.body.appendChild(navBar);
+    const cAnchor = this.currentPath[this.currentPath.length - 1];
+    if (cAnchor) {
+      const cAnchorName = this.parseAttributes(
+        cAnchor.getAttribute("attr") || ""
+      ).nm;
+      this.overlayContainer[cAnchorName][0].style.display = "block";
+    }
   }
 }
 declare global {
