@@ -63,11 +63,10 @@ export class AalamNavbar extends LitElement {
       }
       i++;
     }
-    let len =this.navbar.offsetWidth;
+    
     const toggle = this.querySelector(this.togglesel);
     if (toggle) {
       const originalMenu = toggle as HTMLAnchorElement;
-      len-=originalMenu.offsetWidth;
       this.menuElement = originalMenu.cloneNode(true) as HTMLAnchorElement;
       originalMenu.style.display = "none";
       document.body.appendChild(this.menuElement);
@@ -95,7 +94,7 @@ export class AalamNavbar extends LitElement {
     this.closeElement.id = "close";
     this.parentContainer["menu"] = this.noParentContianer;
     if (this.cutoffwidth === 0) {
-      this.cutoffwidth = len;
+      this.cutoffwidth = this.getNavbarLength();
     }
 
     window.addEventListener("resize", this.updateNavbar.bind(this));
@@ -397,6 +396,34 @@ export class AalamNavbar extends LitElement {
       ).nm;
       this.overlayContainer[cAnchorName][0].style.display = "block";
     }
+  }
+
+  getNavbarLength(): number {
+    let len = 0;
+    const original = this.querySelectorAll(
+      this.attr ? `[${this.attr}]` : "a"
+    ) as NodeListOf<HTMLAnchorElement>;
+    const lengthOfInput = original.length;
+
+    let i = 0;
+    while (i < lengthOfInput) {
+      const anchor = original[i];
+      const attrValue = anchor.getAttribute(this.attr) || "";
+      const attributes = this.parseAttributes(attrValue);
+      const attrName = attributes.nm;
+
+      if (!attributes.pnt) {
+        this.noParentAnchors.push({ elementName: attrName, children: [] });
+        if (!(attrName === "menu"))
+        {
+          len+=anchor.offsetWidth;
+        }
+      }
+      i++;
+    }
+    console.log(len);
+
+    return len+35;
   }
 }
 declare global {
