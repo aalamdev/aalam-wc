@@ -26,7 +26,8 @@ export default defineConfig({
             'accordion': path.resolve(__dirname, 'src/accordion.ts'),
             'dtpick': path.resolve(__dirname, 'src/dtpick.ts'),
             'sgn-box': path.resolve(__dirname, 'src/suggestion-box.ts'),
-            'scroller':path.resolve(__dirname, "src/scroller.ts")
+            'scroller':path.resolve(__dirname, "src/scroller.ts"),
+            'navbar':path.resolve(__dirname, "src/navbar.ts")
           },
           output: [{
             format: 'es',
