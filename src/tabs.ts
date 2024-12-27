@@ -110,6 +110,7 @@ export class AalamTabs extends LitElement {
         }
     }
     override render() {
+
         if (this._internal_fashion == 'accordion') {
             return html`
 <div @click=${this._titleClicked}
@@ -144,6 +145,9 @@ export class AalamTabs extends LitElement {
         }
     }
     override connectedCallback() {
+
+
+
         super.connectedCallback();
         this.setAttribute('data-fashion', this._internal_fashion);
         this.renderRoot.addEventListener("slotchange", (e) => {
@@ -194,7 +198,7 @@ export class AalamTabs extends LitElement {
         fashion = fashion || this._internal_fashion;
         return this.querySelectorAll(fashion == 'accordion'?':scope > [slot=acc] > [slot=tab-body]':':scope > [slot=tab-body]');
     }
-    private __mutationListener(mutations:MutationRecord[]) {
+    private __mutationListener(mutations: MutationRecord[]) {
         let num_added_nodes = 0;
         for (let record of mutations) {
             num_added_nodes += record.addedNodes.length;
@@ -205,6 +209,20 @@ export class AalamTabs extends LitElement {
                     if (ix >= 0 && this._cur_ix != ix)
                         this.show(ix);
                 }
+            }
+            if (record.removedNodes.length > 0) {
+
+                for (let node of record.removedNodes) {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        let el = node as HTMLElement;
+                        if ((el.slot === 'tab-title' || (el.slot == 'acc')) && el.classList.contains(this.activecls)) {
+                            let curr =this._cur_ix;
+                            this._cur_ix=null;
+                            if(curr){this.show(curr-1);}
+                        }
+                    }
+                }
+                
             }
         }
         if (this._internal_fashion == 'accordion' && num_added_nodes > 0)
@@ -412,7 +430,7 @@ export class AalamTabs extends LitElement {
             return trans_defs[this._animation_styles[val]][val][prop];
     }
     private _hideBody(ix:number|null, bpix:HTMLElement, tpix:HTMLElement, is_overlay:boolean, rect?:DOMRect) {
-        bpix.classList.remove(this.activecls);
+        +bpix.classList.remove(this.activecls);
         tpix.classList.remove(this.activecls);
         if (!rect)
             rect = this.getBoundingClientRect();
@@ -501,6 +519,8 @@ export class AalamTabs extends LitElement {
         this.dispatchEvent(
             new CustomEvent("change", {detail:{ix}}));
     }
+    
+    
 }
 
 declare global {
