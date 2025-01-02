@@ -142,7 +142,7 @@ var(--attrcolor);}
 #_input-container.mode-normal {padding-top:0;padding-bottom:0;}
 #_label {
     position:absolute;top:50%;left:0;
-    transition:transform 0.2s ease;transform:translateY(-50%)}
+    transition:all 0.2s ease;transform:translateY(-50%)}
 #_prefix, #_suffix {opacity:0}
 #_input-span {flex:1;display:inline-flex;}
 #_helper-text {display:flex;padding-left:5px}
@@ -171,7 +171,8 @@ var(--attrcolor);}
 #_container.mode-outline.focused #_label {
     padding:4px;background:white;
     transform-origin:left;
-    transform:translateY(-130%) translateX(calc(var(--tx, 0)*-1px)) scale(0.75)}`
+    top:0;
+    transform:translateY(-50%) translateX(calc(var(--tx, 0)*-1px)) scale(0.75)}`
     }
     override firstUpdated() {
         if(this._input_slot[0])
