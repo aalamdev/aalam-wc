@@ -37,7 +37,7 @@ export class AalamAccordion extends LitElement {
     override connectedCallback() {
         super.connectedCallback();
         this._observer = new MutationObserver(this._mutation_listener);
-        this._observer.observe(this, { attributes:true, childList: true, subtree: true});
+        this._observer.observe(this, { childList: true, subtree: true});
 
     }
     override disconnectedCallback() {
