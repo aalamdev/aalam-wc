@@ -207,20 +207,6 @@
                     accordion.removeAttribute("nomultiple");
                 }
             });
-            accordion.addEventListener("contextmenu", function(event) {
-                console.log("Rightclick event received");
-                let el = event.target.closest('.acc-title');
-                if (el == null) return;
-
-                el = el.parentElement;
-                event.stopPropagation();
-                event.preventDefault();
-
-                if (el.classList.contains('ac'))
-                    el.classList.remove('ac');
-                else
-                    el.classList.add('ac');
-            })
         </script>
     </body>
 </html>

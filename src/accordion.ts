@@ -31,19 +31,10 @@ export class AalamAccordion extends LitElement {
     private items!: Element[];
 
     private processedItems = new Set<HTMLElement>();
-    private _mutation_listener = this.__mutationListener.bind(this);
-    private _observer:MutationObserver;
 
     override connectedCallback() {
         super.connectedCallback();
-        this._observer = new MutationObserver(this._mutation_listener);
-        this._observer.observe(this, { childList: true, subtree: true});
 
-    }
-    override disconnectedCallback() {
-        if (this._observer) {
-            this._observer.disconnect();
-        }
     }
     override render() {
         return html`<slot @slotchange=${this.handleSlotChange} @transitionend=${this._handleTransitionEnd} ></slot>`;
@@ -73,18 +64,6 @@ export class AalamAccordion extends LitElement {
             }
         } else if ( name === "nocloseall" && this.nocloseall && this.openItems.length === 0 && this.items.length > 0 ) {
             this._openItem(this.items[0], 0);
-        }
-    }
-    private __mutationListener(mutations:MutationRecord[]) {
-        for (let record of mutations) {
-            if (record.attributeName == 'class' && record.target) {
-                if (record.target.parentElement == this) {
-                    let ix = this.items.indexOf(<Element>record.target);
-                    if (ix < 0)
-                        continue;
-                    this._toggle(ix, !(<Element>record.target).classList.contains(this.activecls));
-                }
-            }
         }
     }
     private handleSlotChange(e: Event) {
