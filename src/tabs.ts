@@ -132,7 +132,7 @@ export class AalamTabs extends LitElement {
             let body_click_fn = (this._internal_fashion == 'overlay'?this._bodyClicked:null)
             let flex_dir = (this._internal_fashion == 'row'?'row':'column')
             return html`
-<div style=${styleMap(title_style_map)}>
+<div style=${styleMap(title_style_map)} part="tab-root">
     <div part="tab-title-holder tab-title-holder-${this._internal_fashion}" id="tab-title-holder">
         <div part="tab-title tab-title-${this._internal_fashion}" style="display:flex;flex-direction:${flex_dir}">
             <slot name="tab-title" @click=${this._titleClicked}></slot>
@@ -145,9 +145,6 @@ export class AalamTabs extends LitElement {
         }
     }
     override connectedCallback() {
-
-
-
         super.connectedCallback();
         this.setAttribute('data-fashion', this._internal_fashion);
         this.renderRoot.addEventListener("slotchange", (e) => {
@@ -211,18 +208,20 @@ export class AalamTabs extends LitElement {
                 }
             }
             if (record.removedNodes.length > 0) {
-
                 for (let node of record.removedNodes) {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                         let el = node as HTMLElement;
-                        if ((el.slot === 'tab-title' || (el.slot == 'acc')) && el.classList.contains(this.activecls)) {
-                            let curr =this._cur_ix;
-                            this._cur_ix=null;
-                            if(curr){this.show(curr-1);}
+                        if ((el.slot === 'tab-title' || el.slot == 'acc') && el.classList.contains(this.activecls)) {
+                            const openTabs = Math.min(this._queryTitles().length, this._queryBody().length);
+                            let curr = this._cur_ix;
+                            this._cur_ix = null;
+                            if (curr !== null) {
+                                if (curr + 1 < openTabs) this.show(curr + 1);
+                                else this.show(0);
+                            }
                         }
                     }
                 }
-                
             }
         }
         if (this._internal_fashion == 'accordion' && num_added_nodes > 0)
@@ -430,7 +429,7 @@ export class AalamTabs extends LitElement {
             return trans_defs[this._animation_styles[val]][val][prop];
     }
     private _hideBody(ix:number|null, bpix:HTMLElement, tpix:HTMLElement, is_overlay:boolean, rect?:DOMRect) {
-        +bpix.classList.remove(this.activecls);
+        bpix.classList.remove(this.activecls);
         tpix.classList.remove(this.activecls);
         if (!rect)
             rect = this.getBoundingClientRect();
@@ -519,8 +518,6 @@ export class AalamTabs extends LitElement {
         this.dispatchEvent(
             new CustomEvent("change", {detail:{ix}}));
     }
-    
-    
 }
 
 declare global {
