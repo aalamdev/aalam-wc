@@ -4,7 +4,6 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/vite.svg" />
         <style>
-            
             .parentDiv {margin-left:10px;border:2px solid rgb(202, 32, 32); margin-bottom:20px}
             .title-tab {padding:4px;text-decoration:underline}
             button.title-tab {text-decoration:none}
@@ -67,8 +66,15 @@
                 color: #ffffff;
             }
 
-
-
+            .mm-button {
+                background-color: #1e1e1e;
+                color: #ffffff;
+                border: 1px solid #333;
+                padding: 10px 20px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s, color 0.3s;
+            }    
         </style>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>NavBar </title>
@@ -78,7 +84,7 @@
     </head>
 
     <body>
-        <aalam-navbar  mode="overlay" attr="attr" togglesel=".toggle-menu">
+        <aalam-navbar cutoffwidth="450" mode="overlay" attr="attr" togglesel=".toggle-menu">
             <template data-type='back'>
                 <svg width=30 height=30 stroke="currentColor" viewBox="0 0 20 20"><path d="M18 9.667H3.076M8.503 3 2.199 9.195a.666.666 0 0 0-.147.728.657.657 0 0 0 .148.216l6.303 6.194" strokeLinecap="round"/></svg>
 
@@ -92,8 +98,9 @@
                 
                 <a  attr="nm:home">Home</a>
                 <a class="toggle-menu" >
-                    <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="#e8eaed"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg>
-                <a  attr="nm:login">Login</a>                      
+                    <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="#e8eaed"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg></a>
+                <a  attr="nm:login;pos:left">Login</a>
+                <a  attr="nm:signup;pos:right">SignUp</a>                      
                 <a attr="nm:abt">About us</a>
                 <aalam-dropdown mode="hover" pos="right">
                     <a slot="dd-toggler" attr="nm:dd1;mode:overlay">Help and Support</a>
