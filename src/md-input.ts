@@ -74,11 +74,10 @@ export class AalamMdInput extends LitElement {
                 this.mode = 'filled';
             }
         } else if (name == 'value') {
-            if (this._input_slot.length == 0) {
-                if (this._input_box)
-                    this._input_box.value = new_val;
-            }
-            if (new_val?.length)
+            this._input_element.value = new_val;
+            if (!new_val?.length)
+                this._blurEvent();
+            else
                 this.__updateFocus();
         }
     }
@@ -105,7 +104,7 @@ ${when(this.mode == 'normal', () => html`<slot name="normal-label">
     <div id="_input-container" class="mode-${this.mode}">
         ${when(this.prefix, () =>
             html`<span id="_prefix">${this.prefix}</span>`)}
-        <span id="_input-span" @change=${this._charCounter}>
+        <span id="_input-span" @input=${this._charCounter}>
             <slot name="input">
                 <input id="_input-box" type="text"
                     @focus=${this._focusEvent}
