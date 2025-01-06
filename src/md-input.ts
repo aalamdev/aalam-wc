@@ -74,11 +74,10 @@ export class AalamMdInput extends LitElement {
                 this.mode = 'filled';
             }
         } else if (name == 'value') {
-            if (this._input_slot.length == 0) {
-                if (this._input_box)
-                    this._input_box.value = new_val;
-            }
-            if (new_val?.length)
+            this._input_element.value = new_val;
+            if (!new_val?.length)
+                this._blurEvent();
+            else
                 this.__updateFocus();
         }
     }
@@ -182,6 +181,9 @@ var(--attrcolor);}
         this._input_element.value = '';
         if(this.charcount)
             this._charCounter();
+        this._input_element.addEventListener('input', () => {
+            this._charCounter();
+        });
         this._setTransX();
         this._disableInput();
     }
