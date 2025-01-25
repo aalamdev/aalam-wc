@@ -485,4 +485,44 @@ describe('aalam-slider', () => {
         expect(el._guide_els[3].getAttribute("data-active-ix")).to.equal("1");
         expect(el._guide_els[4].getAttribute("data-active-ix")).to.equal("2");
     })
+    it('check unoccupied items', async() => {
+
+        const el = await fixture(html`<aalam-slider gap="s:10px;l:30px">
+        <div slot="slide-item">Slide 1</div>
+        <div slot="slide-item">Slide 2</div>
+        <div slot="slide-item">Slide 3</div>
+        <div slot="slide-item">Slide 4</div>
+        <div slot="slide-item">Slide 5</div>
+        </aalam-slider>`)
+        el.transition_dur = 0;
+        expect(el.loop).to.equal(false);
+        await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
+        expect([0, 1,2,3,4]).to.have.deep.members(getItemsInView(el).sort());
+        expect(el.container_el.style.transform, 'translateX(0px)');
+
+        let pr = el.getBoundingClientRect();
+
+        await sendMouse({type: 'move', position: [pr.left + 40, pr.bottom - 20]})
+        await sendMouse({type: 'down'})
+        await sendMouse({type: 'move', position: [pr.right, (pr.bottom - pr.top)/2]})
+        expect([0]).to.have.deep.members(getItemsInView(el).sort());
+        await sendMouse({type: 'up'})
+        await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
+        expect([0, 1, 2,3,4]).to.have.deep.members(getItemsInView(el).sort());
+        expect(el.container_el.style.transform, 'translateX(0px)');
+
+        await sendMouse({type: 'move', position: [pr.left + 100, pr.bottom - 20]})
+        await sendMouse({type: 'down'})
+        await sendMouse({type: 'move', position: [pr.left, (pr.bottom - pr.top)/2]})
+        expect([2,3,4]).to.have.deep.members(getItemsInView(el).sort());
+        await sendMouse({type: 'up'})
+        await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
+        expect([0, 1, 2,3,4]).to.have.deep.members(getItemsInView(el).sort());
+        expect(el.container_el.style.transform, 'translateX(0px)');
+
+        await el.show(1);
+        await new Promise((resolve) => {setTimeout(() => {resolve()}, 50)});
+        expect([0, 1, 2,3,4]).to.have.deep.members(getItemsInView(el).sort());
+        expect(el.container_el.style.transform, 'translateX(0px)');
+    })
 });

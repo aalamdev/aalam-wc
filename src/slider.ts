@@ -441,8 +441,9 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
             log("  calc: d:", iterate_dir, ", rt_ix ", _ix, ", lt_ix ",show_ix,
                 ", el width ", el_w, ", total wd ", el_w,
                 "+", total_wd, "=", (total_wd + el_w), ", parent width ",
-                this.clientWidth, " (", r.left, ":", r.right, ")");
+                this.clientWidth, " (", pr.left, ":", pr.right, ")");
             total_wd += (r.right - r.left);
+            total_wd = Math.ceil(total_wd); /*Sometimes the pixel difference will be decimals*/
             if (total_wd >= this.clientWidth)
                 break
             if (_ix == last_ix) {
@@ -454,10 +455,13 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                 } else
                     _ix = -1;
             }
-            if (iterate_dir == 'R')
+            if (iterate_dir == 'R') {
                 _ix += 1;
-            else if (iterate_dir == 'L')
+            } else if (iterate_dir == 'L') {
+                if (show_ix == 0)
+                    break;
                 show_ix -= 1
+            }
         }
         return {lt_ix: show_ix, rt_ix: _ix, c_ix: c_ix}
     }
@@ -470,7 +474,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
 
     }
     private _calcRightLeftIndices(new_ix:number, direction:string, offset?:number):number {
-        log("_calcIndices: dir ", direction, ", lt_ix ", (new_ix),
+        log("_calcIndices: dir ", direction, ", new_ix ", (new_ix), ", lt ix ", this._coords.lt_ix,
             ", rt ix ", this._coords.rt_ix, ", transx ", this.translatex,
             ", offset ", offset, ", showing ", this.anchorindex);
         let prev_lt_ix = this._coords.lt_ix;
@@ -711,10 +715,14 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
             <DOMRect>{right: _tr(rt_r as DOMRect), left: _tl(rt_r as DOMRect)},
             parent_limit, 'left');
 
-        this._coords.c_ix = c_ix as number;
-        this._coords.c_limit = this._getLimit(
-            <DOMRect>{right: _tr(c_r as DOMRect), left: _tl(c_r as DOMRect)},
-            parent_limit, 'center');
+        if (c_ix != null) {
+            /*There could be a case where even the right end is near the center of the parent
+             *e.x when the slide items are very less compared the parent width */
+            this._coords.c_ix = c_ix as number;
+            this._coords.c_limit = this._getLimit(
+                <DOMRect>{right: _tr(c_r as DOMRect), left: _tl(c_r as DOMRect)},
+                parent_limit, 'center');
+        }
     }
     private _touchEndEvent() {
         if (!this._mouse_event_data) return
@@ -737,7 +745,12 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                         getBoundingClientRect();
                     let pr = this.getBoundingClientRect();
                     if (!this.center) {
-                        this.translatex += (pr.right - ir.right);
+                        if (this._coords.lt_ix > 0)
+                            this.translatex += (pr.right - ir.right);
+                        else {
+                            /*Entire slide items was fit inside the parent*/
+                            this.translatex += (pr.left - this.slide_items[0].getBoundingClientRect().left - gap); 
+                        }
                     } else {
                         let r = pr.left + this.clientWidth/2;
                         this.translatex += (r - ir.right + (
@@ -747,7 +760,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                 })
                 this.anchorindex = (this._set_items || this.slide_items).length - 1;
                 this.no_next = true;
-                this.no_prev = false;
+                this.no_prev = this._coords.lt_ix == 0;
             } else if ((this.center?this.anchorindex:this._coords.lt_ix) == 0
                        && tx > 0) {
                 this.showing = true;
@@ -765,7 +778,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                         this._recalibrateCoords(tx - this.translatex);
                     })
                 }
-                this.no_next = false;
+                this.no_next = this._coords.rt_ix == last_ix;
                 this.no_prev = true;
                 this.anchorindex = 0;
             }
@@ -891,7 +904,6 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                      * as the index
                      */
                     _ix = this._coords.lt_ix;
-                    this._coords.no_next = true;
                 } else if (dir == 'R' && this._coords.lt_ix == 0) {
                     _ix = 0;
                 }
@@ -921,7 +933,8 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                 if (!this.loop) {
                     if (!this.center) {
                         if (dir == 'L' && this._coords.rt_ix == last_ix) {
-                            span = Math.max(span, 0 - this._coords.rt_limit.right)
+                            /*Accomodate the right end only when the right ix's right end is exceeding the parent bounds*/
+                            span = Math.max(span, (this._coords.lt_ix == 0 && this._coords.rt_limit.right < 0)?0:(0 - this._coords.rt_limit.right));
                         } else if (dir == 'R' && this._coords.lt_ix == 0) {
                             span = Math.max(span, 0);
                         }
