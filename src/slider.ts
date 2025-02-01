@@ -741,19 +741,16 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                 && tx < 0) {
                 this.showing = true;
                 requestAnimationFrame(() => {
-                    let ir = this.slide_items[last_ix].
+                    let rr = this.slide_items[last_ix].
                         getBoundingClientRect();
+                    let lr = this.slide_items[0].getBoundingClientRect();
                     let pr = this.getBoundingClientRect();
                     if (!this.center) {
-                        if (this._coords.lt_ix > 0)
-                            this.translatex += (pr.right - ir.right);
-                        else {
-                            /*Entire slide items was fit inside the parent*/
-                            this.translatex += (pr.left - this.slide_items[0].getBoundingClientRect().left - gap); 
-                        }
+                        this.translatex += Math.min((pr.left - lr.left), (pr.right - rr.right));
+                        //this.translatex += (pr.right - rr.right);
                     } else {
                         let r = pr.left + this.clientWidth/2;
-                        this.translatex += (r - ir.right + (
+                        this.translatex += (r - rr.right + (
                             this.slide_items[last_ix].clientWidth - gap)/2);
                     }
                     this._recalibrateCoords(tx - this.translatex);
