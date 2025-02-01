@@ -82,7 +82,17 @@ export class AalamNavMenu extends LitElement {
             });
         } else if(name == 'collapsed-item') {
             let el = this.querySelectorAll(`[slot=collapsed-item][data-proxy]`);
-            el.forEach((e) => {(e as HTMLElement).style.display = 'none';});
+            let dpd = this.renderRoot.querySelector("aalam-dropdown");
+            if(dpd) {
+                dpd.updateComplete.then( () => {
+                    el.forEach((e) => {
+                        let px = e.getAttribute('data-proxy');
+                        let proxy_el = this.querySelector(`[data-proxy=${px}][slot=menu-item]`) as HTMLElement;
+                        if((proxy_el as HTMLElement).style.display != 'none')
+                            (e as HTMLElement).style.display = 'none';
+                    });
+                });
+            }
         } else if(name == 'menu-item') {
             let el:HTMLElement[] = Array.from(
                 this.querySelectorAll('[slot=menu-item]'));
