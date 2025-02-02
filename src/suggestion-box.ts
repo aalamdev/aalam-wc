@@ -79,7 +79,7 @@ export class AalamSuggestionBox extends LitElement {
     override render() {
         return html`
             <div style="position:relative">
-                <div  part="sgn-input" @focusin=${this._inputFocusEvent} @keydown=${this.keyDownInputEvent} >
+                <div  part="sgn-input" @focusin=${this._inputFocusEvent} @focusout=${this._inputBlurEvent} @keydown=${this.keyDownInputEvent} >
                     <slot name="sgn-input" id="sgn-input" @input=${this._inputEvent} @click=${this._inputClickEvent} @select=${this._inputSelectEvent}>
                         <input part="sgn-input" type="text" />
                     </slot>
@@ -169,6 +169,11 @@ export class AalamSuggestionBox extends LitElement {
 
     private _inputSelectEvent(event:Event) {
         event.stopPropagation();
+    }
+
+    private _inputBlurEvent() {
+        this.show_container = false;
+        this.index = -1;
     }
 
     private _inputFocusEvent() {
