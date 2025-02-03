@@ -171,9 +171,11 @@ export class AalamSuggestionBox extends LitElement {
         event.stopPropagation();
     }
 
-    private _inputBlurEvent() {
-        this.show_container = false;
-        this.index = -1;
+    private _inputBlurEvent(event:any) {
+        if (event.relatedTarget) {
+            this.show_container = false;
+            this.index = -1;
+        }
     }
 
     private _inputFocusEvent() {
@@ -191,11 +193,10 @@ export class AalamSuggestionBox extends LitElement {
     }
     windowClickEvent(event: any) {
         let el = event.target;
-        while (el) {
-            if (el == this) return;
-            el = el.parentElement;
+        if (el.closest('aalam-sgn-box') != this) {
+            this.show_container = false
+            this.index = -1;
         }
-        this.show_container = false;
     }
 
     private _highlightSelect(value: string) {
