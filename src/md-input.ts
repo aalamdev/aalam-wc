@@ -75,7 +75,11 @@ export class AalamMdInput extends LitElement {
             }
         } else if (name == 'value') {
             if(!this._input_element) return;
-            this._input_element.value = new_val;
+            if (this._input_element.value != new_val) {
+                this._input_element.value = new_val;
+            }
+            if (document.activeElement == this._input_element)
+                return;
             if (!new_val?.length)
                 this._blurEvent();
             else

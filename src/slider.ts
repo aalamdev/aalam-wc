@@ -895,7 +895,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
                 this.no_prev = true;
             if (!this.center) {
                 if (dir == 'L' && this._coords.rt_ix == last_ix &&
-                    this._coords.lt_limit.right > this._coords.rt_limit.right) {
+                    this._coords.lt_limit?.right > this._coords.rt_limit?.right) {
                     /*If left and last element has no room further if the
                      * current left end moves out, then retain the cur left
                      * as the index
