@@ -218,9 +218,11 @@ export class AalamDropdown extends LitElement {
             this._dd_container.classList.remove('anim-close');
     }
     private _bodyClickedEvent(e:Event) {
-        if(this.closesel && (e.target as HTMLElement).matches(this.closesel))
-            this.hide();
-        return;
+        let el = <HTMLElement>e.target;
+        let _sel = el.matches(this.closesel)?el:el.closest(this.closesel);
+        if (!_sel || <HTMLElement>_sel.closest('aalam-dropdown') != this)
+            return;
+        this.hide();
     }
     private _handleMouseEnter() {
         this.show();

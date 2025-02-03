@@ -377,7 +377,7 @@ export class AalamTabs extends LitElement {
     private _bodyClicked(e:Event) {
         let el = e.target as HTMLElement;
         let _sel = el.matches(this.olclosesel)?el:el.closest(this.olclosesel);
-        if (!_sel || el.closest('aalam-tabs') != this)
+        if (!_sel || _sel.closest('aalam-tabs') != this)
             return;
         let title = this._queryTitles();
         let body = this._queryBody();
