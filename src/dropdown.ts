@@ -219,8 +219,7 @@ export class AalamDropdown extends LitElement {
     }
     private _bodyClickedEvent(e:Event) {
         let el = <HTMLElement>e.target;
-        let _sel = el.matches(this.closesel)?el:el.closest(this.closesel);
-        if (!_sel || <HTMLElement>_sel.closest('aalam-dropdown') != this)
+        if (!el.matches(this.closesel) && (el.closest(this.closesel)?.closest('aalam-dropdown') != this))
             return;
         this.hide();
     }

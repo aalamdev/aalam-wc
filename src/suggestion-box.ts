@@ -172,7 +172,7 @@ export class AalamSuggestionBox extends LitElement {
     }
 
     private _inputBlurEvent(event:any) {
-        if (event.relatedTarget) {
+        if (event.relatedTarget && event.relatedTarget?.closest('aalam-sgn-box') != this) {
             this.show_container = false;
             this.index = -1;
         }
