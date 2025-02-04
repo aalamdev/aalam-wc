@@ -31,6 +31,9 @@ export class AalamSuggestionBox extends LitElement {
     @property()
     activecls: string = "sgn-active";
 
+    @property()
+    closesel:string = ".dd-close";
+
     @state()
     result: Array<{ [key: string]: string } | string | any> = [];
 
@@ -89,7 +92,7 @@ export class AalamSuggestionBox extends LitElement {
                     <div style="display:${this.show_empty ? "block" : "none"}">
                         <slot id="sgn-empty" name="sgn-empty"></slot>
                     </div>
-                    <div style="display:${this.show_nomatch ? "block" : "none"}" >
+                    <div style="display:${this.show_nomatch ? "block" : "none"}" @click=${this._noMatchSuggestionClickedEvent}>
                         <slot id="sgn-nomatch" name="sgn-nomatch"></slot>
                     </div>
                     <div style="display:${!this.show_empty ? "block" : "none"};" @click=${this._itemClickedEvent} @mouseover=${this._mouseOverEvent} @mouseout=${this._mouseOutEvent}>
@@ -101,6 +104,11 @@ export class AalamSuggestionBox extends LitElement {
                 </div>
             </div>
         `;
+    }
+    private _noMatchSuggestionClickedEvent(e:Event) {
+        e.stopPropagation();
+        if(this.closesel && (e.target as HTMLElement).matches(this.closesel))
+            this.show_container = false;
     }
     private _slotChanged() {
         const template = this.template_slots[0];
