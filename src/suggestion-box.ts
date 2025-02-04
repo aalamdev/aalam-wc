@@ -16,6 +16,9 @@ export class AalamSuggestionBox extends LitElement {
     @queryAssignedElements({ slot: "sgn-empty" })
     empty_slot: Array<HTMLElement>;
 
+    @queryAssignedElements({ slot: "sgn-nomatch" })
+    nomatch_slot: Array<HTMLElement>;
+
     @property({ type: Array<Object> })
     list: Array<{ [key: string]: any } | string> = [];
 
@@ -309,7 +312,6 @@ export class AalamSuggestionBox extends LitElement {
         } else {
             this.filtered_list = [];
             this.show_empty = true;
-            this.show_nomatch = false;
             this.setSuggestions(this.filtered_list, false);
             if (this._actual_inp_value.length == 0)
                 this.show_container = this.empty_slot.length > 0;
@@ -449,10 +451,8 @@ export class AalamSuggestionBox extends LitElement {
         return name.replace(re, `<strong class="sgn-highlight">$1</strong>`);
     }
     public setSuggestions ( suggestions: Array<{ [key: string]: string } | string>, has_more: boolean) {
-        if (suggestions.length === 0) this.show_nomatch = true;
         this.result = [...suggestions];
         this.index = -1;
-        this.show_nomatch = this.result.length && this.input_el ? false : true;
 
         (this.input_el as HTMLInputElement)?.value
             ? (this.show_empty = false)
@@ -462,7 +462,6 @@ export class AalamSuggestionBox extends LitElement {
             for (let el of this.private_items) el.remove();
         }
         this.filtered_list = suggestions;
-        this.show_container = true;
         this.show_nomatch =
             this.input_el &&
             (this.input_el as HTMLInputElement).value.length >= this.minchar &&
@@ -470,6 +469,7 @@ export class AalamSuggestionBox extends LitElement {
                 ? true
                 : false;
 
+        this.show_container = !this.show_nomatch || this.nomatch_slot.length > 0;
         this._processedSuggestion(suggestions, has_more);
     }
 
