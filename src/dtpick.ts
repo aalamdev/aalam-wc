@@ -1203,6 +1203,7 @@ ${cal.html(cls_map)}
                 if(mer)
                     this.mer2 = mer;
             }
+            this._setDate(this.date1, this.date2);
         }
         const scrl_hr = (e:CustomEvent, id:string) => {
             let val = parseInt(e.detail.val);
