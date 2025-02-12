@@ -22,7 +22,8 @@ export class AalamNavMenu extends LitElement {
     private _slot_dirty_changes = false;
     private _sorted_dd:HTMLElement[] = [];
     private _tgl_width:number;
-    private _resizeListener = this._manageCollapsedItems.bind(this);
+    private _resizeListener:ResizeObserver;
+    private _prev_resize_done_at = 0;
 
     constructor() {
         super();
@@ -37,7 +38,19 @@ export class AalamNavMenu extends LitElement {
     }
     override connectedCallback() {
         super.connectedCallback();
-        window.addEventListener('resize', this._resizeListener);
+        this._resizeListener = new ResizeObserver((entries:ResizeObserverEntry[]) => {
+            for (let entry of entries) {
+                if (entry.target == this) {
+                    if (Math.floor(entry.contentRect.width) == this._prev_resize_done_at) {
+                        return;
+                    }
+                    this._manageCollapsedItems();
+                    this._prev_resize_done_at = Math.floor(this.clientWidth);
+                }
+            }
+        });
+
+        this._resizeListener.observe(this);
         this.renderRoot.addEventListener('slotchange', (e) => {
             if(!this._slot_dirty_changes) {
                 this._slotChangedEvent(e);
@@ -46,7 +59,7 @@ export class AalamNavMenu extends LitElement {
     }
     override disconnectedCallback() {
         super.disconnectedCallback();
-        window.removeEventListener("resize", this._resizeListener);
+        this._resizeListener.disconnect();
     }
     override render() {
         return html`
@@ -122,7 +135,7 @@ export class AalamNavMenu extends LitElement {
         const c_width = () => {
             return this._container.getBoundingClientRect().width};
         const par_width = () => {
-            return this.parentElement?.clientWidth || this.clientWidth };
+            return this.parentElement?.clientWidth || this.clientWidth};
         const change_slot_name = (el:HTMLElement, _slot:string) => {
             this._slot_dirty_changes = true;
             el.slot = _slot;
@@ -141,7 +154,7 @@ export class AalamNavMenu extends LitElement {
         }
         let parent_width = par_width();
         let cont_width = c_width();
-        if(parent_width <= cont_width) {
+        if(parent_width < cont_width) {
             if(!this._persist)
                 this._dd_toggler.style.display = '';
             if(this._sorted_menu.length < 1) return;

@@ -282,57 +282,57 @@ describe('aalam-navmenu', () => {
         expect(nav._slotted_menu_order[el_wid()].slot).to.equal('collapsed-item');
 
         await setViewport({width:1000, height:y});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
         await setViewport({width:x(), height:y})
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
         await setViewport({width:rx(), height:y})
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
         await setViewport({width:rx(), height:y})
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
         await setViewport({width:rx(), height:y})
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
         await setViewport({width:1852, height:y})
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
         await setViewport({width:1854, height:y})
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
         await setViewport({width:500, height:y})
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
         await setViewport({width:x(), height:y})
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
         await setViewport({width:x(), height:y})
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
         await setViewport({width:x(), height:y})
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(menu_el());
         expect(c_slot(nav).length).to.equal(mn_len - m_slot(nav).length);
 
@@ -347,35 +347,35 @@ describe('aalam-navmenu', () => {
         let full_x = Math.ceil(len * 100/70) + 16;
 
         await setViewport({width: full_x, height:y});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(mn_len);
         expect(nav._dd_toggler.style.display).to.equal('none');
 
         await setViewport({width:rx(), height:y});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(11);
         expect(c_slot(nav).length).to.equal(1);
         expect(nav._dd_toggler.style.display).to.equal('');
 
         await setViewport({width:rx(), height:y});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(10);
         expect(c_slot(nav).length).to.equal(2);
         expect(nav._dd_toggler.style.display).to.equal('');
 
         await setViewport({width:rx(), height:y});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(9);
         expect(c_slot(nav).length).to.equal(3);
         expect(nav._dd_toggler.style.display).to.equal('');
 
         await setViewport({width:full_x, height:y});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(mn_len);
         expect(nav._dd_toggler.style.display).to.equal('none');
 
         await setViewport({width:full_x - 1, height:y});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(m_slot(nav).length).to.equal(mn_len - 1);
         expect(nav._dd_toggler.style.display).to.equal('');
     });
@@ -463,7 +463,6 @@ describe('aalam-navmenu', () => {
             tgl_disp();
         }
 
-
         check_persist();
         let sz = 0;
         let i = 0;
@@ -475,7 +474,6 @@ describe('aalam-navmenu', () => {
         sz = Math.ceil((sz + nav._tgl_width) * 100/70) + 16;
 
         await setViewport({width:sz, height:200});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
         expect(nav._sorted_menu.length).to.equal(i);
         check_persist();
 
@@ -488,13 +486,13 @@ describe('aalam-navmenu', () => {
 
         check_persist();
         await setViewport({width:full_x, height:200});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(nav._sorted_menu.length).to.equal(mn_len);
         expect(nav._sorted_dd.length).to.equal(0);
         check_persist();
 
         await setViewport({width:rx(), height:200});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(nav._sorted_menu.length).to.equal(mn_len - 1);
         expect(nav._sorted_dd.length).to.equal(1);
         check_not_proxy(nav._sorted_dd[dd_len() - 1]);
@@ -503,21 +501,21 @@ describe('aalam-navmenu', () => {
         check_persist();
 
         await setViewport({width:rx(), height:200});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(nav._sorted_menu.length).to.equal(mn_len - 2);
         expect(nav._sorted_dd.length).to.equal(2);
         check_proxy_clp(nav._sorted_dd[dd_len() - 1]);
         check_persist();
 
         await setViewport({width:rx(), height:200});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(nav._sorted_menu.length).to.equal(mn_len - 3);
         expect(nav._sorted_dd.length).to.equal(3);
         check_not_proxy(nav._sorted_dd[dd_len() - 1]);
         check_persist();
 
         await setViewport({width:x(), height:200});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(nav._sorted_menu.length).to.equal(mn_len - 2);
         expect(nav._sorted_dd.length).to.equal(2);
         expect(isProxy(nav._sorted_dd[dd_len() - 1])).to.equal(true);
@@ -525,7 +523,7 @@ describe('aalam-navmenu', () => {
         check_persist();
 
         await setViewport({width:full_x + full_x, height:200});
-        nav.dispatchEvent(new Event('resize', {bubbles:true}));
+        nav._manageCollapsedItems();
         expect(nav._sorted_menu.length).to.equal(mn_len);
         expect(nav._sorted_dd.length).to.equal(0);
         check_persist();
