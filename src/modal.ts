@@ -109,9 +109,15 @@ export class AalamModal extends LitElement {
     private _cur_pos:string|null;
     private _clamp_values:{[key:string]:number|null} = {};
     private _body_overflow:string|null;
+    private _mutation_obs:MutationObserver;
 
     constructor() {
         super();
+        this._mutation_obs = new MutationObserver(() => {
+            if (this._actualparent && !document.body.contains(this._actualparent)) {
+                this.hide();
+            }
+        })
     }
     override attributeChangedCallback(
         name:string, old_val:string, new_val:string) {
@@ -230,8 +236,13 @@ ${this._animateStyles()}
             this.style.zIndex = "" + (DEFAULT_MODAL_ZINDEX + active_modals.length);
         else
             active_modals.forEach((m:any) => m.hide());
-        if(!this._actualparent)
-            this._actualparent = this.parentElement;
+        if(!this._actualparent) {
+            let parent_el = this._actualparent = this.parentElement;
+            while (parent_el && parent_el != document.firstChild) {
+                this._mutation_obs.observe(<Node>parent_el, {childList: true});
+                parent_el = parent_el.parentElement;
+            }
+        }
         this._open = this.open = true;
         this.dispatchEvent(new CustomEvent('open', {
             bubbles: true,
@@ -314,8 +325,11 @@ ${this._animateStyles()}
     private _animationEndEvent() {
         this._open = this.open;
         if (!this._open) {
-            this._actualparent?.appendChild(this);
+            this._mutation_obs.disconnect();
             document.body.style.overflow = <string>this._body_overflow;
+            if (!document.body.contains(this._actualparent))
+                this.remove()
+            this._actualparent?.appendChild(this);
             this._body_overflow = null;
             let ix = active_modals.indexOf(this);
             if (ix >= 0)

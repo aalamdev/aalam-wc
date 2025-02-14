@@ -1534,5 +1534,24 @@ describe('aalam-modal', () => {
 
         bounds = modal_body.getBoundingClientRect();
         expect(bounds.right).to.equal(r_clamp);
-   });
+    });
+    it('parent removal', async () => {
+       const el1 = await fixture(html`<div>
+<div id="parent">
+   <aalam-modal id="modal">
+           <div id="modal_body" slot="modal-dialog">
+               <h2 id="c_click">h2 </h2>
+           </div>
+   </aalam-modal>
+</div></div>`);
+       const modal = el1.querySelector("#modal");
+       modal.animationDur = 0;
+       modal.show();
+       await modal.updated();
+       element_bounds(modal);
+
+       el1.querySelector('#parent').remove();
+       await modal.updated();
+       expect(modal.open).to.equal(false);
+    });
 });
