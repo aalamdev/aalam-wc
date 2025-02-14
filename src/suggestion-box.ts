@@ -266,7 +266,7 @@ export class AalamSuggestionBox extends LitElement {
             case "Enter":
                 if (this.index === resultLength) {
                     this._loadmoreEntry(e);
-                } else {
+                } else if (this.index >= 0 && this.index <= resultLength) {
                     this._setInputEvent(this.index);
                 }
 
