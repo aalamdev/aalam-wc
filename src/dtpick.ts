@@ -1137,7 +1137,7 @@ ${cal.html(cls_map)}
         }
         let tm_html = (id:string, d:Date|null) => {
             return html`
-<div part="tm-input-box" id="tm-input-box" class="input-box" style="border:0" @click=${(e:MouseEvent) => set_scroller(e, id)}>
+<div part="tm-input-box" class="tm-input-box input-box" style="border:0" @click=${(e:MouseEvent) => set_scroller(e, id)}>
     <aalam-minput order=${tm_order.join(",")} id=${id}
         @change=${this._minputChangedEvent}
         data-hr=${when(tm_order.indexOf('hr') >= 0, () => data_hr)}
@@ -1163,6 +1163,10 @@ ${cal.html(cls_map)}
                     e.classList.add("open");
                 else
                     e.classList.remove("open");
+            }
+            if (this.range && this.date1_tm_scrl && this.date2_tm_scrl) {
+                /*Close the other timeselector*/
+                this.shadowRoot?.querySelector(id == 'date1-tm'?'#date2-tm':'#date1-tm')?.parentElement?.click();
             }
         }
         const select_date = (id:string) => {
@@ -1570,7 +1574,7 @@ aalam-scroller::part(empty-el) {
 #minute::after {
     content:'M';
 }
-#tm-input-box::after {
+.tm-input-box::after {
     content:'';
     display:inline-block;
     width:16px;
@@ -1579,7 +1583,7 @@ aalam-scroller::part(empty-el) {
     vertical-align:middle;
     clip-path:polygon(25.5% 37.3%, 49.9% 62.7%, 75.5% 37.3%);
 }
-.open#tm-input-box::after {
+.open.tm-input-box::after {
     clip-path:polygon(49.5% 37.5%, 25.5% 62.7%, 75.5% 62.7%);
 }
 aalam-minput[order="yr"] {width:4em;}`
