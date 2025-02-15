@@ -1178,14 +1178,14 @@ ${cal.html(cls_map)}
         }
         const set_date = (id:string) => {
             if(id == 'date1') {
-                this.date1 = new Date();
+                this.date1 = new Date(0, 0, 1, 0, 0, 0);
                 this.mer1 = (this.date1.getHours()>12?'PM':'AM');
                 return this.date1;
             } else {
                 if(this.date1 && this.date1 > new Date())
                     this.date2 = new Date(this.date1);
                 else
-                    this.date2 = new Date();
+                    this.date2 = new Date(0, 0, 1, 23, 59, 59);
                 this.mer2 = (this.date2.getHours()>12?'PM':'AM');
                 return this.date2;
             }
@@ -1195,18 +1195,24 @@ ${cal.html(cls_map)}
                 d.setHours(val);
             else if(cls == 'min')
                 d.setMinutes(val);
+            else if (cls == 'sec')
+                d.setSeconds(val);
             if (id == 'date1') {
                 this.date1 = new Date(d.getFullYear(), d.getMonth(),
-                d.getDate(), d.getHours(), d.getMinutes(), 0);
+                d.getDate(), d.getHours(), d.getMinutes(), (d.getSeconds() || 0));
                 if(mer)
                     this.mer1 = mer;
             }
             else {
                 this.date2 = new Date(d.getFullYear(), d.getMonth(),
-                d.getDate(), d.getHours(), d.getMinutes(), 59);
+                d.getDate(), d.getHours(), d.getMinutes(), (d.getSeconds() || 59));
                 if(mer)
                     this.mer2 = mer;
             }
+            if (id == 'date1' && this.date1 < this._min_dt)
+                this.date1 = new Date(this._min_dt);
+            if (id == 'date2' && this.date2 && this.date2 > this._max_dt)
+                this.date2 = new Date(this._max_dt);
             this._setDate(this.date1, this.date2);
         }
         const scrl_hr = (e:CustomEvent, id:string) => {
@@ -1222,6 +1228,10 @@ ${cal.html(cls_map)}
         const scrl_min = (e:CustomEvent, id:string) => {
             let d = select_date(id);
             set_time(id, d, 'min', e.detail.val);
+        }
+        const scrl_sec = (e:CustomEvent, id:string) => {
+            let d = select_date(id);
+            set_time(id, d, 'sec', e.detail.val);
         }
         const scrl_mdn = (e:CustomEvent, id:string) => {
             let d = select_date(id);
@@ -1242,17 +1252,22 @@ ${cal.html(cls_map)}
             let mdn = d?(d.getHours() > 12?'PM':'AM'):(id == 'date1'?'AM':'PM');
             return html`
 <div class="input-row ${this.type != 't'?'inline':''}">
-    <div class="input-row-date">${dt_html(label, id + '-dt', d)}</div>
+    ${when(dt_order.length > 0,() => html`<div class="input-row-date">${dt_html(label, id + '-dt', d)}</div>`)}
     ${when(this.type == 't',
-           () => html`<div class="input-row-time">${
+           () => html`<div>${
                 tm_html(id + '-tm', d)}</div>`)}
 </div>
 ${when(id == 'date1'?this.date1_tm_scrl:this.date2_tm_scrl, () => html`
 <div class="scroller-blk">
     <div class="scroller-parent">
-        <aalam-scroller id="hour" @change=${(e:CustomEvent) => scrl_hr(e, id)} choices=${this.hr_limits} init=${hrs}></aalam-scroller>
-        <aalam-scroller id="minute" @change=${(e:CustomEvent) => scrl_min(e, id)} choices=${this.min_limits} init=${d?.getMinutes() || (id == 'date1'?0:59)}></aalam-scroller>
-        <aalam-scroller id="mdn" @change=${(e:CustomEvent) => scrl_mdn(e, id)} choices="AM,PM" init=${mdn}></aalam-scroller>
+        ${when(tm_order.indexOf('hr') >= 0,
+            () => html`<aalam-scroller id="hour" @change=${(e:CustomEvent) => scrl_hr(e, id)} choices=${this.hr_limits} value=${[hrs]}></aalam-scroller>`)}
+        ${when(tm_order.indexOf('min') >= 0,
+            () => html`<aalam-scroller id="minute" @change=${(e:CustomEvent) => scrl_min(e, id)} choices=${this.min_limits} value=${[d?.getMinutes() || (id == 'date1'?0:59)]}></aalam-scroller>`)}
+        ${when(dt_order.length == 0 && tm_order.indexOf('sec') >= 0,
+            () => html`<aalam-scroller id="second" @change=${(e:CustomEvent) => scrl_sec(e, id)} choices=${this.min_limits} value=${[d?.getSeconds() || (id == 'date1'?0:59)]}></aalam-scroller>`)}
+        ${when(tm_order.indexOf('hr') >= 0,
+            () => html`<aalam-scroller id="mdn" @change=${(e:CustomEvent) => scrl_mdn(e, id)} choices="AM,PM" value=${mdn}></aalam-scroller>`)}
     </div>
 </div>`
 )}
@@ -1274,7 +1289,7 @@ ${when(id == 'date1'?this.date1_tm_scrl:this.date2_tm_scrl, () => html`
                 dec[k] = true;
             }
         }
-        if (dec.hh)
+        if (dec.hh || dec.mm || dec.ss)
             this.type = 't';
         else if (dec.DD)
             this.type = 'd';
@@ -1497,10 +1512,10 @@ top: 50%;left: 50%;height: 30px;width: 30px;border-radius: 6px;transform: transl
 .ext-bfr, .ext-aft {color:#1D6AB3;position:relative;padding:6px 14px;cursor:pointer}
 .ext-aft {border-top: px solid #C9D6E2;}
 .input-row:not(.inline) {display:flex;margin-bottom:1.2rem;}
+.input-row {justify-content: 'space-between'}
 .input-row:not(.inline):last-child {margin-bottom:0;}
 .input-row.inline {display:inline-flex;}
 .input-row.inline:nth-child(2)::before {content: "-";margin:0 10px;display:inline-flex;align-items:center}
-.input-row-time {margin-left:auto;}
 .input-box {
     border:1px solid #0F2234;padding:12px 12px;position:relative;
     width:fit-content;border-radius:4px;
@@ -1574,6 +1589,9 @@ aalam-scroller::part(empty-el) {
 #minute::after {
     content:'M';
 }
+#second::after {
+    content:'S';
+}
 .tm-input-box::after {
     content:'';
     display:inline-block;
@@ -1590,14 +1608,15 @@ aalam-minput[order="yr"] {width:4em;}`
     }
     override render() {
         let chdr = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        let is_tm_only = !this._dec_fmt['DD'] && !this._dec_fmt['MM'] && !this._dec_fmt['YYYY'];
         return html`
 <div id="__container">
     <div id="__header">
         <div style="padding:10px 10px 0 10px;margin-bottom:10px;">
         ${this._inputHtml()}
         </div>
-        ${this._selectorHtml()}
-        ${when(this.current_view == DATE_VIEW, () => html`
+        ${when(!is_tm_only, () => html`${this._selectorHtml()}`)}
+        ${when(!is_tm_only && this.current_view == DATE_VIEW, () => html`
         <div class="cal-headcontainer">
             <div class="cal-week cal-weekhead">
                 ${chdr.map(d => html`<div class="cal-dayhead cal-day"
@@ -1605,6 +1624,7 @@ aalam-minput[order="yr"] {width:4em;}`
             </div>
         </div>`)}
     </div>
+    ${when(!is_tm_only, () => html`
     <div id="__nav">
         <div id="__scr_hldr_top" class="scroll-holder"
              style="display:${this._scrollLimitHits['top']?"none":"block"}">
@@ -1615,42 +1635,43 @@ aalam-minput[order="yr"] {width:4em;}`
         <div id="__scr_hldr_btm" class="scroll-holder"
              style="display:${this._scrollLimitHits['btm']?"none":"block"}">
         </div>
-    </div>
+    </div>`)}
 </div>`
     }
     override firstUpdated() {
         if (!this.date1)
-            this.nav_el.style.setProperty('--gpfrom', "0");
+            this.nav_el?.style.setProperty('--gpfrom', "0");
         else
             this._setupCSSVar('--gpfrom', this.date1);
         if (!this.date2)
-            this.nav_el.style.setProperty('--gpto', "0");
+            this.nav_el?.style.setProperty('--gpto', "0");
         else
             this._setupCSSVar('--gpto', this.date2);
-        this.nav_el.style.setProperty('--gphovto', "0");
+        this.nav_el?.style.setProperty('--gphovto', "0");
 
-        if (!this._intr_observer)  {
+        if (!this._intr_observer && this.nav_el)  {
             this._intr_observer = new IntersectionObserver(
                 (e) => {this._intrObserverCallback(e)}, {
                     root: this.nav_el,
                     threshold: 0.1
                 })
-            let scr_holders = this.nav_el.querySelectorAll(".scroll-holder")
+            let scr_holders = this.nav_el?.querySelectorAll(".scroll-holder")
             scr_holders.forEach(el => this._intr_observer?.observe(el));
         }
-        this._mut_observer.observe(this.nav_el, {childList: true});
+        if (this.nav_el)
+            this._mut_observer.observe(this.nav_el, {childList: true});
         let els!:NodeList;
         if (this.type == 'd' || this.type == 't')
-            els = this.nav_el.querySelectorAll(".cal-title");
+            els = this.nav_el?.querySelectorAll(".cal-title");
         else if (this.type == 'm')
-            els = this.nav_el.querySelectorAll(".month-title");
+            els = this.nav_el?.querySelectorAll(".month-title");
         else if (this.type == 'y')
-            els = this.nav_el.querySelectorAll(".years-title");
+            els = this.nav_el?.querySelectorAll(".years-title");
         els?.forEach(el => this._intr_observer?.observe(<Element>el));
     }
     override updated() {
         if (this._update_scroll) {
-            let el = <HTMLElement>this.nav_el.querySelector("#" + this._update_scroll)
+            let el = <HTMLElement>this.nav_el?.querySelector("#" + this._update_scroll)
             if (el)
                 this._scrollIntoView(el);
             this._update_scroll = null;
@@ -1676,7 +1697,7 @@ aalam-minput[order="yr"] {width:4em;}`
 
         let g = dt_match.groups;
         if (g)
-            return new Date(+g['y'], (+g['M'] || 1) - 1, +g['d'] || 1,
+            return new Date(+g['y'] || 0, (+g['M'] || 1) - 1, +g['d'] || 1,
                             +g['h'] || 0, +g['m'] || 0, +g['s'] || 0);
         return null
     }

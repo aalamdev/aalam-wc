@@ -9,7 +9,7 @@ export class AalamScroller extends LitElement {
     choices:string;
 
     @property()
-    init:string;
+    value:string;
 
     @state()
     _choices:string[];
@@ -29,9 +29,12 @@ export class AalamScroller extends LitElement {
         super.attributeChangedCallback(name, old_val, new_val);
         if (name == 'choices')
             this._choices = this.choices.split(",");
-        else if (name == 'init') {
-            if (this.divs)
+        else if (name == 'value') {
+            if (Array.isArray(new_val))
+                this.value = new_val[0];
+            if (this.divs) {
                 this._scrollToInit();
+            }
         }
     }
     override connectedCallback() {
@@ -92,7 +95,7 @@ export class AalamScroller extends LitElement {
 .child > div.active {font-size:14px;opacity:1;}`
     }
     private _scrollToInit() {
-        let ix = this._choices.indexOf(this.init);
+        let ix = this._choices.indexOf(this.value);
         if (ix < 0) return;
         this.child.scrollTop = this.divs[ix].offsetTop;
     }
@@ -112,7 +115,7 @@ export class AalamScroller extends LitElement {
         this.divs.forEach(target => {
             this.observer.observe(target);
         })
-        if(this.init == null) return;
+        if(this.value == null) return;
         this._scrollToInit();
     }
     isClose(n1:number, n2:number) {
@@ -141,7 +144,10 @@ export class AalamScroller extends LitElement {
                         val = next.textContent;
                 }
             }
-            if(val) this.dispatchEvent(new CustomEvent("change", {detail:{val}}));
+            if(val) {
+                this.value = val;
+                this.dispatchEvent(new CustomEvent("change", {detail:{val}}));
+            }
             if(prev_sel) prev_sel.classList.remove('active');
             if(this.sel_el) this.sel_el.classList.add('active');
         })
