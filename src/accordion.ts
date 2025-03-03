@@ -77,8 +77,7 @@ export class AalamAccordion extends LitElement {
                 this.processedItems.add(item);
                 item.querySelector(this.togglesel)?.addEventListener(
                     "click",
-                    () => this.toggle(index)
-                );
+                    () => {this.toggle(Array.from(this.children).indexOf(item))});
                 if (item.classList.contains(this.activecls)) {
                     if (this.nomultiple && this.openItems.length >= 1) {
                         this._closeItem(item, index, false);
@@ -193,7 +192,7 @@ export class AalamAccordion extends LitElement {
             this._closeItem(item, index);
         } else {
             if (this.nomultiple && this.openItems.length > 0) {
-                this._closeItem(this.openItems[0], index);
+                this._closeItem(this.openItems[0], Array.from(this.children).indexOf(this.openItems[0]));
             }
             this._openItem(item, index);
         }

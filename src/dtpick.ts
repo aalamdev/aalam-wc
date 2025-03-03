@@ -1209,9 +1209,9 @@ ${cal.html(cls_map)}
                 if(mer)
                     this.mer2 = mer;
             }
-            if (id == 'date1' && this.date1 < this._min_dt)
+            if (id == 'date1' && this.date1 && this._min_dt && this.date1 < this._min_dt)
                 this.date1 = new Date(this._min_dt);
-            if (id == 'date2' && this.date2 && this.date2 > this._max_dt)
+            if (id == 'date2' && this.date2 && this._max_dt && this.date2 > this._max_dt)
                 this.date2 = new Date(this._max_dt);
             this._setDate(this.date1, this.date2);
         }
@@ -1572,7 +1572,6 @@ aalam-scroller::after {
 aalam-scroller::part(scroller-parent) {
     background:transparent;
     height:150px;
-    width:calc(100% - 30px);
 }
 aalam-scroller::part(scroller-el) {
     align-content:center;
