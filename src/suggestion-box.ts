@@ -392,6 +392,9 @@ export class AalamSuggestionBox extends LitElement {
             this.loadmore_slot[0].classList.remove(`${this.activecls}`);
             this._loadmoreEntry(event);
         }
+        let ev = event.target as HTMLElement;
+        if(ev.closest(this.closesel))
+            this.show_container = false;
     }
 
     private _setInputEvent(index: number) {
