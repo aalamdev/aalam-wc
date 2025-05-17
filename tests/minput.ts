@@ -377,23 +377,23 @@ data-n*="chars:2;type:num;gapnxt:10px;sepnxt::;ph:n*;nmax:15;nmin:1">
         expect(inp1.value).to.be.equal('6');
         expect(ev_dets.length).to.be.equal(5);
         expect(ev_dets[4].changed).to.be.equal("n1")
-        expect(ev_dets[4].old_val).to.equal('5')
-        expect(ev_dets[4].new_val).to.equal('6')
+        expect(ev_dets[4].old_val).to.equal(5)
+        expect(ev_dets[4].new_val).to.equal(6)
 
         await sendKeys({press:'ArrowUp'})
         expect(inp1.value).to.be.equal('7');
         expect(ev_dets.length).to.be.equal(6);
         expect(ev_dets[5].changed).to.equal("n1")
-        expect(ev_dets[5].old_val).to.equal('6')
-        expect(ev_dets[5].new_val).to.equal('7')
+        expect(ev_dets[5].old_val).to.equal(6)
+        expect(ev_dets[5].new_val).to.equal(7)
         ev_dets = [];
 
         await sendKeys({press:'ArrowUp'})
         expect(inp1.value).to.be.equal('2');
         expect(ev_dets.length).to.be.equal(1);
         expect(ev_dets[0].changed).to.equal("n1")
-        expect(ev_dets[0].old_val).to.equal('7')
-        expect(ev_dets[0].new_val).to.equal('2')
+        expect(ev_dets[0].old_val).to.equal(7)
+        expect(ev_dets[0].new_val).to.equal(2)
         ev_dets = [];
 
         inp2.click();
@@ -428,7 +428,7 @@ data-n*="chars:2;type:num;gapnxt:10px;sepnxt::;ph:n*;nmax:15;nmin:1">
         await sendKeys({type: '00'})
         expect(el.shadowRoot.activeElement).to.be.equal(inp3);
         expect(inp2.value).to.be.equal('1');
-        expect(ev_dets.length).to.be.equal(1);
+        expect(ev_dets.length).to.be.equal(2);
         expect(ev_dets[0].changed, "n2")
         expect(ev_dets[0].old_val, '11')
         expect(ev_dets[0].new_val, '1')
@@ -479,5 +479,201 @@ data-n*="chars:2;type:text;gapnxt:10px;sepnxt::;ph:n*">
         await sendKeys({press: 'ArrowRight'});
         expect(el.shadowRoot.activeElement).to.be.equal(inp3);
         expect(event_detail).to.equal(null);
+    })
+    it("event from backspace and delete when clear input", async () => {
+        const el = await fixture(html`<aalam-minput order="n1,n2,n3"
+data-n1="chars:1;type:number;nmax:7;nmin:2;loop:1"
+data-n*="chars:2;type:num;gapnxt:10px;sepnxt::;ph:n*;nmax:15;nmin:1">
+</aalam-minput>`);
+
+        let event_detail = null;
+        /*Check if the events are sent correctly and the value is read correctly*/
+        el.addEventListener("change", (event) => {
+            event_detail = event.detail});
+
+        let inp1 = el.shadowRoot.querySelector("#n1");
+        let inp2 = el.shadowRoot.querySelector("#n2");
+        let inp3 = el.shadowRoot.querySelector("#n3");
+        inp1.focus();
+
+        await sendKeys({type: '1121'});
+        expect(event_detail?.changed).to.equal('n2');
+        expect(event_detail?.old_val).to.equal(undefined);
+        expect(event_detail?.new_val).to.equal(12);
+
+        await sendKeys({press: 'Backspace'})
+        await sendKeys({press: 'Backspace'});
+        await sendKeys({press: 'Backspace'});
+        expect(event_detail?.changed).to.equal('n2');
+        expect(event_detail?.old_val).to.equal(12);
+        expect(event_detail?.new_val).to.equal('');
+
+        await sendKeys({press: 'Backspace'});
+        expect(event_detail.changed).to.equal('n1');
+        expect(event_detail.old_val).to.equal(2);
+        expect(event_detail.new_val).to.equal('');
+
+        await sendKeys({type: '1121'});
+        await sendKeys({press: 'ArrowLeft'});
+        await sendKeys({press: 'Backspace'});
+        expect(event_detail.changed).to.equal('n3');
+        expect(event_detail.old_val).to.equal(undefined);
+        expect(event_detail.new_val).to.equal(1);
+
+        await sendKeys({press: 'Delete'});
+        expect(event_detail.changed).to.equal('n3');
+        expect(event_detail.new_val).to.equal('');
+        expect(event_detail.old_val).to.equal(1);
+        expect(event_detail.all.n2).to.equal(1);
+
+    })
+    it("copy and paste inputs", async () => {
+        const el = await fixture(html`<aalam-minput order="n1,n2,n3"
+data-n1="chars:1;type:number;nmax:7;nmin:2;loop:1"
+data-n*="chars:2;type:num;gapnxt:10px;sepnxt::;ph:n*;nmax:15;nmin:1">
+</aalam-minput>`);
+        let event_detail = null;
+        /*Check if the events are sent correctly and the value is read correctly*/
+        el.addEventListener("change", (event) => {
+            event_detail = event.detail});
+
+        let inp1 = el.shadowRoot.querySelector("#n1");
+        let inp2 = el.shadowRoot.querySelector("#n2");
+        let inp3 = el.shadowRoot.querySelector("#n3");
+        inp1.focus();
+
+        await sendKeys({type: '123'});
+        expect(event_detail?.changed).to.equal('n3');
+        expect(event_detail?.old_val).to.equal(undefined);
+        expect(event_detail?.new_val).to.equal(3);
+        expect(event_detail?.all.n1).to.equal(2);
+        expect(event_detail?.all.n2).to.equal(2);
+
+        await sendKeys({type: '112'});
+        expect(event_detail?.changed).to.equal('n2');
+        expect(event_detail?.old_val).to.equal(2);
+        expect(event_detail?.new_val).to.equal(12);
+        expect(event_detail?.all.n1).to.equal(2);
+
+        await sendKeys({type: '56789'});
+        expect(event_detail?.changed).to.equal('n1');
+        expect(event_detail?.new_val).to.equal(7);
+        expect(event_detail?.old_val).to.equal(6);
+        expect(event_detail?.all['n2']).to.equal(7);
+        expect(event_detail?.all['n3']).to.equal(8);
+
+        /* paste event simulation */
+        event_detail = null;
+        inp1.value = inp2.value = inp3.value = '';
+        inp1.focus();
+        let paste_data = 56789;
+        const paste_ev = new ClipboardEvent('paste', {
+            bubbles: false,
+            clipboardData: new DataTransfer()
+        });
+        paste_ev.clipboardData.setData('text/plain', paste_data);
+        inp1.dispatchEvent(paste_ev);
+
+        expect(event_detail?.changed).to.equal('n2');
+        expect(event_detail?.new_val).to.equal(9);
+        expect(event_detail?.old_val).to.equal(6);
+        expect(event_detail?.all['n1']).to.equal(7);
+        expect(event_detail?.all['n2']).to.equal(9);
+        expect(event_detail?.all['n3']).to.equal(7);
+
+        const el2 = await fixture(html`<aalam-minput order="i1,i2,i3"
+data-i1="chars:1;type:text;loop:1"
+data-i*="chars:2;type:text;gapnxt:10px;sepnxt::;ph:n*">
+</aalam-minput>`);
+
+        let i1 = el2.shadowRoot.querySelector('#i1');
+        let i2 = el2.shadowRoot.querySelector('#i2');
+        let i3 = el2.shadowRoot.querySelector('#i3');
+
+        let detail = null;
+        /*Check if the events are sent correctly and the value is read correctly*/
+        el2.addEventListener("change", (event) => {
+            detail = event.detail});
+
+        paste_data = 'abcde';
+        paste_ev.clipboardData.setData('text/plain', paste_data);
+        i1.dispatchEvent(paste_ev);
+        expect(detail.changed).to.equal('i3');
+        expect(detail.old_val).to.equal(undefined);
+        expect(detail.new_val).to.equal('de');
+
+        expect(detail.all['i1']).to.equal('a');
+        expect(detail.all['i2']).to.equal('bc');
+        expect(detail.all['i3']).to.equal('de');
+
+        paste_data = 'abcde';
+        paste_ev.clipboardData.setData('text/plain', paste_data);
+        i2.select();
+        i2.dispatchEvent(paste_ev);
+        expect(detail.changed).to.equal('i1');
+        expect(detail.old_val).to.equal('a');
+        expect(detail.new_val).to.equal('e');
+
+        expect(detail.all['i1']).to.equal('e');
+        expect(detail.all['i2']).to.equal('ab');
+        expect(detail.all['i3']).to.equal('cd');
+
+        paste_data = 'abcdefgh';
+        paste_ev.clipboardData.setData('text/plain', paste_data);
+        i3.select();
+        i3.dispatchEvent(paste_ev);
+        expect(detail.changed).to.equal('i1');
+        expect(detail.old_val).to.equal('c');
+        expect(detail.new_val).to.equal('h');
+
+        expect(detail.all['i1']).to.equal('h');
+        expect(detail.all['i2']).to.equal('de');
+        expect(detail.all['i3']).to.equal('fg');
+
+        /* paste in-between characters */
+        const el3 = await fixture(html`<aalam-minput order="t1,t2,t3"
+data-t1="chars:3;type:text;loop:1"
+data-t*="chars:5;type:text;gapnxt:10px;sepnxt::;ph:n*">
+</aalam-minput>`);
+
+        let t1 = el3.shadowRoot.querySelector('#t1');
+        let t2 = el3.shadowRoot.querySelector('#t2');
+        let t3 = el3.shadowRoot.querySelector('#t3');
+
+        let dt = null;
+        /*Check if the events are sent correctly and the value is read correctly*/
+        el3.addEventListener("change", (event) => {
+            dt = event.detail});
+
+        t1.focus();
+        await sendKeys({type:'ab'});
+        await sendKeys({press: 'ArrowLeft'});
+
+        paste_data = 'cdefghi';
+        paste_ev.clipboardData.setData('text/plain', paste_data);
+        t1.dispatchEvent(paste_ev);
+
+        expect(dt.changed).to.equal('t2');
+        expect(dt.new_val).to.equal('defgh');
+        expect(dt.old_val).to.equal(undefined);
+        expect(dt.all['t1']).to.equal('acb');
+
+        paste_data = 'mnopqrst';
+        paste_ev.clipboardData.setData('text/plain', paste_data);
+        t3.dispatchEvent(paste_ev);
+
+        expect(dt.all['t3']).to.equal('imnop');
+        expect(dt.changed).to.equal('t1');
+        expect(dt.new_val).to.equal('qrs');
+        expect(dt.old_val).to.equal('acb');
+
+        t2.select();
+        paste_data = 'vwxyz';
+        paste_ev.clipboardData.setData('text/plain', paste_data);
+        t2.dispatchEvent(paste_ev);
+
+        expect(dt.changed).to.equal('t2');
+        expect(dt.new_val).to.equal(paste_data);
+        expect(dt.old_val).to.equal('defgh');
     })
 })
