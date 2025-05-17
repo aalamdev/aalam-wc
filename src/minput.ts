@@ -20,6 +20,8 @@ export class AalamManagedInputElement extends LitElement {
     private _items:string[] = [];
     private _dset:{[key:string]: {[key:string]:any}} = {};
     private _evnt_data:{[key:string]:any} = {};
+    private _cur_el:HTMLInputElement|null;
+    private _inp_replace:boolean;
     private _isNum = (spec:{[key:string]:string}) => ['n', 'num', 'number']
         .indexOf((spec['type'] || '').toLowerCase()) >= 0;
     private _getItemSpec(iname:string):{[key:string]:any} {
@@ -27,14 +29,13 @@ export class AalamManagedInputElement extends LitElement {
         if (!(iname in this._dset)) {
             if (!this.dataset[dkey]) {
                 for (let k of Object.keys(this.dataset)) {
-                    if (k[k.length - 1] == '*' &&
-                        iname.startsWith(k.substr(0, k.length - 1))) {
+                    let lc = k[k.length - 1];
+                    if ((lc == '*' || lc == '-') && iname.startsWith(k.substr(0, k.length - 1))) {
                         dkey = k;
                         break
                     }
                 }
                 if (!this.dataset[dkey]) {
-                    console.warn("No data attribute set for ", iname);
                     return this._dset[iname] = {}
                 }
             }
@@ -67,12 +68,12 @@ export class AalamManagedInputElement extends LitElement {
             sep_styles['text-align'] = 'center';
         }
         return html`
-<input id="${item}" part="inp-field" class="fld" data-ix="${index}"
+<input id="${item}" part="inp-field" class="fld" data-ix="${index}" @paste=${this.pasteEvent}
     type="${data.type == 'text'?'text':'tel'}" style=${styleMap(style_map)}
     placeholder="${data.ph}" @input=${this._inputEvent} @blur=${this._blurEvent}
     @keydown=${this._keyDownEvent} @click=${this._clickEvent}
     value=${data['choices']?.length?data['choices'][0]:null}
-    autocomplet="off"/>
+    autocomplete="off"/>
 ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}>${data['sepnxt']}</div>`)}
 `
     }
@@ -97,7 +98,8 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
         return false
     }
     private _clickEvent(event:PointerEvent) {
-        (event.target as HTMLInputElement).select();
+        this._cur_el = event.target as HTMLInputElement;
+        this._cur_el.select();
     }
     private _keyDownEvent(event:KeyboardEvent) {
         let el = event.target as HTMLInputElement;
@@ -114,9 +116,9 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
                     event.preventDefault();
                     return false;
                 }
-                let nxt_el = this.input_els[nxt_ix];
-                nxt_el.focus();
-                nxt_el.selectionStart = nxt_el.selectionEnd = 0;
+                this._cur_el = this.input_els[nxt_ix];
+                this._cur_el.focus();
+                this._cur_el.selectionStart = this._cur_el.selectionEnd = 0;
                 if (event.key == 'ArrowRight')
                     event.preventDefault();
             } else if (data['choices']?.length && event.key == 'Delete') {
@@ -130,9 +132,9 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
                     event.preventDefault();
                     return false;
                 }
-                let prev_el = this.input_els[prev_ix]
-                prev_el.focus();
-                prev_el.selectionStart = prev_el.selectionEnd = prev_el.value.length;
+                this._cur_el = this.input_els[prev_ix];
+                this._cur_el.focus();
+                this._cur_el.selectionStart = this._cur_el.selectionEnd = this._cur_el.value.length;
                 if (event.key == 'ArrowLeft')
                     event.preventDefault();
             } else if (data['choices']?.length && event.key == 'Backspace') {
@@ -181,7 +183,7 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
                                     +data['nmax'] < +(o.slice(0, ss) +
                                                       event.key +
                                                       o.slice(ss))
-                if (inp_el.value.length >= +data['chars'] || limit_crossed) {
+                if (event.key == ' ' || inp_el.value.length >= +data['chars'] || limit_crossed) {
                     event.preventDefault();
                     return false;
                 }
@@ -191,11 +193,11 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
     }
     private _raiseEvent(el:HTMLInputElement, spec:{[key:string]:string}) {
         let fld = el.id;
-        let is_num = this._isNum(spec)
-        if (this._evnt_data[fld] == (is_num?+el.value:el.value))
+        let new_val = this._isNum(spec) && el.value.toString().trim().length ? +el.value : el.value;
+        if ((!this._evnt_data[fld] && !new_val.toString().length) || (this._evnt_data[fld] == new_val))
             return;
         let old_val = this._evnt_data[fld];
-        this._evnt_data[fld] = is_num?el.value:el.value;
+        this._evnt_data[fld] = new_val;
         this.dispatchEvent(new CustomEvent('change', {
             bubbles: true,
             cancelable: true,
@@ -215,7 +217,42 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
          * character limit while key input event, but the input is focussed out.
          */
         this._resetChoiceVal(el)
-        this._raiseEvent(el, this._getItemSpec(el.id));
+        let item_spec = this._getItemSpec(el.id);
+        if(el.value.length < item_spec['chars'])
+            this._raiseEvent(el, this._getItemSpec(el.id));
+    }
+    private pasteEvent(event:ClipboardEvent) {
+        this._cur_el = event.target as HTMLInputElement;
+        let clip_data = event.clipboardData;
+        if(!this._cur_el || !clip_data) return;
+        let val = clip_data.getData('text');
+        event.preventDefault();
+        let sel_el = this._cur_el;
+        let char_lim = this._getItemSpec(this._cur_el.id)['chars'];
+        let start = this._cur_el.selectionStart ?? 0;
+        let end = '';
+        if(this._cur_el.selectionEnd)
+            end = this._cur_el.value.slice(this._cur_el.selectionEnd);
+        for(const char of val) {
+            if(char == ' ') continue;
+            this._inp_replace = false;
+            if(sel_el != this._cur_el) {
+                sel_el = this._cur_el;
+                start = 0;
+                if(end.length)
+                    end = '';
+                char_lim = this._getItemSpec(this._cur_el.id)['chars'];
+            }
+            let val = this._cur_el.value;
+            val = val.slice(0, start) + char + end;
+            this._cur_el.value = val;
+            ++start;
+            if(this._cur_el?.value.length < char_lim)
+                this._inp_replace = true;
+            const inp_ev = new Event('input', {bubbles:false});
+            this._cur_el?.dispatchEvent(inp_ev);
+        }
+        this._inp_replace = false;
     }
     private _inputEvent(event:KeyboardEvent) {
         let etgt = event.target as HTMLInputElement;
@@ -226,17 +263,19 @@ ${when(data['sepnxt'] && !is_last, () => html`<div style=${styleMap(sep_styles)}
         let cur_data = this._getItemSpec(cur_fld);
         let cur_el:HTMLInputElement = etgt;
         let is_num = this._isNum(cur_data);
-        let limit_crossed = is_num && cur_data['nmax'] && +cur_data['nmax'] < +(cur_el.value + '0')
-        if (cur_el.value.length >= +cur_data['chars'] || limit_crossed) {
-            if (limit_crossed && cur_el.value.length > +cur_data['chars'])
+        let limit_crossed = is_num && cur_data['nmax'] && +cur_data['nmax'] < +(cur_el.value + '0');
+        if ((!this._inp_replace && cur_el.value.length >= +cur_data['chars']) || limit_crossed) {
+            if (limit_crossed && +cur_el.value > +cur_data['nmax'])
                 cur_el.value = cur_data['nmax'];
             else if (is_num && cur_data['nmin'] && +cur_el.value < +cur_data['nmin'])
                 cur_el.value = cur_data['nmin'];
             let nxt_el = this.input_els[nxt_ix];
             nxt_el.focus();
             nxt_el.select();
+            this._cur_el = nxt_el;
             this._raiseEvent(cur_el, cur_data);
-        }
+        } else if(!cur_el.value)
+            this._raiseEvent(cur_el, cur_data);
     }
     private _valueChanged() {
         let obj = parseAttrVal(this.value);
@@ -272,7 +311,7 @@ ${map(this._items, (item, index) => this._itemHtml(item, index))}
     }
     static override get styles() {
         return css`
-:host {display:inline-block;}
+:host {display:flex}
 input,input:focus {border:0;padding:0;outline:0;background:transparent;color:inherit;font-size:inherit;line-height:inherit;}
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
