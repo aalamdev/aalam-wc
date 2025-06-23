@@ -33,3 +33,7 @@ and run:
 npm install .
 npm run dev
 ```
+
+## Documentation
+
+You can check the instructions on how to use these components [in here](doc/README.md)
