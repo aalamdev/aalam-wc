@@ -25,7 +25,7 @@ This is a normal input box which shows suggestions based on the user input
    | Prototype                                                      | Description                                                                                                                                           |
 |----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `setSuggestions(suggestions: object[], hasMore?: boolean)`    | This will set the suggestion elements. The suggestions will be a string array. The idea is that each suggestion item can either be a string, or a dom string.                |
-| `appendSuggestions(suggestions: object[], hasMore?:` boolean)'  |This call should append the suggestions to the existing list. Will be used on the load more event.|                                                                   
+| `appendSuggestions(suggestions: object[], hasMore?: boolean)`  |This call should append the suggestions to the existing list. Will be used on the load more event.|                                                                   
                                                                                                                                       
 **Events:**
 | Name     | Description                                                                                      |
