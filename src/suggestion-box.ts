@@ -291,10 +291,12 @@ export class AalamSuggestionBox extends LitElement {
         }
         if (Array.isArray(this.list) && this.list.length > 0) {
             if (this._actual_inp_value) {
-                this.filtered_list = this.list.filter((item) =>
-                    this._isMatching(item, this._actual_inp_value)
-                );
-                this.setSuggestions(this.filtered_list, false);
+                if (this._actual_inp_value.length >= min_char) {
+                    this.filtered_list = this.list.filter((item) =>
+                        this._isMatching(item, this._actual_inp_value)
+                    );
+                    this.setSuggestions(this.filtered_list, false);
+                }
             } else {
                 this.show_empty = true;
                 if (this._actual_inp_value.length == 0)
@@ -306,7 +308,7 @@ export class AalamSuggestionBox extends LitElement {
             composed: true,
             detail: {list: this.filtered_list, value: this._actual_inp_value}
         });
-        let ev_ret = this.dispatchEvent(input);
+        this.dispatchEvent(input);
     }
 
     private _isMatching(item: any, value: string): boolean {
