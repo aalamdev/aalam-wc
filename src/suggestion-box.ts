@@ -289,33 +289,24 @@ export class AalamSuggestionBox extends LitElement {
         if (previousMatchElement) {
             previousMatchElement.remove();
         }
-
-        if (this._actual_inp_value.length >= min_char) {
-            if (Array.isArray(this.list)) {
-                if (this._actual_inp_value) {
-                    this.filtered_list = this.list.filter((item) =>
-                        this._isMatching(item, this._actual_inp_value)
-                    );
-                    this.setSuggestions(this.filtered_list, false);
-                } else {
-                    this.show_empty = true;
-                    if (this._actual_inp_value.length == 0)
-                        this.show_container = this.empty_slot.length > 0;
-                }
+        if (Array.isArray(this.list) && this.list.length > 0) {
+            if (this._actual_inp_value) {
+                this.filtered_list = this.list.filter((item) =>
+                    this._isMatching(item, this._actual_inp_value)
+                );
+                this.setSuggestions(this.filtered_list, false);
+            } else {
+                this.show_empty = true;
+                if (this._actual_inp_value.length == 0)
+                    this.show_container = this.empty_slot.length > 0;
             }
-            const input = new CustomEvent("input", {
-                bubbles: true,
-                composed: true,
-                detail: {list: this.filtered_list, value: this._actual_inp_value}
-            });
-            this.dispatchEvent(input);
-        } else {
-            this.filtered_list = [];
-            this.show_empty = true;
-            this.setSuggestions(this.filtered_list, false);
-            if (this._actual_inp_value.length == 0)
-                this.show_container = this.empty_slot.length > 0;
         }
+        const input = new CustomEvent("input", {
+            bubbles: true,
+            composed: true,
+            detail: {list: this.filtered_list, value: this._actual_inp_value}
+        });
+        let ev_ret = this.dispatchEvent(input);
     }
 
     private _isMatching(item: any, value: string): boolean {
@@ -471,8 +462,9 @@ export class AalamSuggestionBox extends LitElement {
             !this.result.length
                 ? true
                 : false;
-
-        this.show_container = !this.show_nomatch || this.nomatch_slot.length > 0;
+        this.show_container = (this.show_nomatch && this.nomatch_slot.length > 0) ||
+                              (this.result.length > 0) ||
+                              (this.show_empty && this.empty_slot.length > 0);
         this._processedSuggestion(suggestions, has_more);
     }
 
