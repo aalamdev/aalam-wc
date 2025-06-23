@@ -14,7 +14,7 @@ on how to use each of the webcomponent can be seen in detail.
 8. [Tab Switch](tabs.md)
 9. [Dropdown](dropdown.md)
 10. [Tool Tip](tooltip.md)
-11. [Input box with custom label](md-input.md)
+11. [Input box with custom label](input.md)
 12. [Nav Menu](navmenu.md)
 13. [Nav bar](navbar.md)
 14. [Text Loop](txtloop.md)
