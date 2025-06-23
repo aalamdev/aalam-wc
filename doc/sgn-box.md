@@ -17,7 +17,7 @@ This is a normal input box which shows suggestions based on the user input
 **Properties**
 | Name | Values                  | Description                           |
 |------|-------------------------|---------------------------------------|
-| list | String[] \| object[]    | Predefined list to filter from.       |
+| list |` String[] \| object[]`    | Predefined list to filter from.       |
 
 
 
