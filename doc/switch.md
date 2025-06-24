@@ -2,6 +2,7 @@
 #### Tag Name:
 
 `<aalam-switch>`
+
 **Description:**
 
 This produces a switch that toggles from left to right.
