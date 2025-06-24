@@ -6,6 +6,7 @@
 #### Description:
 
 This element lets you choose a date/month/year/time or a range from a calendar setup.
+
 **Attributes:**
 | Name   | Values | Description |
 |--------|--------|-------------|
