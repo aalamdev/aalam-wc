@@ -17,6 +17,7 @@ This element creates a drop down toggle
 | `position`   | Enum `bottom-left`,`bottom-left`, `bottom-right`, `top-left`, `top-right`, `top`, `bottom`, `left`, `right`, `right-bottom`, `right-top`, `left-bottom`, `left-top` <br> default: bottom-left|The position of the dropdown relative to the toggler.<br><br>bottom-right means, the dropdown should be shown below the bottom of the toggler and the right end of the dropdown should be in the same line as the right of the toggler.<br><br>right-bottom means, the dropdown should be shown at the right side of the toggler and the top of the dropdown and top of the toggler are aligned.<br>top, bottom - Means the dropdown is aligned to the boundary and the body of the dropdown should be aligned to the center of the x limit|
 | `noflip`     | Boolean (default: `false`) | When set, the dropdown will not be flipped due to space constraints.|
 | `offset`     | Number (default: `0`) | The gap between the dropdown and the toggler|
+|
 **Methods:**
 | Prototype | Description         |
 |-----------|---------------------|
