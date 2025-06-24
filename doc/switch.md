@@ -14,6 +14,7 @@ This produces a switch that toggles from left to right.
 | style  | CSS style value               | Following attributes are accepted <br><br>**width**: The width of the switch. Only pixel values are supported. Default 28px. <br>**height**: The height of the switch. Only pixel values are supported. Default 16px. |
 
 **Methods:**
+
 No Methods.
 
 **Events:**
