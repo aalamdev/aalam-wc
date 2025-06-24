@@ -31,8 +31,8 @@ This element creates a drop down toggle
 **Slots:**
 | Name       | Description             |
 |------------|-------------------------|
-| dd-toggler | This is the toggle initiator |
-| dd-body    | The dropdown body       |
+|` dd-toggler `| This is the toggle initiator |
+|` dd-body  `  | The dropdown body       |
 #### Note:
 
 Can use [https://floating-ui.com/docs/offset](https://floating-ui.com/docs/offset) for positioning
