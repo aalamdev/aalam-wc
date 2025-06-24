@@ -1,13 +1,13 @@
 ## Slider
-**Tag Name:**
+#### Tag Name:
 
 `<aalam-slider>`
 
-**Description:**
+#### Description:
 
 This produces a sliding component that slides its children one after the other horizontally.
 
-**Attributes:**
+#### Attributes:
 | Name        | Values | Description |
 |-------------|--------|-------------|
 | loop        | Boolean<br>`Default : false` | If present, the slider should not end. After the last element, the first element will be shown. Default - false |
@@ -18,20 +18,20 @@ This produces a sliding component that slides its children one after the other h
 | anchorindex | Number<br>`Default : 0` | This attribute will let the application know and set the active element to be shown in the slider. If “center” is set, this would be at the center of the slide; else, this would be at the left most side of the slider. At each and every sliding, this anchor index will change. |
 | gap         | String<br>`Default: “s:0px”` | CSS dimension which describes the gap between slider items for different screen dimensions. It is of the following format `<screen-size>:<gap-value>;<screen-size>:<gap-value>`<br>Screen size - s, m, l, xl and 2xl<br>If a value is set for lower screen, the same value will be used for higher screen till a value is set for a much higher screen size |
 
-**Methods:**
+#### Methods:
 | Prototype             | Description |
 |-----------------------|-------------|
 | `next()`              | Slides to the next element. |
 | `prev()`              | Slides to the previous element. |
 | `show(index: number)` | Slides to the element at the given index. Index starts from `0` to `items.length - 1`. |
 
-**Events:**
+#### Events:
 | Name         | Description |
 |--------------|-------------|
 | `itemshown`  |Raised for each of the item(s) that are shown in the last sliding. The detail attribute of the event has the element that is shown |
 | `itemhidden` | Raised for each of the item(s) that are hidden in the last sliding. The detail attribute of the event will have the element that is hiding.|
 
-**Slots:**
+#### Slots:
 | Name             | Description |
 |------------------|-------------|
 | `slide-item`     | Every item to be slid should be slotted with this name. |
@@ -39,7 +39,7 @@ This produces a sliding component that slides its children one after the other h
 | `nav-next`       | Clicking this navigates to the next slide. By default, a left-arrow appears at the left-center of the slider view. |
 | `nav-guide-item` | If present, this template will be used to create the navigation guides. |
 
-**CSS Parts**
+#### CSS Parts:
 | Name        | Description |
 |-------------|-------------|
 | `nav-guide` | This is the guide navigation containing a list of page indicators. Clicking on an indicator will directly navigate to the corresponding slide item. |
