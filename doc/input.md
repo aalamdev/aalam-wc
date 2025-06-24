@@ -15,7 +15,8 @@ This element displays an input box as per the material design with the label ins
 | disabled  | Boolean                                          | When present, it means the input box will be in disabled state.                                                                                                                       |
 | prefix    | String (default: `""`)                           | A prefix text                                                                                                                         |
 | suffix    | String (default: `""`)                           | A suffix text                                                                                                                         |
-| charcount | Number                                           | When set, it will accept max this number of characters and a char count indication will be shown at the bottom of the input.
+| charcount | Number                                           | When set, it will accept max this number of characters and a char count indication will be shown at the bottom of the input.|
+
 **Slots:**
 | Name          | Description                                |
 |---------------|--------------------------------------------|
