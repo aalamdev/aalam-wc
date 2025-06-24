@@ -1,7 +1,6 @@
 # Modal
 **Tag Name:**
-
-	`<aalam-modal>`
+     `<aalam-modal>`
  
 **Description:**
 
