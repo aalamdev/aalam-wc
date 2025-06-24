@@ -7,6 +7,7 @@
 #### Description:
 
 This element builds an accordion
+
 **Attributes:**
 | Name         | Values                       | Description |
 |--------------|------------------------------|-------------|
