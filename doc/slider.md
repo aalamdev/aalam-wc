@@ -1,8 +1,12 @@
 ## Slider
 **Tag Name:**
+
 `<aalam-slider>`
+
 **Description:**
+
 This produces a sliding component that slides its children one after the other horizontally.
+
 **Attributes:**
 | Name        | Values | Description |
 |-------------|--------|-------------|
