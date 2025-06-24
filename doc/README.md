@@ -1,3 +1,4 @@
+[🏠 Home](https://github.com/Akilanan/aalam-wc/tree/master)
 #Aalam Webcomponents
 Webcomponents can be used independent of the application framework and following are 
 some of the webcomponent solving specific user interaction problems. The specification
