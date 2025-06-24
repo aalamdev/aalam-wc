@@ -1,4 +1,4 @@
-[🏠 Home](repo:Akilanan/aalam-wc)
+[🏠 Home]`(repo:Akilanan/aalam-wc)`
 # Suggestion Box
 #### Tag name
 `<aalam-sgn-box>`
