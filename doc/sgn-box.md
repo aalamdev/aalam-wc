@@ -3,6 +3,7 @@
 `<aalam-sgn-box>`
 #### Description
 This is a normal input box which shows suggestions based on the user input
+
 #### Attributes
 | Name       | Values                            | Description                                                                                                                                      |
 |------------|-----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -14,27 +15,27 @@ This is a normal input box which shows suggestions based on the user input
 | itemcls    | String (default: `sgn-item`)      | When the suggestion item is a string, it will be appended to the list of suggestions carrying this class name.                                   |
 |closesel|String (default:`.dd-close`)|When presenting the dropdown with any elements that when clicked should close the dropdown will carry this selector|
 
-**Properties**
+#### Properties:
 | Name | Values                  | Description                           |
 |------|-------------------------|---------------------------------------|
 | list |` String[] \| object[]`    | Predefined list to filter from.       |
 
 
 
- **Methods:**                                                                                                                         
+#### Methods:                                                                                                                         
    | Prototype                                                      | Description                                                                                                                                           |
 |----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `setSuggestions(suggestions: object[], hasMore?: boolean)`    | This will set the suggestion elements. The suggestions will be a string array. The idea is that each suggestion item can either be a string, or a dom string.                |
 | `appendSuggestions(suggestions: object[], hasMore?: boolean)`  |This call should append the suggestions to the existing list. Will be used on the load more event.|                                                                   
                                                                                                                                       
-**Events:**
+#### Events:
 | Name     | Description                                                                                      |
 |----------|--------------------------------------------------------------------------------------------------|
 |` input `   | This will be called when the input value is changed. This will be called only when the input value is more than minChar       |
 | `select`   | The suggestion input would be returned as the parameter        |
 |` loadmore` | When load more is pressed                                         |
 
-**Slots:**
+#### Slots:
 | Name             | Description                                                                                                                                                                                                                                                                                                                                                                         |
 |------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `sgn-input`      | This slot will by default have an input box if unslotted. If slotted, it should have an input element as part of it. Else an exception will be thrown, and the behaviour of the element will be unexpected.                                                                                                                                                                        |
