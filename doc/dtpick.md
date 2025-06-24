@@ -22,6 +22,7 @@ This element lets you choose a date/month/year/time or a range from a calendar s
 |--------------------------------------------------|-------------|
 | `static fromStr(str: string, in_format: string)` | Converts a date string (`str`) into a `Date` object using the specified input format (`in_format`). |
 | `static toStr(obj: Date, out_format: string)`    |Static method to convert a date object to string with the out date in the out_format |
+
 **Events:**
 | Name     | Description |
 |----------|-------------|
