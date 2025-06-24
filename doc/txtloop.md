@@ -35,6 +35,7 @@ Following are the valid animation names
 
 **fade** - Fade in and fade out based on the context.
 
+
 **Events:**
 | Name   | Description                                                                                                                                                          |
 |--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
