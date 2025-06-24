@@ -7,13 +7,13 @@
 
 This element display a tooltip whenever a child of this tag is hovered upon.
 
-**Attributes:**
+#### Attributes:
 | Name     | Values                    | Description                                                   |
 |----------|---------------------------|---------------------------------------------------------------|
 | `msg`      | String `(default: "This is a tooltip")` | The actual tooltip message                          |
 | position | `Enum: top \| bottom \| right \| left <br>Default: top` | The position to display the tooltip relative to the child |
 
-**CSS Parts**
+#### CSS Parts:
 | Name     | Description                 |
 |----------|-----------------------------|
 | `tt-body`  | This denotes the body part. |
