@@ -7,7 +7,7 @@
 
 This element loops its children (list of text elements) to show one child for a prefixed interval.
 
-**Attributes:**
+#### Attributes:
 | Name          | Values                                           | Description                                                                                                                                                                                                                                                                                                  |
 |---------------|--------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | interval      | Number<br>`Default: 3 `                            | The amount of seconds to wait before changing the text element                                                                                                                                                                                                       |
@@ -37,7 +37,7 @@ Following are the valid animation names
 **fade** - Fade in and fade out based on the context.
 
 
-**Events:**
+#### Events:
 | Name   | Description                                                                                                                                                          |
 |--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | change | Raised when a change happens, with the detail having the following data, after the hide animation is completed.<br>{<br>hiding: The index of the child that is being hidden<br>showing: The index of the child that is being shown<br>} |
