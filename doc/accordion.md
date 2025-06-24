@@ -8,7 +8,7 @@
 
 This element builds an accordion
 
-**Attributes:**
+#### Attributes:
 | Name         | Values                       | Description |
 |--------------|------------------------------|-------------|
 | togglesel    | String<br>`Default: .acc-title `| The selector of the accordion item to monitor to toggle that respective accordion. |
@@ -18,15 +18,17 @@ This element builds an accordion
 | nomultiple   | Boolean<br>`Default : false `   | If present, it will not allow more than one item to be opened at any instant. If a new item is toggled to open, the previously open element will collapse. |
 | animationDur | Number<br>`Default: 200 `       | The number of milliseconds for the animation. If it's 0, then the toggling will not be animated. |
 
-**Methods:**
+#### Methods:
 | Prototype              | Description                             |
 |------------------------|-----------------------------------------|
 | `toggle(index: number)` |Toggle (open/close) the element at index. |
-**Events:**
+
+#### Events:
 | Name            | Description                     |
 |-----------------|---------------------------------|
 | `itemopened`    | Raised when an item is opened.  |
 | `itemcollapsed` | Raised when an item is closed.  |
+
 #### Notes:
 
 When this element is getting created, the accordion items with “activecls” will be opened and the rest of them remain closed. If nomultiple is set, then the first accordion item with the activecls will be opened and rest will be collapsed.
