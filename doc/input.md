@@ -9,7 +9,7 @@ This element displays an input box as per the material design with the label ins
 **Attributes:**
 | Name      | Values                                           | Description                                                                                                                                                     |
 |-----------|--------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| label     | String (default: "Label")                        | The label for the text field/input box                                                                                                                          |
+| label     | String `(default: "Label")`                        | The label for the text field/input box                                                                                                                          |
 | mode      | Enum: `filled` \| `outline` \| `normal` <br>Default: `filled` | As per [https://m2.material.io/components/text-fields](https://m2.material.io/components/text-fields)<br>Normal mode will have a label followed by the input box. The label can be slotted at normal-label.                                 |
 | color     | String (default: `currentColor`)                 | The color to be used for the outline and label text                                                                                                             |
 | disabled  | Boolean                                          | When present, it means the input box will be in disabled state.                                                                                                                       |
@@ -20,10 +20,10 @@ This element displays an input box as per the material design with the label ins
 | Name          | Description                                |
 |---------------|--------------------------------------------|
 | input         | This is the actual input element            |
-| leading-icon  | Icon(s) to be shown at the left end         |
-| trailing-icon | Icon(s) to be shown at the right end        |
-| helper-text   | The help message to be shown                |
-| normal-label  | An optional slot to have a custom label for the normal mode |
+| `leading-icon`  | Icon(s) to be shown at the left end         |
+| `trailing-icon` | Icon(s) to be shown at the right end        |
+| `helper-text`   | The help message to be shown                |
+| `normal-label`  | An optional slot to have a custom label for the normal mode |
    #### Note:
 
 This element is displayed as a block element and will occupy the entire width of its parent.The input box width will expand to occupy the space that's remaining after displaying the trailing and leading icons.                                         |
