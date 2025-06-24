@@ -6,6 +6,7 @@
 #### Description:
 
 This element creates a drop down toggle
+
 **Attributes:**
 | Name         | Values | Description |
 |--------------|--------|-------------|
