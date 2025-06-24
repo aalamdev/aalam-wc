@@ -24,11 +24,13 @@ This produces a sliding component that slides its children one after the other h
 | `next()`              | Slides to the next element. |
 | `prev()`              | Slides to the previous element. |
 | `show(index: number)` | Slides to the element at the given index. Index starts from `0` to `items.length - 1`. |
+
 **Events:**
 | Name         | Description |
 |--------------|-------------|
 | `itemshown`  |Raised for each of the item(s) that are shown in the last sliding. The detail attribute of the event has the element that is shown |
 | `itemhidden` | Raised for each of the item(s) that are hidden in the last sliding. The detail attribute of the event will have the element that is hiding.|
+
 **Slots:**
 | Name             | Description |
 |------------------|-------------|
