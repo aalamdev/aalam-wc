@@ -1,7 +1,7 @@
 ## Sticky Element
 #### Tag Name:
 
-<aalam-sticky>
+`<aalam-sticky>`
 
 #### Description:
 
