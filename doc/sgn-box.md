@@ -1,4 +1,3 @@
-[🏠 Home](https://github.com/Akilanan/aalam-wc/tree/master)
 # Suggestion Box
 #### Tag name
 `<aalam-sgn-box>`
