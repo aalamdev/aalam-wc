@@ -16,8 +16,8 @@ This element display a tooltip whenever a child of this tag is hovered upon.
 **CSS Parts**
 | Name     | Description                 |
 |----------|-----------------------------|
-| tt-body  | This denotes the body part. |
-| tt-arrow | This denotes the arrow part.|
+| `tt-body`  | This denotes the body part. |
+| `tt-arrow` | This denotes the arrow part.|
 
 #### Note:
 
