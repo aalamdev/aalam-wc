@@ -34,6 +34,7 @@ This is a normal input box which shows suggestions based on the user input
 |` input `   | This will be called when the input value is changed. This will be called only when the input value is more than minChar       |
 | `select`   | The suggestion input would be returned as the parameter        |
 |` loadmore` | When load more is pressed                                         |
+
 **Slots:**
 | Name             | Description                                                                                                                                                                                                                                                                                                                                                                         |
 |------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
