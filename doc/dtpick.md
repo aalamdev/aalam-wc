@@ -28,6 +28,7 @@ This element lets you choose a date/month/year/time or a range from a calendar s
 | Name     | Description |
 |----------|-------------|
 | `change` | When a selection is made. The event’s detail attribute will be an object with the following fields.<br>{<br>**date**: Date object,<br>**value**: Date in string format.<br>}<br>For range based picking the detail will be<br>{<br>**from**: date object for the beginning,<br>**to**: date object for the end.<br>**value**: Date string from and to separated by semicolon(;)<br>}|
+
 **CSS Parts**
 | Name                    | Description |
 |-------------------------|-------------|
