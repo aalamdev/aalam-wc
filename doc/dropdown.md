@@ -7,7 +7,7 @@
 
 This element creates a drop down toggle
 
-**Attributes:**
+#### Attributes:
 | Name         | Values | Description |
 |--------------|--------|-------------|
 | `animation`  | String (default: `""`) |The string value can be either of one format<br>**Format 1:** <br>show`<revealanimation-name>`;hide:`<conceal-animation-name>`<br>**Format 2:**<br>`<reveal-animation-name>`<br>Reveal Animation name is one among<br><br>**reveal-x** - The dropdown will be revealed from left to right or right to left whichever is appropriate.<br>**reveal-y** - The dropdown will be revealed from top to bottom or bottom to top whichever is appropriate for the dropdown position<br>**fade-in** - The dropdown’s opacity moves from 0 to 1<br><br>Conceal Animation name is one among<br>**conceal-x** - Dropdown body is closing in the x direction (left to right or right to left)<br>**conceal-y** - Dropdown body is closing in the y direction (top to bottom or bottom to top)<br>**fade-out** - Dropdown’s opacity moves from 1 to 0.<br>If either “show” or “hide” is missing in format 1, the body will not be animated at the respective occasion.<br>If format 2 is chosen, this implies the animation to be used while showing the body and the corresponding opposite animation will be used while hiding. |
@@ -19,22 +19,24 @@ This element creates a drop down toggle
 | `noflip`     | Boolean (default: `false`) | When set, the dropdown will not be flipped due to space constraints.|
 | `offset`     | Number (default: `0`) | The gap between the dropdown and the toggler|
 
-**Methods:**
+#### Methods:
 | Prototype | Description         |
 |-----------|---------------------|
 | `show()`  | Show the dropdown.  |
 | `hide()`  | Hide the dropdown.  |
 
-**Events:**
+#### Events:
 | Name  | Description                  |
 |-------|------------------------------|
 | show  | Raised when the dropdown is shown  |
 | hide  | Raised when the dropdown is hidden |
-**Slots:**
+
+#### Slots:
 | Name       | Description             |
 |------------|-------------------------|
 |` dd-toggler `| This is the toggle initiator |
 |` dd-body  `  | The dropdown body       |
+
 #### Note:
 
 Can use [https://floating-ui.com/docs/offset](https://floating-ui.com/docs/offset) for positioning
