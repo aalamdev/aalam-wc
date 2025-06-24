@@ -7,7 +7,7 @@
 
 This element lets you choose a date/month/year/time or a range from a calendar setup.
 
-**Attributes:**
+#### Attributes:
 | Name   | Values | Description |
 |--------|--------|-------------|
 | value | String<br>`Default: null` | The initial value and the value that’s chosen currently. If its range, the from and end date string is separated by semicolon (;) |
@@ -18,18 +18,18 @@ This element lets you choose a date/month/year/time or a range from a calendar s
 
 
 
-**Methods:**
+#### Methods:
 | Prototype                                        | Description |
 |--------------------------------------------------|-------------|
 | `static fromStr(str: string, in_format: string)` | Converts a date string (`str`) into a `Date` object using the specified input format (`in_format`). |
 | `static toStr(obj: Date, out_format: string)`    |Static method to convert a date object to string with the out date in the out_format |
 
-**Events:**
+#### Events:
 | Name     | Description |
 |----------|-------------|
 | `change` | When a selection is made. The event’s detail attribute will be an object with the following fields.<br>{<br>**date**: Date object,<br>**value**: Date in string format.<br>}<br>For range based picking the detail will be<br>{<br>**from**: date object for the beginning,<br>**to**: date object for the end.<br>**value**: Date string from and to separated by semicolon(;)<br>}|
 
-**CSS Parts**
+#### CSS Parts:
 | Name                    | Description |
 |-------------------------|-------------|
 | `cal-title`              | The title element holding the calendar’s month and year |
@@ -58,7 +58,7 @@ This element lets you choose a date/month/year/time or a range from a calendar s
 | `nav-selector-month `     | The month navigation selector. Navigates to months of years |
 | `nav-selector-year `      | The year navigation selector. Navigates to decades of years to enable easy year selection. |
 
-**Notes:**
+#### Notes:
 
 If a cal-day, or a month-in-year, or a year-in-years fall in the range of selection, two css variables will be set. Available only when the “range” attribute is set.
 
