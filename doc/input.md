@@ -6,6 +6,7 @@
 #### Description:
 
 This element displays an input box as per the material design with the label inside the empty input box without focus. When the input box gains focus, the label moves to the top of the input box and size becomes small.
+
 **Attributes:**
 | Name      | Values                                           | Description                                                                                                                                                     |
 |-----------|--------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
