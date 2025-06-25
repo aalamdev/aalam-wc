@@ -1,6 +1,7 @@
 [🏠 Home](https://github.com/Akilanan/aalam-wc/tree/master)
 
-#Aalam Webcomponents
+# Aalam Webcomponents
+
 Webcomponents can be used independent of the application framework and following are 
 some of the webcomponent solving specific user interaction problems. The specification
 on how to use each of the webcomponent can be seen in detail.
@@ -8,7 +9,7 @@ on how to use each of the webcomponent can be seen in detail.
 ## Table of contents
 1. [Suggestion Box](sgn-box.md)
 2. [Slider](slider.md)
-3. [model](modal.md)
+3. [modal](modal.md)
 4. [Toggle Switch](switch.md)
 5. [Accordion](accordion.md)
 6. [Date Picker](dtpick.md)
