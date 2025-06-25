@@ -1,3 +1,4 @@
+[🏠 Home](https://github.com/Akilanan/aalam-wc/tree/master/doc)
 # Modal
 #### Tag Name:
      `<aalam-modal>`
