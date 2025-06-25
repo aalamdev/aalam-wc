@@ -1,4 +1,4 @@
-[🏠 Home](https://github.com/Akilanan/aalam-wc/tree/master)
+[🏠 Home](https://github.com/Akilanan/aalam-wc/tree/master/doc)
 
 # Suggestion Box
 #### Tag name
