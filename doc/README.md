@@ -1,5 +1,3 @@
-[🏠 Home](https://github.com/Akilanan/aalam-wc/tree/master)
-
 # Aalam Webcomponents
 
 Webcomponents can be used independent of the application framework and following are 
