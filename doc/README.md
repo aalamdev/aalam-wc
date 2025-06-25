@@ -7,7 +7,7 @@ on how to use each of the webcomponent can be seen in detail.
 ## Table of contents
 1. [Suggestion Box](sgn-box.md)
 2. [Slider](slider.md)
-3. [modal](modal.md)
+3. [Modal](modal.md)
 4. [Toggle Switch](switch.md)
 5. [Accordion](accordion.md)
 6. [Date Picker](dtpick.md)
