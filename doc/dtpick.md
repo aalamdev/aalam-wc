@@ -12,7 +12,7 @@ This element lets you choose a date/month/year/time or a range from a calendar s
 | Name   | Values | Description |
 |--------|--------|-------------|
 | value | String<br>`Default: null` | The initial value and the value that’s chosen currently. If its range, the from and end date string is separated by semicolon (;) |
-| range | Boolean<br`>Default: false` | Pick a range of type values |
+| range | Boolean<br>`Default: false` | Pick a range of type values |
 | format | String<br>`Default: DD/MM/YYYY` | The format of the input date units and how to present output date units.<br>DD - denotes date<br>MM - denotes month<br>YYYY - denotes year in four digits<br>hh - denotes hour<br>mm - denotes minutes<br>ss - denotes seconds<br>Based on the format, the type of selection is enabled. If hh is present, it implies time selection, If DD is present, and hh is not present, it implies date selection. If DD is not present & hh is not present and MM is present, it implies month selection. If hh, DD, and MM are not present but YYYY is present, it implies year selection. |
 | maxval | String<br>`Default: null` | This denotes the max date/time that can be chosen from the calendar. The date part of the value will be as per the “format” attribute. If time selection is applicable, then the max time value follows the date with a literal T and time in HH:mm:ss format. |
 | minval | String<br>`Default: null` | This denotes the minimum date/time value to be chosen from the calendar. The date part of the value will be as per the format attribute. If time selection is applicable, then the min time value follows the date after a literal T and time in HH:mm:ss format |
@@ -28,7 +28,7 @@ This element lets you choose a date/month/year/time or a range from a calendar s
 #### Events:
 | Name     | Description |
 |----------|-------------|
-| `change` | When a selection is made. The event’s detail attribute will be an object with the following fields.<br>{`**date**: Date object,**value**: Date in string format.`}<br>For range based picking the detail will be<br>{`**from**: date object for the beginning,**to**: date object for the end.**value**: Date string from and to separated by semicolon(;)`}|
+| `change` | When a selection is made. The event’s detail attribute will be an object with the following fields.<br>{`date: Date object,value: Date in string format.`}<br>For range based picking the detail will be<br>{`from: date object for the beginning,to: date object for the end.value: Date string from and to separated by semicolon(;)`}|
 
 #### CSS Parts:
 | Name                    | Description |
