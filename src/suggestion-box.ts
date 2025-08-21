@@ -268,7 +268,7 @@ export class AalamSuggestionBox extends LitElement {
                     this._loadmoreEntry(e);
                 } else if (this.index >= 0 && this.index <= resultLength) {
                     this._setInputEvent(this.index);
-                }
+                } else this.show_container = false;
 
                 break;
         }
