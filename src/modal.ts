@@ -219,7 +219,7 @@ ${this._animateStyles()}
     override firstUpdated() {
         this._cur_pos = this._checkPos();
     }
-    show(delay?:number) {
+    public show = (delay?:number) => {
         this._clearTimer();
         if (this._open)
             return;
@@ -253,7 +253,7 @@ ${this._animateStyles()}
         this._body_overflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
     }
-    hide(delay?:number) {
+    public hide = (delay?:number) => {
         this._clearTimer();
         if (!this._open)
             return;
