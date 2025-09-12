@@ -527,7 +527,8 @@ ${wrapper_def?`.__modal-wrapper {${wrapper_def}}`:''}
 ${cls == "width"?'overflow-x:auto':'overflow-y:auto'}}}`);
             else
                 ret.push(`
-@media screen and ${bp.cond} {#__wrapper {justify-content:center}}`);
+    @media screen and ${bp.cond} {#__wrapper {justify-content:center}}
+    @media screen and (max-width: ${screen_limits['m'][1]}px) {#__wrapper.__resp_height {height: 90vh;overflow: auto;}}`);
         }
         return html`<style>${map(ret, (r) => html`${r}`)}</style>`
     }
