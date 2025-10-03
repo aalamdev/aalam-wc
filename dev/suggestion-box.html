@@ -80,6 +80,7 @@
 
         .content {
             display: flex;
+            flex-wrap: wrap;
             gap: 50px;
             padding: 20px 0 0 20px;
         }
@@ -196,6 +197,33 @@
                     <li>loadmore also avaiable based on the response type</li>
                 </ul>
             </div>
+            <hr />
+            <div>
+                <h1>Hybrid suggestion box for placeholders</h1>
+                <aalam-sgn-box id="sgnbox-hybrid">
+                    <div class="div" slot="sgn-input">
+                        <input type="text" oninput="hybridInput(event)" placeholder="Type something">
+                    </div>
+                    <div slot="sgn-item-template">
+                        <div class="container">
+                            <p name="name">{name}</p>
+                            <p class="description">{description}</p>
+                        </div>
+                    </div>
+                </aalam-sgn-box>
+                <ul>
+                    <li>Type some text and use {} to have placeholders. This suggestion box will show suggestions only for the placeholders</li>
+                    <li>
+                        <div>Available placeholders</div>
+                        <ul>
+                            <li>{item_name}</li>
+                            <li>{item_code}</li>
+                            <li>{item_price}</li>
+                            <li>{prop.*}</li>
+                        </ul>
+                    </li>
+                </ul>
+            </diV>
         </div>
         <script>
             let el_key = "name";
@@ -436,6 +464,79 @@
                     "sleeveless shirt",
                 ];
                 elem.appendSuggestions(res, true);
+            }
+            let sgn_hybrid = document.getElementById('sgnbox-hybrid');
+            sgn_hybrid.listkey = 'name';
+            let hybrid_placeholders = [
+                {name: 'item_name', description: 'Name of the product'},
+                {name: 'item_code', description: 'SKU code of the product'},
+                {name: 'item_price', description: 'Sale Price of the product'},
+                {name: 'prop.Color', description: 'Colour property of the product'},
+                {name: 'prop.Size', description: 'Size property'},
+                {name: 'prop.Material', description: 'Material property'}
+            ]
+            class MockInput {
+                input_obj;
+                start_offset = null;
+                act_inp_value = null;
+                constructor(input_obj) {
+                    this.input_obj = input_obj;
+                }
+                get value() {
+                    return this.act_inp_value || this.input_obj.value;
+                }
+                set value(_val) {
+                    if (!_val) {
+                        this.input_obj.value = this.act_inp_value;
+                        return;
+                    }
+                    if (this.start_offset >= 0) {
+                        let val = this.act_inp_value || this.input_obj.value;
+                        let end_offset = this.input_obj.selectionStart;
+                        for (let i = end_offset;i < val.length; i++) {
+                            if (val[i] == '}') {
+                                end_offset = i;
+                                break;
+                            }
+                        }
+                        this.input_obj.value = val.substring(0, this.start_offset + 1) + _val + (end_offset?val.substring(end_offset):'');
+                        console.log("end_offset ", end_offset, ", value length ", val.length, ", end start ", val.substring(end_offset));
+                        if (end_offset >= val.length)
+                            this.input_obj.value += '}';
+
+                    }
+                }
+            }
+            function hybridInput(event) {
+                if (!sgn_hybrid.input_el)
+                    sgn_hybrid.input_el = new MockInput(event.target);
+                event.stopPropagation();
+                sgn_hybrid.input_el.act_inp_value = event.target.value;
+                let index = event.target.selectionStart - 1;
+                let val = event.target.value;
+                let templ = "";
+                let i = index;
+                sgn_hybrid.input_el.start_offset = null;
+
+                for (;i >= 0; i--) {
+                    if (val[i] == '}') {
+                        sgn_hybrid.setSuggestions([]);
+                        return;
+                    }
+                    if (val[i] == '{')
+                        break;
+                    else
+                        templ = val[i] + templ;
+                }
+                sgn_hybrid.input_el.start_offset = i;
+                if (i == 0 && val[0] != '{') {
+                    sgn_hybrid.setSuggestions(hybrid_placeholders);
+                    return;
+                }
+                if (!templ)
+                    sgn_hybrid.setSuggestions(hybrid_placeholders);
+                else
+                    sgn_hybrid.setSuggestions(hybrid_placeholders.filter(x => x['name'].startsWith(templ)));
             }
         </script>
     </body>
