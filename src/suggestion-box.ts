@@ -268,7 +268,10 @@ export class AalamSuggestionBox extends LitElement {
                     this._loadmoreEntry(e);
                 } else if (this.index >= 0 && this.index <= resultLength) {
                     this._setInputEvent(this.index);
-                } else this.show_container = false;
+                } else {
+                    this.show_container = false;
+                    this._selectEvent({new:true, value:this._actual_inp_value});
+                }
 
                 break;
         }
@@ -401,16 +404,18 @@ export class AalamSuggestionBox extends LitElement {
             (this.input_el as HTMLInputElement).value = selectedValue;
             this.show_container = false;
         }
-
+        this._selectEvent(this.result[index]);
+        this._scrollIntoView();
+    }
+    private _selectEvent(value:any) {
         this.dispatchEvent(
             new CustomEvent("select", {
-                detail: this.result[index],
+                detail: value,
                 bubbles: true,
                 cancelable: false,
                 composed: true,
             })
         );
-        this._scrollIntoView();
     }
 
     private _highlightEnd(text: string, match_str: string) {
