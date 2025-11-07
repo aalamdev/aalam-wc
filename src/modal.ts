@@ -201,7 +201,6 @@ ${this._animateStyles()}
              "mousedown":""} ${this.open?'animate-open':'animate-close'}"
         @animationend=${this._animationEndEvent}
         @touchstart=${this.guidesel?this._touchStart:null}
-        @dragstart=${this.guidesel?this._dragStart:null}
         @mousedown=${this.guidesel?this._touchStart:null}
         @click=${this._wrapperClickedEvent}>
         <slot name="modal-dialog" id="slot-body" class="modal-body">
@@ -335,9 +334,6 @@ ${this._animateStyles()}
             if (ix >= 0)
                 active_modals.splice(ix, 1);
         }
-    }
-    private _dragStart(event:Event) {
-        event.preventDefault();
     }
     private _touchStart(event:Event) {
         let css_pos = window.getComputedStyle(
