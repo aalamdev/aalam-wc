@@ -317,10 +317,14 @@ export class AalamTabs extends LitElement {
         else {
             this._showRC();
             if (val == 'overlay') {
+                if (this._cur_ix)
+                    this.dispatchEvent(
+                        new CustomEvent("hide", {detail:this._cur_ix}));
                 this._cur_ix = null;
                 let body = this._queryBody()
-                for (let b of body)
+                for (let b of body) {
                     (b as HTMLElement).style.display = "none";
+                }
             }
         }
         this._internal_fashion = val;
@@ -465,8 +469,8 @@ export class AalamTabs extends LitElement {
         this._cur_ix = ix;
         if (bix)
             bix.style.display = 'block';
+        this._tab_body_hldr_el.style.display = 'block';
         if (this._internal_fashion == 'overlay') {
-            this._tab_body_hldr_el.style.display = 'block';
             if (this.olboundsel) {
                 let ref = <HTMLElement>document.querySelector(<string>this.olboundsel);
                 if (ref)
@@ -497,6 +501,13 @@ export class AalamTabs extends LitElement {
     show(ix:number) {
         if (this._cur_ix == ix && this._cur_ix != null)
             return
+        if (ix == null && this._cur_ix != null){
+            let title = this._queryTitles();
+            let body = this._queryBody();
+            this._hideBody(this._cur_ix, <HTMLElement>body[this._cur_ix], <HTMLElement>title[this._cur_ix], true);
+            this._cur_ix = null;
+            return;
+        }
         this._show(ix, this._cur_ix);
         this.dispatchEvent(
             new CustomEvent("change", {detail:{ix}}));
