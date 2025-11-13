@@ -12,6 +12,7 @@
                 border-radius: 4px;
                 font-size: 90%;
                 width:max-content;
+                z-index:1;
             }
             aalam-tooltip::part(tt-arrow) {
                 background: #222;
@@ -35,8 +36,20 @@
     </head>
     <body>
         <div id="container">
-            <aalam-tooltip msg="show me" id="ttp" position="top">
-                <button>Btn element</button>
+            <aalam-tooltip msg="show me" id="ttp_attr" position="top">
+                <button>MSG as attribute</button>
+            </aalam-tooltip>
+            <aalam-tooltip id="ttp_slot" position="top">
+                <button>MSG as slot</button>
+                <div slot="msg">
+                    <p>This tooltip information is through a slot</p>
+                    <ul>
+                        <li>Info 1</li>
+                        <li>Info 2</li>
+                        <li>Info 3</li>
+                        <li>Info 4</li>
+                    </ul>
+                </div>
             </aalam-tooltip>
             <fieldset>
                 <legend>position</legend>
@@ -59,12 +72,14 @@
             </fieldset>
         </div>
         <script>
-            const tooltip = document.getElementById("ttp");
+            const tooltip_attr = document.getElementById("ttp_attr");
+            const tooltip_slot = document.getElementById('ttp_slot');
             const pos = document.querySelectorAll('input[name="pos"]');
             window.onload = pos[0].checked = true;
             for(let i=0; i < pos.length; i++) {
                 pos[i].addEventListener("change", () => {
-                    tooltip.setAttribute("position", event.target.value);
+                    tooltip_attr.setAttribute("position", event.target.value);
+                    tooltip_slot.setAttribute("position", event.target.value);
                 });
             }
         </script>

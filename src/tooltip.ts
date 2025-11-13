@@ -43,7 +43,7 @@ export class AalamTooltip extends LitElement {
     override render() {
         return html`
 <slot></slot>
-<div id="body" part="tt-body">${this.msg}<div id="arrow" part="tt-arrow"></div></div>`
+<div id="body" part="tt-body"><slot name="msg">${this.msg}</slot><div id="arrow" part="tt-arrow"></div></div>`
     }
     static override get styles() {
         return css`

@@ -14,6 +14,11 @@ This element display a tooltip whenever a child of this tag is hovered upon.
 | `msg`      | String `(default: "This is a tooltip")` | The actual tooltip message                          |
 | position | `Enum: top \| bottom \| right \| left Default: top` | The position to display the tooltip relative to the child |
 
+#### Slots:
+| Name       | Description |
+|------------|-------------|
+| `msg` | The tooltip message can be optionally given with this slot. If the slot is provided, the msg attribute will be discarded. |
+
 #### CSS Parts:
 | Name     | Description                 |
 |----------|-----------------------------|
