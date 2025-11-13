@@ -28,7 +28,8 @@ export class AalamTabs extends LitElement {
         activecls: 'tab-active',
         fashion: 'xs:row',
         colsize: "title:30%;body:70%",
-        olclosesel: '.tab-close'
+        olclosesel: '.tab-close',
+        olopts: 'closesel:.tab-close;covered:false',
     }
 
     @property({type:String, attribute:true})
@@ -52,6 +53,9 @@ export class AalamTabs extends LitElement {
     @property({type:String, attribute:true})
     olclosesel = this.DEFAULT_VALUES.olclosesel;
 
+    @property({type:Boolean, attribute:true})
+    olopts = this.DEFAULT_VALUES.olopts;
+
     @state()
     _internal_fashion:string = 'row';
 
@@ -64,11 +68,13 @@ export class AalamTabs extends LitElement {
     private _cur_ix:number|null;
     private _transient_el:HTMLElement| null;
     private _resizeListener = this._resizeEvent.bind(this);
+    private _popstateListener = this._popStateHandler.bind(this);
     private _mutation_listener = this.__mutationListener.bind(this);
     private _animation_styles:{[key:string]:string} = {};
     private _column_size:{[key:string]:string} = {title:'30%', body:'70%'};
     private _fashion_style:Array<ResponsiveVal> =
                 [{ll: 0, ul: null, val: "row", cond: "(min-width:0px)"}];
+    private olcovered:boolean;
     private _mut_observer:MutationObserver;
     private _int_observer:IntersectionObserver;
     private _cleanup: (() => void) | null = null;
@@ -107,6 +113,11 @@ export class AalamTabs extends LitElement {
                 } catch (err:any) {}
                     return false;
             });
+        } else if (name == 'olopts') {
+            let val = parseAttrVal(new_val);
+            this.olboundsel = val.boundsel;
+            this.olclosesel = val.closesel || this.olclosesel || this.DEFAULT_VALUES.olclosesel;
+            this.olcovered = ['true', '1'].indexOf((val.covered || "").toLowerCase()) >= 0;
         }
     }
     override render() {
@@ -159,9 +170,11 @@ export class AalamTabs extends LitElement {
                 });
             })
         this._int_observer.observe(this);
+        window.addEventListener("popstate", this._popstateListener)
     }
     override disconnectedCallback() {
         window.removeEventListener("resize", this._resizeListener);
+        window.removeEventListener('postate', this._popstateListener);
         if (this._mut_observer) {
             this._mut_observer.disconnect();
         }
@@ -338,6 +351,11 @@ export class AalamTabs extends LitElement {
                 this.show(0);
         }
     }
+    private _popStateHandler() {
+        if (this._internal_fashion === 'overlay' && this.olcovered) {
+            this._cleanupOverlay();
+        }
+    }
     private _showAccordion() {
         let title = this._queryTitles('row');
         let body = this._queryBody('row');
@@ -421,6 +439,11 @@ export class AalamTabs extends LitElement {
         if (!rect)
             rect = this.getBoundingClientRect();
 
+        /*Pop state addition for the overlay mode*/
+        if (history.state?.__overlay_open__) {
+            history.back();
+        }
+
         if (is_overlay) {
             this._transient_el = bpix;
             bpix = this._tab_body_hldr_el;
@@ -475,6 +498,9 @@ export class AalamTabs extends LitElement {
                 let ref = <HTMLElement>document.querySelector(<string>this.olboundsel);
                 if (ref)
                     ref.style.overflow = "hidden";
+            }
+            if (this.olcovered) {
+                history.pushState({ __overlay_open__: true }, '', '');
             }
         }
         if (this._animation_styles.open && rect.width > 0) {

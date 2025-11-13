@@ -15,9 +15,11 @@ This element creates a tab switcher.
 | `animationDur` | Number<br>`Default: 100` | The number of milliseconds for the animation. |
 | `activecls`    | String<br>`Default: tab-active` | The class name to be added to the active tab’s title and body. |
 | fashion      | String<br>`Default: s:row` | CSS dimension which describes the gap between slider items for different screen dimensions. It is of the following format<br>&lt;screen-size&gt;:&lt;value&gt;;&lt;screen-size&gt;:&lt;value&gt;<br><br>**Screen size** - s, m, l, xl and 2xl<br>If a value is set for lower screen, the same value will be used for higher screen till a value is set for a much higher screen size<br><br>The value can be one of the following<br>**row** - title appears first and body below it.<br>**column** - title and body are in a grid, width auto.<br>**accordion** - tabs function like an accordion. |
-| `colsize`      | String<br>`Default title:30%;body:70%` | The size of the columns to be used when displayed in column fashion |
-|` boundsel`     | String<br>`Default: null` | Used by the overlay fashion to determine the size and position of the overlay based on a reference element whose bounds will be overlaid upon. |
-| `closesel`     | String<br>`Default: .tab-close` | Used by the overlay fashion. When the tab body is shown in an overlay, the overlay |
+| `colsize`      | String<br>`Default: title:30%;body:70%` | The size of the columns to be used when displayed in column fashion |
+| `olopts`       | String<br>`Default: closesel:.tab-close;covered:false`. It is of the following format<br>&lt;closesel&gt;:&lt;value&gt;;&lt;boundsel&gt;:&lt;value&gt;;&lt;covered&gt;:&lt;value&gt;
+<br><br>**closesel (Close Selector)** - When the tab body is shown in an overlay, an element with this selector will trigger the hiding of the overlay.
+<br><br>**boundsel (Bounds Selector)** - The overlay body's size and position will be determined by this reference element whose bounds will be overlaid upon
+<br><br>**covered** - true | false. If true, this means that the overlay is occupying the entire visible screen and a back key or gesture in the browser should hide the overlay, instead of going back in navigation |
 
 
 
