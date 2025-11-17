@@ -188,7 +188,7 @@ var(--attrcolor);}
             this._charCounter();
         this._setTransX();
         this._disableInput();
-        if(this.value.length) {
+        if(this.value?.length) {
             this._input_element.value = this.value;
             this.__updateFocus();
         }

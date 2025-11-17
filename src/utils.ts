@@ -52,7 +52,7 @@ export function parseAttrVal(val:string, validator?:Function):{
                                 [key:string]:string} {
     let pos = 0;
     let val_obj:{[key:string]:string} = {};
-    while (pos < val.length) {
+    while (pos < val?.length) {
         let col_ix = val.indexOf(":", pos);
         if (col_ix < 0)
             break
