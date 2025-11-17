@@ -181,7 +181,7 @@ export class AalamSliderElement extends LitElement {
 .__container {display:flex;flex-wrap:nowrap;will-change:transform;position:relative;touch-action:pan-y;}
 .__container.__trans {trasition-timing-function: ease;}
 .__container > ::slotted(*) {flex:none;box-sizing:border-box;}
-.__nav {position:absolute;font-weight:700;font-size:40px;color:rgba(0,0,0,0.5);top:50%;transform:translateY(-50%);cursor:pointer;user-select:none}
+.__nav {position:absolute;font-weight:700;font-size:40px;color:var(--clr-txt, rgba(0,0,0,0.5));top:50%;transform:translateY(-50%);cursor:pointer;user-select:none}
 .__nav.__prev {left: 0;margin-left:20px;}
 .__nav.__next {right: 0;margin-right:20px;}
 .__def_guide {margin-right:12px;cursor:pointer}
