@@ -14,6 +14,12 @@
             aalam-modal::part(modal-dialog) {
                 background-color:white;
             }
+            .flx {display:flex;}
+            .flx-h-sb {justify-content: space-between;}
+            .v\@l {display:none;}
+            @media screen and (min-width: 960px) and (max-width:1200px) {
+                .v\@l {display:block;}
+            }
         </style>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>Tabs Demo</title>
@@ -65,6 +71,15 @@
                         fashion="xs:clumn;s:row;l:column;xl:accordion">
                 <button slot="tab-title" class="title-tab">title 1</button>
                 <div class="bdy tab-active" slot="tab-body">body 1</div>
+
+                <div slot="tab-title" class="tab-col-hdr v@l">
+                    <div class="flx flx-h-sb">
+                        <b>Header slot</b>
+                        <button class="tab-col-hdr-open">Open</button>
+                    </div>
+                    <input placeholder="Search"/>
+                </div>
+                <div class="bdy" slot="tab-body">This is the body for the header element</div>
 
                 <button slot="tab-title" class="tab-active title-tab">title 2
                 </button>

@@ -62,7 +62,7 @@ export function parseAttrVal(val:string, validator?:Function):{
         if (sem_ix < 0)
             sem_ix = val.length;
         let res = val.substr(col_ix, sem_ix - col_ix).trim();
-        if (!validator || validator(res)) {
+        if (!validator || validator(res, key)) {
             val_obj[key.trim()] = res;
         }
         pos = sem_ix + 1;

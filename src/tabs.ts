@@ -30,6 +30,7 @@ export class AalamTabs extends LitElement {
         colsize: "title:30%;body:70%",
         olclosesel: '.tab-close',
         olopts: 'closesel:.tab-close;covered:false',
+        colopts: "size.title:30%;size.body:70%;hdr.sel:.tab-col-hdr;hdropensel:.tab-col-hdr-open"
     }
 
     @property({type:String, attribute:true})
@@ -72,6 +73,8 @@ export class AalamTabs extends LitElement {
     private _mutation_listener = this.__mutationListener.bind(this);
     private _animation_styles:{[key:string]:string} = {};
     private _column_size:{[key:string]:string} = {title:'30%', body:'70%'};
+    private _column_hdr_sel:string = '.tab-col-hdr';
+    private _column_hdr_open_sel: string = '.tab-col-hdr-open';
     private _fashion_style:Array<ResponsiveVal> =
                 [{ll: 0, ul: null, val: "row", cond: "(min-width:0px)"}];
     private olcovered:boolean;
@@ -118,6 +121,21 @@ export class AalamTabs extends LitElement {
             this.olboundsel = val.boundsel;
             this.olclosesel = val.closesel || this.olclosesel || this.DEFAULT_VALUES.olclosesel;
             this.olcovered = ['true', '1'].indexOf((val.covered || "").toLowerCase()) >= 0;
+        } else if (name == 'colopts') {
+            let val = parseAttrVal(new_val, (v:string, k:string) => {
+                if (k == 'size.title' || k == 'size.body') {
+                    try {
+                        CSS.supports('grid-template-columns', v);
+                        return true;
+                    } catch(err:any) {}
+                    return false;
+                }
+                return true;
+            })
+            this._column_size = {title: val['size.title'] || '30%',
+                                 body: val['size.body'] || '70%'};
+            this._column_hdr_sel = val['hdr.sel'] || '.tab-col-hdr';
+            this._column_hdr_open_sel = val['hdr.opensel'] || '.tab-col-hdr-open';
         }
     }
     override render() {
@@ -384,17 +402,17 @@ export class AalamTabs extends LitElement {
         if (el.closest('aalam-tabs') != this) return;
         if (this._internal_fashion == 'overlay' && !this._cleanup)
             this._setupOverlay();
-        while(el) {
-            if (el.slot == "tab-title") {
-                let ix = Array.prototype.indexOf.call(title, el);
-                this.show(ix);
-                break;
-            } else if (el.parentElement) {
-                el = el.parentElement;
-            } else {
-                break;
-            }
+        const slot_el = el.closest("[slot=tab-title]");
+        if (!slot_el)
+            return;
+        if ((this._internal_fashion == 'column' || this._internal_fashion == 'overlay') &&
+                this._column_hdr_sel && slot_el.matches(this._column_hdr_sel) &&
+                this._column_hdr_open_sel && !el.closest(this._column_hdr_open_sel)) {
+            /*If this is a column header then any click outside the open-sel should not open the tab body*/
+            return;
         }
+        let ix = Array.prototype.indexOf.call(title, slot_el);
+        this.show(ix);
     }
     private _bodyClicked(e:Event) {
         let el = e.target as HTMLElement;
