@@ -54,8 +54,11 @@ export class AalamTabs extends LitElement {
     @property({type:String, attribute:true})
     olclosesel = this.DEFAULT_VALUES.olclosesel;
 
-    @property({type:Boolean, attribute:true})
+    @property({type:String, attribute:true})
     olopts = this.DEFAULT_VALUES.olopts;
+
+    @property({type:String, attribute:true})
+    colopts = this.DEFAULT_VALUES.colopts;
 
     @state()
     _internal_fashion:string = 'row';
@@ -502,6 +505,7 @@ export class AalamTabs extends LitElement {
         /*When the element is not show, we need not wait for the transition end event*/
         let rect = this.getBoundingClientRect();
         let bix = body[ix] as HTMLElement;
+
         if (prev_ix != null) {
             this._hideBody(prev_ix, <HTMLElement>body[prev_ix], <HTMLElement>title[prev_ix], false, rect)
         }
@@ -543,8 +547,15 @@ export class AalamTabs extends LitElement {
             new CustomEvent("show", {detail:{ix}}));
     }
     show(ix:number) {
-        if (this._cur_ix == ix && this._cur_ix != null)
+        if (this._cur_ix == ix && this._cur_ix != null) {
+            let title = this._queryTitles();
+            let body = this._queryBody();
+            if (!title[ix].classList.contains(this.activecls))
+                title[ix].classList.add(this.activecls);
+            if (!body[ix].classList.contains(this.activecls))
+                body[ix].classList.add(this.activecls);
             return
+        }
         if (ix == null && this._cur_ix != null){
             let title = this._queryTitles();
             let body = this._queryBody();
