@@ -142,6 +142,7 @@ export class AalamTabs extends LitElement {
         }
     }
     override render() {
+
         if (this._internal_fashion == 'accordion') {
             return html`
 <div @click=${this._titleClicked}
@@ -228,7 +229,7 @@ export class AalamTabs extends LitElement {
         fashion = fashion || this._internal_fashion;
         return this.querySelectorAll(fashion == 'accordion'?':scope > [slot=acc] > [slot=tab-body]':':scope > [slot=tab-body]');
     }
-    private __mutationListener(mutations:MutationRecord[]) {
+    private __mutationListener(mutations: MutationRecord[]) {
         let num_added_nodes = 0;
         for (let record of mutations) {
             num_added_nodes += record.addedNodes.length;
@@ -238,6 +239,22 @@ export class AalamTabs extends LitElement {
                     let ix = [...this._queryTitles()].indexOf(el)
                     if (ix >= 0 && this._cur_ix != ix)
                         this.show(ix);
+                }
+            }
+            if (record.removedNodes.length > 0) {
+                for (let node of record.removedNodes) {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        let el = node as HTMLElement;
+                        if ((el.slot === 'tab-title' || el.slot == 'acc') && el.classList.contains(this.activecls)) {
+                            const openTabs = Math.min(this._queryTitles().length, this._queryBody().length);
+                            let curr = this._cur_ix;
+                            this._cur_ix = null;
+                            if (curr !== null) {
+                                if (curr + 1 < openTabs) this.show(curr + 1);
+                                else this.show(0);
+                            }
+                        }
+                    }
                 }
             }
         }
