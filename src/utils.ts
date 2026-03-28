@@ -1,3 +1,4 @@
+export const eventBus = new EventTarget()
 export const screen_size = ['s', 'm', 'l', 'xl', '2xl'];
 export const screen_limits:{[key:string]:Array<number|null>} = {
     's':  [0,    639],

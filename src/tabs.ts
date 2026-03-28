@@ -1,6 +1,6 @@
 import {LitElement, html} from 'lit';
 import {customElement, state, property, query} from 'lit/decorators.js';
-import {ResponsiveVal,
+import {ResponsiveVal, eventBus,
         getResponsiveValues, parseAttrVal} from "./utils";
 import {computePosition, autoUpdate, offset}
     from "@floating-ui/dom";
@@ -74,6 +74,7 @@ export class AalamTabs extends LitElement {
     private _resizeListener = this._resizeEvent.bind(this);
     private _popstateListener = this._popStateHandler.bind(this);
     private _mutation_listener = this.__mutationListener.bind(this);
+    private _pushstate_listener = this._busPushEvent.bind(this);
     private _animation_styles:{[key:string]:string} = {};
     private _column_size:{[key:string]:string} = {title:'30%', body:'70%'};
     private _column_hdr_sel:string = '.tab-col-hdr';
@@ -83,10 +84,13 @@ export class AalamTabs extends LitElement {
     private olcovered:boolean;
     private _mut_observer:MutationObserver;
     private _int_observer:IntersectionObserver;
+    private pushpop_signature:string;
+    private pushpop_map:string[] = [];
     private _cleanup: (() => void) | null = null;
 
     constructor() {
         super();
+        this.pushpop_signature = Math.random().toString(36);
     }
     override attributeChangedCallback(
                 name:string, old_val:string, new_val:string) {
@@ -391,8 +395,20 @@ export class AalamTabs extends LitElement {
     }
     private _popStateHandler() {
         if (this._internal_fashion === 'overlay' && this.olcovered) {
-            this._cleanupOverlay();
+            if (this.pushpop_map.length == 1 && this.pushpop_map[0] == this.pushpop_signature) {
+                this._cleanupOverlay();
+                eventBus.removeEventListener('__push__', this._pushstate_listener)
+            }
+            this.pushpop_map.pop();
         }
+    }
+    private _busPushEvent(ev:Event) {
+        /* This handles the event raised by an overlay aalam-tab child within this element,
+         * in that we add to the pop signatures and we pop the current overlay when the
+         * map of this element comes to 1*/
+        let event = <CustomEvent>ev;
+        if (event.detail['__sign__'] != null && event.detail['__sign__'] != this.pushpop_signature)
+            this.pushpop_map.push(event.detail['__sign__']);
     }
     private _showAccordion() {
         let title = this._queryTitles('row');
@@ -478,7 +494,7 @@ export class AalamTabs extends LitElement {
             rect = this.getBoundingClientRect();
 
         /*Pop state addition for the overlay mode*/
-        if (history.state?.__overlay_open__) {
+        if (history.state?.__overlay_open__ && history.state?.__sign__ == this.pushpop_signature) {
             history.back();
         }
 
@@ -540,7 +556,15 @@ export class AalamTabs extends LitElement {
                     ref.style.overflow = "hidden";
             }
             if (this.olcovered) {
-                history.pushState({ __overlay_open__: true }, '', '');
+                if (history.state?.['__overlay_open__'])
+                    eventBus.dispatchEvent(new CustomEvent('__push__', {
+                        bubbles: true,
+                        composed: true,
+                        detail: {'__sign__': this.pushpop_signature}}));
+
+                history.pushState({ __overlay_open__: true, __sign__: this.pushpop_signature }, '', '');
+                eventBus.addEventListener("__push__", this._pushstate_listener)
+                this.pushpop_map.push(this.pushpop_signature)
             }
         }
         if (this._animation_styles.open && rect.width > 0) {
