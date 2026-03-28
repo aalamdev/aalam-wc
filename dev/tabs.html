@@ -48,6 +48,83 @@
                 el.appendChild(div);
             }
         </script>
+        <script>
+            function createNewTab() {
+                let custom_tab = document.getElementById("custom-tab");
+                let len = custom_tab.querySelectorAll('[slot="tab-title"]').length;
+
+                let title = document.createElement("div");
+                let body = document.createElement("div");
+
+                let body_text = document.createTextNode('body '+ len);
+                let tclose = document.createElement('a');
+
+                tclose.textContent = "\u2190";
+                tclose.classList.add('tab-close');
+
+                title.setAttribute('slot', 'tab-title');
+                body.setAttribute('slot', 'tab-body');
+
+                title.classList.add('tab-item');
+                body.classList.add('tab-item');
+
+                title.innerText = 'title ' + len;
+                body.appendChild(tclose);
+                body.appendChild(body_text);
+
+                custom_tab.appendChild(title);
+                custom_tab.appendChild(body);
+            }
+            function clearTab() {
+                let custom_tab = document.getElementById("custom-tab");
+                let tab_items = custom_tab.querySelectorAll('.tab-item');
+
+                tab_items.forEach(item => {
+                    item.remove();
+                });
+            }
+            function resetTabs() {
+                clearTab();
+                for (let i = 0;i < 5; i++ ) {
+                    createNewTab();
+                }
+            }
+            function deleteLast() {
+                let custom_tab = document.getElementById("custom-tab");
+                let tab_items = custom_tab.querySelectorAll('.tab-item');
+
+                let len = tab_items.length;
+                tab_items[len - 1].remove();
+                tab_items[len - 2].remove();
+            }
+        </script>
+        <div class="parentDiv">
+            <aalam-tabs class="tab1 sty" colsize="title:40%;body:60%" id="custom-tab"
+                animation="b2t" fashion="s:accordion;m:overlay;l:row;xl:column">
+                <div slot="tab-title" class="tab-col-hdr">
+                    <div>Tab col header</div>
+                    <button onclick="createNewTab()">Add</button>
+                    <button onclick="clearTab()">clear all</button>
+                    <button onclick="resetTabs()">reset</button>
+                    <button onclick="deleteLast()">del last</button>
+                </div>
+                <div slot="tab-body">
+                    <span>tab col hdr body</span>
+                </div>
+                <div class="tab-item" slot="tab-title">title 1</div>
+                <div class="tab-item" slot="tab-body"><a class="tab-close">&lArr;</a>body 1</div>
+                <div class="tab-item tab-active" slot="tab-title">title 2</div>
+                <div class="tab-item" slot="tab-body"><a class="tab-close">&lArr;</a>body 2</div>
+                <div class="tab-item" slot="tab-title">title 3</div>
+                <div class="tab-item" slot="tab-body"><a class="tab-close">&lArr;</a>body 3</div>
+                <div class="tab-item" slot="tab-title">title 4</div>
+                <div class="tab-item" slot="tab-body"><a class="tab-close">&lArr;</a>body 4</div>
+                <div class="tab-item" slot="tab-title">title 5</div>
+                <div class="tab-item" slot="tab-body"><a class="tab-close">&lArr;</a>body 5</div>
+                <div class="tab-item" slot="tab-title">title 6</div>
+                <div class="tab-item" slot="tab-body"><a class="tab-close">&lArr;</a>body 6</div>
+            </aalam-tabs>
+        </div>
         <div class="parentDiv">
             <aalam-tabs class="tab1 sty" colsize="title:40%;body:60%" id="tab1"
                         animation="b2t" fashion="s:overlay;m:accordion;l:row"
@@ -148,7 +225,6 @@
             </aalam-tabs>
         </div>
         <button onclick="addNewTab()">New tab item</button>
-
         <aalam-modal id="modal">
             <div slot="modal-dialog">
                 <aalam-tabs class="tab1 sty" colsize="title:40%;body:60%" id="tabwmodal"
@@ -167,7 +243,6 @@
                 </aalam-tabs>
             </div>
         </aalam-modal>
-
         <button onclick="openModal()">Show Tab in a modal</button>
     </body>
     <script>
