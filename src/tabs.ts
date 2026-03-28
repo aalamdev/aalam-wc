@@ -209,8 +209,14 @@ export class AalamTabs extends LitElement {
     }
     override firstUpdated() {
         this._openActive();
-        if (this._cur_ix == null && this._internal_fashion != 'overlay')
-            this.show(0);
+        if (this._cur_ix == null && this._internal_fashion != 'overlay') {
+            let titles = Array.from(this._queryTitles());
+            for (let i = 0; i < titles.length; i++) {
+                if (titles[i].matches(this._column_hdr_sel)) continue;
+                this.show(i);
+                break;
+            }
+        }
     }
     override updated() {
         if (this._internal_fashion == 'overlay' && !this._cleanup)
@@ -222,11 +228,11 @@ export class AalamTabs extends LitElement {
     }
     private _queryTitles(fashion?:string) {
         fashion = fashion || this._internal_fashion;
-        return this.querySelectorAll(fashion == 'accordion'?':scope > [slot=acc] > [slot=tab-title]':':scope > [slot=tab-title]');
+        return this.querySelectorAll(fashion == 'accordion'?':scope > [slot=acc] > [slot=tab-title]:not(:empty)':':scope > [slot=tab-title]');
     }
     private _queryBody(fashion?:string) {
         fashion = fashion || this._internal_fashion;
-        return this.querySelectorAll(fashion == 'accordion'?':scope > [slot=acc] > [slot=tab-body]':':scope > [slot=tab-body]');
+        return this.querySelectorAll(fashion == 'accordion'?':scope > [slot=acc] > [slot=tab-body]:not(:empty)':':scope > [slot=tab-body]');
     }
     private __mutationListener(mutations:MutationRecord[]) {
         let num_added_nodes = 0;
@@ -239,6 +245,17 @@ export class AalamTabs extends LitElement {
                     if (ix >= 0 && this._cur_ix != ix)
                         this.show(ix);
                 }
+            }
+            if (this._internal_fashion == 'accordion') {
+                record.removedNodes.forEach((_el) => {
+                    let pnt = <HTMLElement>record.target;
+                    let el = <HTMLElement>_el;
+                    if ((el.slot == 'tab-title' || el.slot == 'tab-body') && pnt.slot == 'acc') {
+                        if (pnt.children.length == 0) {
+                            pnt.remove();
+                        }
+                    }
+                })
             }
         }
         if (this._internal_fashion == 'accordion' && num_added_nodes > 0)
@@ -506,7 +523,7 @@ export class AalamTabs extends LitElement {
         let rect = this.getBoundingClientRect();
         let bix = body[ix] as HTMLElement;
 
-        if (prev_ix != null) {
+        if (prev_ix != null && body[prev_ix] && title[prev_ix] ) {
             this._hideBody(prev_ix, <HTMLElement>body[prev_ix], <HTMLElement>title[prev_ix], false, rect)
         }
         title[ix]?.classList.add(this.activecls);
@@ -514,7 +531,8 @@ export class AalamTabs extends LitElement {
         this._cur_ix = ix;
         if (bix)
             bix.style.display = 'block';
-        this._tab_body_hldr_el.style.display = 'block';
+        if (this._internal_fashion != 'accordion')
+            this._tab_body_hldr_el.style.display = 'block';
         if (this._internal_fashion == 'overlay') {
             if (this.olboundsel) {
                 let ref = <HTMLElement>document.querySelector(<string>this.olboundsel);
