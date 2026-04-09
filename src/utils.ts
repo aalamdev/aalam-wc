@@ -2,7 +2,7 @@ export const screen_size = ['s', 'm', 'l', 'xl', '2xl'];
 export const screen_limits:{[key:string]:Array<number|null>} = {
     's':  [0,    639],
     'm':  [640,  959],
-    'l':  [959,  1199],
+    'l':  [960,  1199],
     'xl':  [1200, 1599],
     '2xl': [1600, null]
 };
