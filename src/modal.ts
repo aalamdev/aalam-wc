@@ -90,6 +90,9 @@ export class AalamModal extends LitElement {
     @query('#__wrapper')
     _wrapper_el:HTMLElement;
 
+    @query('#__container')
+    _container_el:HTMLElement;
+
     private _position_breakpoints = this.DEFAULT_VALUES.position_breakpoints;
     private _height_breakpoints = this.DEFAULT_VALUES.height_breakpoints;
     private _width_breakpoints = this.DEFAULT_VALUES.width_breakpoints;
@@ -195,7 +198,7 @@ ${this._hwStyles('height', this._height_breakpoints)}
 ${this._hwStyles('width', this._width_breakpoints)}
 ${this._animateStyles()}
 <div @click=${!this.nobgclose?this._containerClicked:null}
-     class="__modal-container" style="${styleMap(cont_styles)}">
+     class="__modal-container" style="${styleMap(cont_styles)}" id="__container">
     <div id="__wrapper" part="modal-dialog" class="__modal-wrapper __resp_pos __resp_height
              __resp_width ${(this._mouse_up_listener != null)?
              "mousedown":""} ${this.open?'animate-open':'animate-close'}"
@@ -252,7 +255,7 @@ ${this._animateStyles()}
         this._body_overflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
     }
-    public hide = (delay?:number) => {
+    public hide = (delay?: number) => {
         this._clearTimer();
         if (!this._open)
             return;
@@ -309,16 +312,19 @@ ${this._animateStyles()}
             this._timer_obj = null;
         }
     }
-    private _containerClicked() {
+    private _containerClicked(event: MouseEvent) {
+        if (!event.target || ((event.target as HTMLElement) != this._container_el))
+            return;
         if(this.open)
             this.hide();
     }
-    private _wrapperClickedEvent(event:Event) {
-        event.stopPropagation();
-        if(this.closesel && (
+    private _wrapperClickedEvent(event: MouseEvent) {
+        if (this.closesel && (
             event.target as HTMLElement).matches(this.closesel) ||
-            ((event.target as HTMLElement).closest(this.closesel)?.closest('aalam-modal') == this))
+            ((event.target as HTMLElement).closest(this.closesel)?.closest('aalam-modal') == this)) {
+            event.stopPropagation();
             this.hide();
+        }
         return;
     }
     private _animationEndEvent() {
