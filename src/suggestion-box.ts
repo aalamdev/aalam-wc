@@ -182,7 +182,7 @@ export class AalamSuggestionBox extends LitElement {
         event.stopPropagation();
     }
 
-    private _inputBlurEvent(event:any) {
+    private _inputBlurEvent(event: any) {
         if (event.relatedTarget && event.relatedTarget?.closest('aalam-sgn-box') != this) {
             this.show_container = false;
             this.index = -1;
@@ -190,15 +190,12 @@ export class AalamSuggestionBox extends LitElement {
     }
 
     private _inputFocusEvent() {
-        const has_input_val = (this.input_el as HTMLInputElement)?.value.length >= this.minchar;
-
-        this.show_container = (
-            this.empty_slot.length > 0 || 
-            (this.filtered_list.length > 0 && has_input_val) ||
-            (this.show_nomatch && has_input_val)
-        );
-
+        const has_input_val = ((this.input_el as HTMLInputElement)?.value.length || 0) >= this.minchar;
+        this.show_container = ( this.empty_slot.length > 0 || (has_input_val && (this.filtered_list.length > 0 || this.show_nomatch)));
         this.index = -1;
+
+        if (this.minchar == 0 && ((this.input_el as HTMLInputElement)?.value.length || 0) == 0 && (!this.filtered_list.length && this.list.length))
+            this.setSuggestions(this.list, false);
     }
 
     private _mouseOutEvent(e: any) {
@@ -350,7 +347,7 @@ export class AalamSuggestionBox extends LitElement {
     }
 
     private _setActive(resultLength: number) {
-        if (this.index < resultLength) {
+        if (this.input_el && this.index < resultLength) {
             if (this.index < 0) {
                 (this.input_el as HTMLInputElement).value = this._actual_inp_value;
             } else {
@@ -408,7 +405,7 @@ export class AalamSuggestionBox extends LitElement {
             selectedValue = this.result[index][this.listkey];
         }
         if (selectedValue) {
-            (this.input_el as HTMLInputElement).value = selectedValue;
+            if (this.input_el) (this.input_el as HTMLInputElement).value = selectedValue;
             this.show_container = false;
         }
         this._selectEvent(this.result[index]);
@@ -462,7 +459,7 @@ export class AalamSuggestionBox extends LitElement {
         this.result = [...suggestions];
         this.index = -1;
 
-        (this.input_el as HTMLInputElement)?.value
+        ((this.input_el as HTMLInputElement)?.value || this.minchar == 0)
             ? (this.show_empty = false)
             : (this.show_empty = true);
         this.has_more = has_more;
