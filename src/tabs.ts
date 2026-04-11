@@ -1,24 +1,33 @@
 import {LitElement, html} from 'lit';
 import {customElement, state, property, query} from 'lit/decorators.js';
 import {ResponsiveVal, eventBus,
-        getResponsiveValues, parseAttrVal} from "./utils";
+        getResponsiveValues, parseAttrVal, screen_size} from "./utils";
 import {computePosition, autoUpdate, offset}
     from "@floating-ui/dom";
 import {styleMap} from 'lit/directives/style-map.js';
 
-const _transAnimate = (x:string, y:string):{[key:string]:object} => {
-    return {open: {'start': `translate(${x}, ${y})`,
-                   'end': `translate(0px, 0px)`},
-            close: {'start': `translate(0px, 0px)`,
-                    'end': `translate(${x}, ${y}`}}
+const _transAnimate = (x:string, y:string):{[key:string]:object|string} => {
+    return {open: {'start': function(el:HTMLElement) {el.style.transform = `translate(${x}, ${y})`},
+                   'end': function(el:HTMLElement) {el.style.transform = `translate(0px, 0px)`}},
+            close: {'start': function(el:HTMLElement) {el.style.transform = `translate(0px, 0px)`},
+                    'end': function(el:HTMLElement) {el.style.transform = `translate(${x}, ${y})`}},
+            transition: "transform"}
 }
 const trans_defs:{[key:string]:any} = {
     b2t: _transAnimate("0px", "100%"),
     t2b: _transAnimate("0px", "-100%"),
     r2l: _transAnimate("100%", "0px"),
     l2r: _transAnimate("-100%", "0px"),
-    fade: {open: {'start': 0, 'end':1},
-           close: {'start': 1, 'end': 0}}
+    appear: {
+        open: {'start': function(el:HTMLElement) {el.style.opacity = '0';el.style.transform = 'scale(0.9)'},
+               'end': function(el:HTMLElement) {el.style.opacity = '1';el.style.transform = 'scale(1)'}},
+        close: {'start': function(el:HTMLElement) {el.style.opacity = '1';el.style.transform = 'scale(1)'},
+                'end': function(el:HTMLElement) {el.style.opacity = '0';el.style.transform = 'scale(0)'}},
+        transition: 'transform,opacity'
+    },
+    fade: {open: {'start': function(el:HTMLElement) {el.style.opacity = '0'}, 'end': function(el:HTMLElement) {el.style.opacity = '1'}},
+           close: {'start': function(el:HTMLElement) {el.style.opacity = '1'}, 'end': function(el:HTMLElement) {el.style.opacity = '0'}},
+           transition: "opacity"}
 }
 
 @customElement('aalam-tabs')
@@ -75,7 +84,8 @@ export class AalamTabs extends LitElement {
     private _popstateListener = this._popStateHandler.bind(this);
     private _mutation_listener = this.__mutationListener.bind(this);
     private _pushstate_listener = this._busPushEvent.bind(this);
-    private _animation_styles:{[key:string]:string} = {};
+    private _animation_styles:{[key:string]:any}[] = [];
+    private _animation_style:{[key:string]:string} = {};
     private _column_size:{[key:string]:string} = {title:'30%', body:'70%'};
     private _column_hdr_sel:string = '.tab-col-hdr';
     private _column_hdr_open_sel: string = '.tab-col-hdr-open';
@@ -97,15 +107,44 @@ export class AalamTabs extends LitElement {
         super.attributeChangedCallback(name, old_val, new_val);
         if (name == 'animation') {
             if (trans_defs[new_val])
-                this._animation_styles = {open: new_val, close: new_val}
+                this._animation_styles = [{val: {open: new_val, close: new_val}, ll: 0, ul: null}]
             else {
-                this._animation_styles = parseAttrVal(new_val, (v:string) => {
+                let tmp = parseAttrVal(new_val, (v:string) => {
                     return v in trans_defs;
                 });
-                this._animation_styles = {
-                    open:this._animation_styles?.show,
-                    close:this._animation_styles?.hide};
+                let screen_size_map:{[key:string]:any} = {};
+                for (let k of Object.keys(tmp)) {
+                    let spl = k.split(".");
+                    if (spl.length != 1 && spl.length != 2)
+                        continue;
+                    if ((spl[0] != 'show' && spl[0] != 'hide') ||
+                        (spl.length == 2 && screen_size.indexOf(spl[1]) < 0))
+                        continue;
+                    let size = spl.length == 1?'':spl[1];
+                    if (!(size in screen_size_map))
+                        screen_size_map[size] = {}
+                    screen_size_map[size][spl[0]] = tmp[k];
+                }
+                if ('' in screen_size_map) {
+                    for (let size of screen_size) {
+                        if (!(size in screen_size_map))
+                            screen_size_map[size] = screen_size_map[''];
+                    }
+                }
+                delete screen_size_map[''];
+                let resp_val = [];
+                for (let sz of Object.keys(screen_size_map)) {
+                    let val = screen_size_map[sz]
+                    resp_val.push(`${sz}:${val['show'] || ''},${val['hide'] || ''}`);
+                }
+                for (let v of getResponsiveValues(resp_val.join(";"), {})) {
+                    let tmp = v['val'].split(",");
+                    let _v:{[key:string]:any} = {...v}
+                    _v['val'] = {open: tmp[0] || null, close: tmp[1] || null};
+                    this._animation_styles.push(_v);
+                }
             }
+            this._animation_style = this._checkAnimationStyle();
         } else if (name == 'fashion') {
             let valids = ['row', 'column', 'accordion', 'overlay'];
             this._fashion_style = getResponsiveValues(
@@ -161,6 +200,8 @@ export class AalamTabs extends LitElement {
                     'grid-template-columns': `
                         ${this._column_size.title} ${this._column_size.body}`
                 }
+                /*In case of animations the tab-body will be in absolute position*/
+                body_style_map['position'] = 'relative';
             } else if (this._internal_fashion == 'overlay') {
                 body_style_map = {position: 'fixed', display: 'none', top: 0, left: 0};
             }
@@ -306,7 +347,7 @@ export class AalamTabs extends LitElement {
 
         let title = this._queryTitles();
         let body = this._queryBody();
-        this._hideBody(this._cur_ix, <HTMLElement>body[this._cur_ix], <HTMLElement>title[this._cur_ix], true, <DOMRect>{width:0});
+        this._hideBody(this._cur_ix, <HTMLElement>body[this._cur_ix], <HTMLElement>title[this._cur_ix], true);
         this._cur_ix = null;
     }
     private _slotChangedEvent(event:Event) {
@@ -347,6 +388,14 @@ export class AalamTabs extends LitElement {
             }
         }
     }
+    private _checkAnimationStyle(): {[key:string]:string} {
+        let vw = window.innerWidth;
+        for(let style of this._animation_styles)
+            if ((style.ll || 0) <= vw && (
+                    !style.ul || style.ul >= vw))
+                return style.val;
+        return {};
+    }
     private _checkFashion():string {
         let vw = window.innerWidth;
         for(let style of this._fashion_style)
@@ -385,6 +434,7 @@ export class AalamTabs extends LitElement {
         this._internal_fashion = val;
     }
     private _resizeEvent() {
+        this._animation_style = this._checkAnimationStyle();
         let val = this._checkFashion();
         if (this._internal_fashion != val) {
             this._changeFashionStyle(val);
@@ -464,8 +514,9 @@ export class AalamTabs extends LitElement {
     private _transitionEndEvent(e:Event) {
         let el = e.target as HTMLElement;
 
-        if ((el.closest('aalam-tabs') != this || el.slot != 'tab-body') && !el.part.contains('tab-body-holder'))
+        if ((el.closest('aalam-tabs') != this || el.slot != 'tab-body') && !el.part.contains('tab-body-holder')) {
             return;
+        }
 
         if ((el.slot == 'tab-body' && !el.classList.contains(this.activecls)) ||
             (el.part.contains('tab-body-holder') && this._cur_ix == null)) {
@@ -482,10 +533,12 @@ export class AalamTabs extends LitElement {
         el.style.transitionDuration = '';
         el.style.transitionTimingFunction = '';
         el.style.transition = '';
+        if (this._tab_body_hldr_el)
+            this._tab_body_hldr_el.style.overflow = "";
     }
-    private _setTransition(val:string, prop:string) {
-        if (this._animation_styles[val])
-            return trans_defs[this._animation_styles[val]][val][prop];
+    private _setTransition(el:HTMLElement, val:string, prop:string) {
+        if (this._animation_style[val])
+            return trans_defs[this._animation_style[val]][val][prop](el);
     }
     private _hideBody(ix:number|null, bpix:HTMLElement, tpix:HTMLElement, is_overlay:boolean, rect?:DOMRect) {
         bpix.classList.remove(this.activecls);
@@ -507,19 +560,18 @@ export class AalamTabs extends LitElement {
                     ref.style.overflow = "auto";
             }
         }
-        if (this._animation_styles.close && rect.width > 0) {
-            let val = `${this._animation_styles.close == 'fade'?
-                              `opacity`:`transform`}`;
-            bpix.style.transitionProperty = val;
-            bpix.style.transitionDuration =
-                `${this.animationDur}ms`;
-            bpix.style.transitionTimingFunction = 'ease';
+        if (this._animation_style.close && rect.width > 0) {
+            this._tab_body_hldr_el?.style.setProperty("overflow", "hidden", "important");
             requestAnimationFrame( () => {
-                bpix.style.setProperty(
-                    val, `${this._setTransition('close', 'start')}`);
+                this._setTransition(bpix, 'close', 'start');
+                bpix.style.transition = "none";
                 requestAnimationFrame( () => {
-                    bpix.style.setProperty(
-                        val, `${this._setTransition('close', 'end')}`);
+                    bpix.style.transition = '';
+                    bpix.style.transitionProperty = trans_defs[this._animation_style['close']]['transition'];
+                    bpix.style.transitionDuration =
+                        `${this.animationDur}ms`;
+                    bpix.style.transitionTimingFunction = 'ease';
+                    this._setTransition(bpix, 'close', 'end')
                 });
             });
         } else {
@@ -567,21 +619,20 @@ export class AalamTabs extends LitElement {
                 this.pushpop_map.push(this.pushpop_signature)
             }
         }
-        if (this._animation_styles.open && rect.width > 0) {
-            let val = `${this._animation_styles.open == 'fade'?
-                             `opacity`:`transform`}`;
+        if (this._animation_style.open && rect.width > 0) {
+            this._tab_body_hldr_el?.style.setProperty("overflow", "hidden", "important");
             if (this._internal_fashion == 'overlay') {
                 bix = this._tab_body_hldr_el;
             }
-            bix.style.transitionProperty = val;
-            bix.style.transitionDuration = `${this.animationDur}ms`;
-            bix.style.transitionTimingFunction = 'ease';
             requestAnimationFrame( () => {
-                bix.style.setProperty(
-                    val, `${this._setTransition('open', 'start')}`);
+                this._setTransition(bix, 'open', 'start');
+                bix.style.transition = 'none';
                 requestAnimationFrame( () => {
-                    bix.style.setProperty(
-                        val,`${this._setTransition('open', 'end')}`);
+                    bix.style.transition = '';
+                    bix.style.transitionProperty = trans_defs[this._animation_style['open']]['transition'];
+                    bix.style.transitionDuration = `${this.animationDur}ms`;
+                    bix.style.transitionTimingFunction = 'ease';
+                    this._setTransition(bix, 'open', 'end');
                 })
             })
         }

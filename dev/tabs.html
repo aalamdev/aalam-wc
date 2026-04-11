@@ -11,6 +11,9 @@
             aalam-tabs[data-fashion=overlay]::part(tab-body-holder) {
                 background:white;
             }
+            aalam-tabs[data-fashion=column] > [slot=tab-body] {
+                position: absolute;inset: 0;
+            }
             aalam-modal::part(modal-dialog) {
                 background-color:white;
             }
@@ -144,8 +147,8 @@
         </div>
 
         <div class="parentDiv">
-            <aalam-tabs id="tab2" class="tab1 sty" animation="show:l2r;hide:r2l"
-                        fashion="xs:clumn;s:row;l:column;xl:accordion">
+            <aalam-tabs id="tab2" class="tab1 sty" animation="show.s:b2t;hide.s:fade;show.l:appear;hide.l:r2l"
+                        fashion="xs:clumn;s:row;l:column;xl:accordion" animationDur="1000">
                 <button slot="tab-title" class="title-tab">title 1</button>
                 <div class="bdy tab-active" slot="tab-body">body 1</div>
 
