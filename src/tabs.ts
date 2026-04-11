@@ -302,6 +302,43 @@ export class AalamTabs extends LitElement {
                     }
                 })
             }
+            if (record.removedNodes.length > 0) {
+                const removed = Array.from(record.removedNodes) as HTMLElement[];
+                const isTabNode = removed.some(n =>
+                    (n as Element).matches?.('[slot=tab-title],[slot=tab-body],[slot=acc]')
+                );
+                if (isTabNode) {
+                    const prev_ix = this._cur_ix;
+                    this._cur_ix = null;
+                    if (prev_ix !== null) {
+                        setTimeout(() => {
+                            const titles = this._queryTitles();
+                            if (titles.length > 0) {
+                                let next_ix = Math.min(prev_ix, titles.length - 1);
+                                if (this._column_hdr_sel != null && titles[next_ix].matches(this._column_hdr_sel)) {
+                                    let found = false;
+                                    for (let i = next_ix + 1; i < titles.length; i++) {
+                                        if (!titles[i].matches(this._column_hdr_sel)) {
+                                            next_ix = i;
+                                            found = true;
+                                            break
+                                        }
+                                    }
+                                    if (!found) {
+                                        for (let i = next_ix - 1; i >= 0; i--) {
+                                            if (!titles[i].matches(this._column_hdr_sel)) {
+                                                next_ix = i;
+                                                break
+                                            }
+                                        }
+                                    }
+                                }
+                                this.show(next_ix);
+                            }
+                        }, 0);
+                    }
+                }
+            }
         }
         if (this._internal_fashion == 'accordion' && num_added_nodes > 0)
             this._showAccordion();
