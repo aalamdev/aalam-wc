@@ -295,7 +295,7 @@ export class AalamTabs extends LitElement {
                 record.removedNodes.forEach((_el) => {
                     let pnt = <HTMLElement>record.target;
                     let el = <HTMLElement>_el;
-                    if ((el.slot == 'tab-title' || el.slot == 'tab-body') && pnt.slot == 'acc') {
+                    if (el.closest('aalam-tabs') == this && (el.slot == 'tab-title' || el.slot == 'tab-body') && pnt.slot == 'acc') {
                         if (pnt.children.length == 0) {
                             pnt.remove();
                         }
@@ -304,13 +304,13 @@ export class AalamTabs extends LitElement {
             }
             if (record.removedNodes.length > 0) {
                 const removed = Array.from(record.removedNodes) as HTMLElement[];
-                const isTabNode = removed.some(n =>
-                    (n as Element).matches?.('[slot=tab-title],[slot=tab-body],[slot=acc]')
+                const tabNodes = removed.filter(n =>
+                    (n as Element).matches?.('[slot=tab-title],[slot=tab-body],[slot=acc]') && (n as Element).closest('aalam-tabs') == this
                 );
-                if (isTabNode) {
+                if (tabNodes.length) {
                     const prev_ix = this._cur_ix;
                     this._cur_ix = null;
-                    if (prev_ix !== null) {
+                    if (prev_ix != null) {
                         setTimeout(() => {
                             const titles = this._queryTitles();
                             if (titles.length > 0) {
@@ -574,7 +574,7 @@ export class AalamTabs extends LitElement {
             this._tab_body_hldr_el.style.overflow = "";
     }
     private _setTransition(el:HTMLElement, val:string, prop:string) {
-        if (this._animation_style[val])
+        if (this._animation_style[val] && el)
             return trans_defs[this._animation_style[val]][val][prop](el);
     }
     private _hideBody(ix:number|null, bpix:HTMLElement, tpix:HTMLElement, is_overlay:boolean, rect?:DOMRect) {
