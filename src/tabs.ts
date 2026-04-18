@@ -305,7 +305,7 @@ export class AalamTabs extends LitElement {
             if (record.removedNodes.length > 0) {
                 const removed = Array.from(record.removedNodes) as HTMLElement[];
                 const tabNodes = removed.filter(n =>
-                    (n as Element).matches?.('[slot=tab-title],[slot=tab-body],[slot=acc]') && (n as Element).closest('aalam-tabs') == this
+                    (n as Element).matches?.('[slot=tab-title],[slot=tab-body],[slot=acc]') && record.target == this
                 );
                 if (tabNodes.length) {
                     const prev_ix = this._cur_ix;
@@ -548,6 +548,17 @@ export class AalamTabs extends LitElement {
             this._hideBody(this._cur_ix, <HTMLElement>body[this._cur_ix], <HTMLElement>title[this._cur_ix], true);
         this._cur_ix = null;
     }
+    private _resetTransitionStyles(el:HTMLElement) {
+        el.style.transition = '';
+        el.style.transform = '';
+        el.style.opacity = '';
+        el.style.transitionProperty = '';
+        el.style.transitionDuration = '';
+        el.style.transitionTimingFunction = '';
+        el.style.transition = '';
+        if (this._tab_body_hldr_el)
+            this._tab_body_hldr_el.style.overflow = "";
+    }
     private _transitionEndEvent(e:Event) {
         let el = e.target as HTMLElement;
 
@@ -563,15 +574,7 @@ export class AalamTabs extends LitElement {
             }
             el.style.display = 'none';
         }
-        el.style.transition = '';
-        el.style.transform = '';
-        el.style.opacity = '';
-        el.style.transitionProperty = '';
-        el.style.transitionDuration = '';
-        el.style.transitionTimingFunction = '';
-        el.style.transition = '';
-        if (this._tab_body_hldr_el)
-            this._tab_body_hldr_el.style.overflow = "";
+        this._resetTransitionStyles(el);
     }
     private _setTransition(el:HTMLElement, val:string, prop:string) {
         if (this._animation_style[val] && el)
@@ -613,6 +616,7 @@ export class AalamTabs extends LitElement {
             });
         } else {
             bpix.style.display = 'none';
+            this._resetTransitionStyles(bpix);
             if (this._transient_el) {
                 this._transient_el.style.display = 'none';
                 this._transient_el = null;
@@ -661,17 +665,19 @@ export class AalamTabs extends LitElement {
             if (this._internal_fashion == 'overlay') {
                 bix = this._tab_body_hldr_el;
             }
-            requestAnimationFrame( () => {
-                this._setTransition(bix, 'open', 'start');
-                bix.style.transition = 'none';
+            if (bix) {
                 requestAnimationFrame( () => {
-                    bix.style.transition = '';
-                    bix.style.transitionProperty = trans_defs[this._animation_style['open']]['transition'];
-                    bix.style.transitionDuration = `${this.animationDur}ms`;
-                    bix.style.transitionTimingFunction = 'ease';
-                    this._setTransition(bix, 'open', 'end');
+                    this._setTransition(bix, 'open', 'start');
+                    bix.style.transition = 'none';
+                    requestAnimationFrame( () => {
+                        bix.style.transition = '';
+                        bix.style.transitionProperty = trans_defs[this._animation_style['open']]['transition'];
+                        bix.style.transitionDuration = `${this.animationDur}ms`;
+                        bix.style.transitionTimingFunction = 'ease';
+                        this._setTransition(bix, 'open', 'end');
+                    })
                 })
-            })
+            }
         }
         this.dispatchEvent(
             new CustomEvent("show", {detail:{ix}}));
