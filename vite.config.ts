@@ -23,6 +23,7 @@ export default defineConfig({
             'dropdown':path.resolve(__dirname, "src/dropdown.ts"),
             'timetick':path.resolve(__dirname, "src/timetick.ts"),
             'navmenu':path.resolve(__dirname, "src/navmenu.ts"),
+            'navbar':path.resolve(__dirname, "src/navbar.ts"),
             'accordion': path.resolve(__dirname, 'src/accordion.ts'),
             'dtpick': path.resolve(__dirname, 'src/dtpick.ts'),
             'sgn-box': path.resolve(__dirname, 'src/suggestion-box.ts'),
