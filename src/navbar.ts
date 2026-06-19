@@ -24,9 +24,9 @@ export class AalamNavbar extends LitElement {
     change: boolean = false;
     overlayContainer: { [key: string]: HTMLElement[] } = {};
     activeClickOutsideListener: ((event: MouseEvent) => void) | null = null;
-    navbar: HTMLElement;
     anchorAttributes: Map<HTMLAnchorElement, { [key: string]: string }> = new Map();
     originalElements: NodeListOf<HTMLAnchorElement>;
+    private resizeListener = this.updateNavbar.bind(this);
 
     override connectedCallback() {
         super.connectedCallback();
@@ -43,6 +43,9 @@ export class AalamNavbar extends LitElement {
         document.addEventListener('click', this.activeClickOutsideListener);
     }
 
+    override disconnectedCallback() {
+        window.removeEventListener("resize", this.resizeListener);
+    }
     override createRenderRoot() {
         return this;
     }
@@ -101,16 +104,16 @@ export class AalamNavbar extends LitElement {
 
         this.menuElement.style.display = "none";
 
-        let temps = this.getElementsByTagName("template");
+        let temps = this.querySelectorAll("template[data-type]");
         Array.from(temps).forEach((template) => {
             if (template.getAttribute("data-type") === "back") {
-                const newContent = template.content.cloneNode(true) as DocumentFragment;
+                const newContent = (template as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment;
                 this.backElement = document.createElement("a");
-                this.backElement.appendChild(newContent.cloneNode(true));
+                this.backElement.appendChild(newContent);
             } else if (template.getAttribute("data-type") === "close") {
-                const newContent = template.content.cloneNode(true) as DocumentFragment;
+                const newContent = (template as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment;
                 this.closeElement = document.createElement("a");
-                this.closeElement.appendChild(newContent.cloneNode(true));
+                this.closeElement.appendChild(newContent);
             }
         });
         this.parentContainer[""] = this.noParentContianer;
@@ -118,7 +121,7 @@ export class AalamNavbar extends LitElement {
             this.cutoffwidth = this.getNavbarLength();
         }
 
-        window.addEventListener("resize", this.updateNavbar.bind(this));
+        window.addEventListener("resize", this.resizeListener);
         this.updateNavbar();
 
         this.menuElement.onclick = this.handleMenu.bind(this);
