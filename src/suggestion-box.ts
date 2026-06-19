@@ -287,9 +287,9 @@ export class AalamSuggestionBox extends LitElement {
 
         this.index = -1;
         this.input_el = e.target;
-        this._actual_inp_value = (this.input_el as HTMLInputElement)?.value;
+        this._actual_inp_value = (this.input_el as HTMLInputElement)?.value || "";
 
-        if ((this.input_el as HTMLInputElement).value !== "") {
+        if ((this.input_el as HTMLInputElement).value !== "" || min_char == 0) {
             this.show_nomatch = false;
         }
         const previousMatchElement = this.querySelector(".sgn-match");
@@ -297,13 +297,11 @@ export class AalamSuggestionBox extends LitElement {
             previousMatchElement.remove();
         }
         if (Array.isArray(this.list) && this.list.length > 0) {
-            if (this._actual_inp_value) {
-                if (this._actual_inp_value.length >= min_char) {
-                    this.filtered_list = this.list.filter((item) =>
-                        this._isMatching(item, this._actual_inp_value)
-                    );
-                    this.setSuggestions(this.filtered_list, false);
-                }
+            if (this._actual_inp_value.length >= min_char) {
+                this.filtered_list = this.list.filter((item) =>
+                    this._isMatching(item, this._actual_inp_value)
+                );
+                this.setSuggestions(this.filtered_list, false);
             } else {
                 this.show_empty = true;
                 if (this._actual_inp_value.length == 0)
