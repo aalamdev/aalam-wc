@@ -220,8 +220,12 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
     tabindex="-1">
     <slot name="slide-item"></slot>
 </div>
+
+${!this.noguide ? html`
 <span @click=${this.next} style="display:${this.no_next?"none":"inline-block"}"><slot name="nav-next"><span class="__nav __next">&gt;</span></slot></span>
 <span @click=${this.prev} style="display:${this.no_prev?"none":"inline-block"}"><slot name="nav-prev"><span class="__nav __prev">&lt;</span></slot></span>
+` : ''}
+
 <div part="nav-guide" style="display:${this.noguide?'none':'block'}" class="__guide" @click=${this._navGuideClickEvent}>
 <div style="display:none">
 <svg class="__def_guide" height="10px" width="10px" xmlns="http://www.w3.org/2000/svg"><circle r="4.5" cx="5" cy="5" fill="none" stroke="currentColor" /></svg>
