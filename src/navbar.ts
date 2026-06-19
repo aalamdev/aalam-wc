@@ -1,387 +1,591 @@
-import { LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import "./accordion";
-import { parseAttrVal as parseAttributes } from "./utils";
+import { LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import './accordion';
 
-@customElement("aalam-navbar")
+interface NodeType {
+    elementName: string;
+    children: NodeType[];
+}
+
+@customElement('aalam-navbar')
 export class AalamNavbar extends LitElement {
-    @property({ type: String }) attr = "";
-    @property({ type: String }) mode = "saccordion";
+    @property({ type: String }) attr = 'data-m';
+    @property({ type: String }) mode = 'saccordion';
     @property({ type: Number }) cutoffwidth = 0;
-    @property({ type: String }) togglesel = "nav-menu";
-    @property({ type: String }) canvascls = "canvas-body";
+    @property({ type: String }) togglesel = '.nav-menu';
+    @property({ type: String }) pos = 'left';
+    @property({ type: String }) canvascls = 'canvas-body';
 
-    noParentContianer: HTMLAnchorElement[] = [];
-    leftContainer: HTMLElement[] = [];
-    rightContainer: HTMLElement[] = [];
-    parentContainer: { [key: string]: HTMLAnchorElement[] } = {};
-    anchorElements: HTMLAnchorElement[];
+    no_parent_anchors: NodeType[] = [];
+    no_parent_container: HTMLElement[] = [];
+    parent_container: { [key: string]: HTMLElement[] } = {};
+    anchor_elements: HTMLElement[];
     menu: HTMLElement;
-    menuElement: HTMLAnchorElement;
-    closeElement: HTMLAnchorElement;
-    backElement: HTMLAnchorElement;
-    currentPath: HTMLAnchorElement[] = [];
+    menu_element: HTMLElement;
+    close_element: HTMLElement;
+    back_element: HTMLElement;
+    current_path: HTMLElement[] = [];
     change: boolean = false;
-    overlayContainer: { [key: string]: HTMLElement[] } = {};
-    activeClickOutsideListener: ((event: MouseEvent) => void) | null = null;
-    anchorAttributes: Map<HTMLAnchorElement, { [key: string]: string }> = new Map();
-    originalElements: NodeListOf<HTMLAnchorElement>;
-    private resizeListener = this.updateNavbar.bind(this);
+    overlay_container: { [key: string]: HTMLElement[] } = {};
+    active_click_outside_listener: ((event: MouseEvent) => void) | null = null;
+    navbar: HTMLElement;
 
-    override connectedCallback() {
-        super.connectedCallback();
-        this.activeClickOutsideListener = (event: MouseEvent) => {
-            if (this.menuElement.style.display === "block" && this.activeClickOutsideListener) {
-                document.removeEventListener("click", this.activeClickOutsideListener);
-                return;
-            }
-            const target = event.target as HTMLElement;
-            if (!this.menu.contains(target) && !this.menuElement.contains(target)) {
-                this.handleClose();
-            }
-        };
-        document.addEventListener('click', this.activeClickOutsideListener);
-    }
-
-    override disconnectedCallback() {
-        window.removeEventListener("resize", this.resizeListener);
-    }
     override createRenderRoot() {
         return this;
     }
 
+    private getAttr(el: Element, suffix: string): string {
+        return el.getAttribute(`${this.attr}-${suffix}`) || '';
+    }
     override firstUpdated() {
-        this.originalElements = this.querySelectorAll(
-            this.attr ? `[${this.attr}]` : "a"
-        ) as NodeListOf<HTMLAnchorElement>;
-        this.anchorElements = Array.from(this.originalElements).map(
-            (anchor) => anchor.cloneNode(true) as HTMLAnchorElement
-        );
+        const initializeNavbar = () => {
+            this.navbar = this as HTMLElement;
 
-        const toggle = this.querySelector(this.togglesel);
-        this.menuElement = toggle as HTMLAnchorElement;
+            const original = this.querySelectorAll(`[${this.attr}-nm]`);
+            this.anchor_elements = Array.from(original).map((anchor) => {
+                let clone: HTMLElement;
 
-        let rightOffset = 0, leftOffset = 20;
-        const svgElement = this.menuElement.querySelector('svg');
-        if (svgElement) {
-            leftOffset += svgElement.getBoundingClientRect().width;
-        }
-        for (let anchor of this.anchorElements) {
-            const attrValue = anchor.getAttribute(this.attr) || "";
-            const attributes = parseAttributes(attrValue);
-            this.anchorAttributes.set(anchor, attributes);
-            const pos = attributes.pos;
-            if (pos === 'right') {
-                const element = anchor.cloneNode(true) as HTMLButtonElement;
-                element.classList.add('mm-button');
-                element.style.position = 'fixed';
-                element.style.top = '10px';
-                document.body.appendChild(element);
-                element.style.right = `${rightOffset}px`;
-                rightOffset += element.offsetWidth;
-                document.body.removeChild(element);
-                this.rightContainer.push(element);
-            } else if (pos === 'left') {
-                const element = anchor.cloneNode(true) as HTMLButtonElement;
-                element.classList.add('mm-button');
-                element.style.position = 'fixed';
-                element.style.top = '10px';
-                document.body.appendChild(element);
-                element.style.left = `${leftOffset}px`;
-                leftOffset += element.offsetWidth;
-                document.body.removeChild(element);
-                this.leftContainer.push(element);
-            }
-            if (!attributes.pnt) {
-                if (!(anchor === this.menuElement)) this.noParentContianer.push(anchor);
-            } else {
-                if (!this.parentContainer[attributes.pnt]) {
-                    this.parentContainer[attributes.pnt] = [];
+                if (anchor.tagName.toLowerCase() === 'aalam-dropdown') {
+                    clone = document.createElement('div');
+                    const toggler = anchor.querySelector('[slot="dd-toggler"]');
+
+                    if (toggler) {
+                        clone.innerHTML = toggler.innerHTML;
+                    } else {
+                        clone.innerHTML = anchor.innerHTML;
+                    }
+
+                    Array.from(anchor.attributes).forEach((attr) => clone.setAttribute(attr.name, attr.value));
+                } else {
+                    clone = anchor.cloneNode(true) as HTMLElement;
                 }
-                this.parentContainer[attributes.pnt].push(anchor);
+
+                clone.addEventListener('click', () => {
+                    const nm = this.getAttr(anchor, 'nm');
+
+                    if (nm && this.parent_container[nm] && this.parent_container[nm].length > 0) {
+                        return;
+                    }
+
+                    const link = anchor.tagName === 'A' ? anchor : anchor.querySelector('a');
+                    if (link) {
+                        (link as HTMLElement).click();
+                    } else {
+                        (anchor as HTMLElement).click();
+                    }
+                });
+
+                const cls = this.getAttr(anchor, 'cls');
+                if (cls) {
+                    clone.className = cls;
+                }
+
+                return clone;
+            });
+
+            const length_of_input = this.anchor_elements.length;
+
+            let i = 0;
+            while (i < length_of_input) {
+                const anchor = original[i];
+                const clone = this.anchor_elements[i];
+                const attr_name = this.getAttr(anchor, 'nm');
+
+                let attr_pnt = this.getAttr(anchor, 'pnt');
+
+                if (!attr_pnt) {
+                    const parentEl = anchor.parentElement?.closest(`[${this.attr}-nm]`);
+                    if (parentEl) {
+                        attr_pnt = this.getAttr(parentEl, 'nm');
+                    }
+                }
+
+                if (!attr_pnt) {
+                    this.no_parent_anchors.push({ elementName: attr_name, children: [] });
+                    if (attr_name !== 'menu' && attr_name !== 'back') this.no_parent_container.push(clone);
+                } else {
+                    if (!this.parent_container[attr_pnt]) {
+                        this.parent_container[attr_pnt] = [];
+                    }
+                    this.parent_container[attr_pnt].push(clone);
+                }
+                i++;
             }
-        }
 
-        this.menuElement.style.display = "none";
-
-        let temps = this.querySelectorAll("template[data-type]");
-        Array.from(temps).forEach((template) => {
-            if (template.getAttribute("data-type") === "back") {
-                const newContent = (template as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment;
-                this.backElement = document.createElement("a");
-                this.backElement.appendChild(newContent);
-            } else if (template.getAttribute("data-type") === "close") {
-                const newContent = (template as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment;
-                this.closeElement = document.createElement("a");
-                this.closeElement.appendChild(newContent);
+            const toggle = document.querySelector(this.togglesel) as HTMLElement;
+            if (toggle) {
+                this.menu_element = toggle;
             }
-        });
-        this.parentContainer[""] = this.noParentContianer;
-        if (this.cutoffwidth === 0) {
-            this.cutoffwidth = this.getNavbarLength();
+
+            let temps = document.getElementsByTagName('template');
+
+            Array.from(temps).forEach((template) => {
+                if (template.getAttribute('data-type') === 'back') {
+                    const new_content = template.content.cloneNode(true) as DocumentFragment;
+                    this.back_element = document.createElement('a');
+                    this.back_element.appendChild(new_content.cloneNode(true));
+                } else if (template.getAttribute('data-type') === 'close') {
+                    const new_content = template.content.cloneNode(true) as DocumentFragment;
+                    this.close_element = document.createElement('a');
+                    this.close_element.appendChild(new_content.cloneNode(true));
+                }
+            });
+
+            if (this.back_element) this.back_element.id = 'back';
+            if (this.close_element) this.close_element.id = 'close';
+
+            this.parent_container['menu'] = this.no_parent_container;
+
+            if (this.cutoffwidth === 0) {
+                this.cutoffwidth = this.getNavbarLength();
+            }
+
+            window.addEventListener('resize', this.updateNavbar.bind(this));
+            this.updateNavbar();
+
+            if (this.menu_element) {
+                this.menu_element.onclick = (e) => {
+                    e.stopPropagation();
+                    this.handleMenu();
+                };
+            }
+            if (this.close_element) this.close_element.onclick = this.handleClose.bind(this);
+
+            this.menu = document.createElement('div');
+            this.menu.style.position = 'fixed';
+            this.menu.style.top = '0';
+            this.menu.style.height = '100vh';
+            this.menu.style.width = '320px';
+            this.menu.style.maxWidth = '85vw';
+
+            // Prevent parent scroll trap
+            this.menu.style.overflowY = 'hidden';
+            this.menu.style.overflowX = 'hidden';
+
+            this.menu.style.zIndex = '9999';
+            this.menu.style.backgroundColor = 'var(--clr-bg, #ffffff)';
+            this.menu.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
+
+            if (this.pos === 'right') this.menu.style.right = '0';
+            else this.menu.style.left = '0';
+
+            // Scroll wrapper for root menu items
+            const scrollWrapper = document.createElement('div');
+            scrollWrapper.style.height = '100%';
+            scrollWrapper.style.width = '100%';
+            scrollWrapper.style.overflowY = 'auto';
+
+            if (this.mode == 'overlay') {
+                scrollWrapper.appendChild(this.overlayNode());
+            } else if (this.mode == 'saccordion') {
+                scrollWrapper.appendChild(this.accordionCreator());
+            } else {
+                scrollWrapper.appendChild(this.accordionCreator('menu', false));
+            }
+
+            this.menu.appendChild(scrollWrapper);
+            this.menu.style.display = 'none';
+            document.body.appendChild(this.menu);
+
+            for (const key in this.overlay_container) {
+                const anchor = this.getAnchorElement(key);
+                if (anchor) {
+                    anchor.onclick = () => {
+                        if (this.current_path.length > 0) {
+                            const previous_anchor = this.current_path[this.current_path.length - 1];
+                            const nm = this.getAttr(previous_anchor, 'nm');
+
+                            if (this.overlay_container[nm]) {
+                                this.overlay_container[nm][0].style.display = 'none';
+                            }
+                        }
+                        if (this.overlay_container[key]) {
+                            // Maintained layout fix for flexbox display
+                            this.overlay_container[key][0].style.display = 'flex';
+                        }
+                        this.current_path.push(anchor);
+                    };
+                }
+            }
+
+            const elements = document.querySelectorAll('#close');
+            elements.forEach((element) => {
+                (element as HTMLElement).onclick = () => this.handleClose();
+            });
+
+            const ele = document.querySelectorAll('#back');
+            ele.forEach((element) => {
+                (element as HTMLElement).onclick = () => this.handleBack();
+            });
+
+            this.menu.classList.add(this.canvascls);
+        };
+
+        let is_initialized = false;
+
+        const attemptInit = () => {
+            if (is_initialized) return;
+            const dynamic_elements = this.querySelectorAll(`[${this.attr}-nm]`);
+
+            if (dynamic_elements.length > 0) {
+                is_initialized = true;
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        initializeNavbar();
+                    });
+                });
+            }
+        };
+
+        attemptInit();
+
+        if (!is_initialized) {
+            const observer = new MutationObserver((_mutations, obs) => {
+                attemptInit();
+                if (is_initialized) obs.disconnect();
+            });
+
+            observer.observe(this, { childList: true, subtree: true });
+
+            setTimeout(() => {
+                if (!is_initialized) {
+                    is_initialized = true;
+                    observer.disconnect();
+                    initializeNavbar();
+                }
+            }, 1500);
         }
 
-        window.addEventListener("resize", this.resizeListener);
-        this.updateNavbar();
-
-        this.menuElement.onclick = this.handleMenu.bind(this);
-        this.closeElement.onclick = this.handleClose.bind(this);
-
-        this.menu = document.createElement("div");
-        if (this.mode == "overlay") {
-            this.menu.appendChild(this.overlayNode());
-        } else if (this.mode == "saccordion") {
-            this.menu.appendChild(this.accordionCreator());
-        } else {
-            this.menu.appendChild(this.accordionCreator("", false));
+        // Wait for all web fonts to finish loading, then force a recount
+        if ('fonts' in document) {
+            document.fonts.ready.then(() => {
+                if (is_initialized) {
+                    this.refreshCutoffWidth();
+                    this.updateNavbar();
+                }
+            });
         }
-        this.menu.style.display = "none";
-        document.body.appendChild(this.menu);
-        this.menu.classList.add(this.canvascls);
     }
 
-    overlayNode(parentName: string = ""): HTMLElement {
-        const dive = document.createElement("div");
-        if (parentName == "") {
-            const div = document.createElement("div");
-            div.appendChild(this.closeElement);
+    overlayNode(parentName: string = 'menu'): HTMLElement {
+        const dive = document.createElement('div');
+        if (parentName == 'menu') {
+            const div = document.createElement('div');
+            div.style.display = 'flex';
+            div.style.justifyContent = 'flex-end';
+            div.style.padding = '15px';
+
+            if (this.close_element) {
+                const close_btn = this.close_element.cloneNode(true) as HTMLElement;
+                close_btn.onclick = () => this.handleClose();
+                div.appendChild(close_btn);
+            }
             dive.appendChild(div);
         }
-        this.parentContainer[parentName].forEach((child) => {
-            const div = document.createElement("div");
-            div.appendChild(child);
-            dive.appendChild(div);
-            const attributes = this.anchorAttributes.get(child) || {};
-            this.overlayCreator(attributes.nm);
-        });
+
+        if (this.parent_container[parentName]) {
+            this.parent_container[parentName].forEach((child: HTMLElement) => {
+                const div = document.createElement('div');
+                const nm = this.getAttr(child, 'nm');
+
+                const hasChildren = nm && this.parent_container[nm] && this.parent_container[nm].length > 0;
+                if (hasChildren) {
+                    div.className = 'acc-title';
+                }
+
+                div.appendChild(child);
+                dive.appendChild(div);
+
+                this.overlayCreator(nm);
+            });
+        }
 
         return dive;
     }
 
     overlayCreator(anchorName: string): void {
-        const children = this.parentContainer[anchorName];
+        const children = this.parent_container[anchorName];
 
-        const closeCloned = this.closeElement.cloneNode(true) as HTMLAnchorElement;
-        closeCloned.style.display = "block";
-
-        const backCloned = this.backElement.cloneNode(true) as HTMLAnchorElement;
-        if (anchorName == "") backCloned.style.display = "none";
-        else {
-            backCloned.style.display = "block";
+        const close_cloned = this.close_element?.cloneNode(true) as HTMLElement;
+        if (close_cloned) {
+            close_cloned.style.display = 'block';
+            close_cloned.onclick = () => this.handleClose();
         }
-        const anchor = this.getAnchorElement(anchorName);
-        const overlay = document.createElement("div");
+
+        const back_cloned = this.back_element?.cloneNode(true) as HTMLElement;
+        if (back_cloned) {
+            if (anchorName == 'menu') back_cloned.style.display = 'none';
+            else back_cloned.style.display = 'block';
+            back_cloned.onclick = () => this.handleBack();
+        }
+
+        const anchor_element = this.getAnchorElement(anchorName);
+        const overlay = document.createElement('div');
         if (children) {
             overlay.id = `overlay-dropdown-${anchorName}`;
-            overlay.style.position = "absolute";
-            overlay.style.top = "0";
-            overlay.style.left = "0";
-            overlay.style.width = "100%";
-            overlay.style.height = "100%";
-            overlay.style.backgroundColor = "rgba(0, 0, 0, 1)";
-            overlay.style.zIndex = "1000";
-            overlay.style.display = "flex";
-            overlay.style.flexDirection = "column";
+            overlay.classList.add('aalam-overlay-panel');
+            overlay.style.position = 'absolute';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'var(--clr-bg, #ffffff)';
+            overlay.style.zIndex = '1000';
+            overlay.style.display = 'flex';
+            overlay.style.flexDirection = 'column';
 
-            const parentName = document.createElement("h3");
-            if (anchor) parentName.textContent = anchor.innerHTML;
-            parentName.style.marginRight = "10px";
+            // Nested scroll behavior for overlays
+            overlay.style.overflowY = 'auto';
 
-            const header = document.createElement("div");
-            header.style.padding = "10px";
-            header.style.color = "#ffffff";
-            header.style.display = "flex";
-            header.style.width = "100%";
+            const parent_name_el = document.createElement('div');
+            if (anchor_element) parent_name_el.innerHTML = anchor_element.innerHTML;
+            parent_name_el.style.flex = '1';
 
-            header.appendChild(backCloned);
+            const header = document.createElement('div');
+            header.style.padding = '10px';
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+            header.style.gap = '10px';
+            header.style.width = '100%';
+            header.style.borderBottom = '1px solid rgba(128,128,128,0.2)';
+            header.style.boxSizing = 'border-box';
 
-            header.appendChild(parentName);
-            header.appendChild(closeCloned);
+            if (back_cloned) header.appendChild(back_cloned);
+            header.appendChild(parent_name_el);
+            if (close_cloned) header.appendChild(close_cloned);
             overlay.appendChild(header);
 
-            const dbox = document.createElement("div");
+            const dbox = document.createElement('div');
 
+            const anchor = this.getAnchorElement(anchorName);
             if (anchor) {
-                const attributes = this.anchorAttributes.get(anchor) || {};
-                const mod = attributes.mode || this.mode;
-                if (mod == "overlay") {
-                    dbox.appendChild(this.overlayNode(attributes.nm));
-                } else if (mod == "maccordion") {
-                    dbox.appendChild(this.accordionCreator(attributes.nm, false));
-                } else if (mod == "saccordion") {
-                    dbox.appendChild(this.accordionCreator(attributes.nm));
+                const mode = this.getAttr(anchor, 'mode') || 'saccordion';
+                const nm = this.getAttr(anchor, 'nm');
+
+                if (mode == 'overlay') {
+                    dbox.appendChild(this.overlayNode(nm));
+                } else if (mode == 'maccordion') {
+                    dbox.appendChild(this.accordionCreator(nm, false));
+                } else {
+                    dbox.appendChild(this.accordionCreator(nm));
                 }
             }
             overlay.appendChild(dbox);
-            overlay.style.display = "none";
-            this.overlayContainer[anchorName] = [overlay];
+            overlay.style.display = 'none';
+            this.overlay_container[anchorName] = [overlay];
             if (this.menu) this.menu.appendChild(overlay);
-
-            backCloned.onclick = this.handleBack.bind(this);
-            closeCloned.onclick = this.handleClose.bind(this);
-            if (anchor) anchor.onclick = this.handleClick.bind(this);
-        };
+        }
     }
 
-    accordionCreator(
-        parentName: string = "",
-        noMultiple: boolean = true
-    ): HTMLElement {
-        const saccordion = document.createElement("aalam-accordion");
-        saccordion.nomultiple = noMultiple;
-        const children = this.parentContainer[parentName];
-        if (parentName == "") {
-            const div = document.createElement("div");
-            const divp = document.createElement("div");
-            divp.className = "acc-title";
-            divp.appendChild(this.closeElement);
+    accordionCreator(parentName: string = 'menu', noMultiple: boolean = true): HTMLElement {
+        const saccordion = document.createElement('aalam-accordion');
+        (saccordion as any).nomultiple = noMultiple;
+        const children = this.parent_container[parentName];
+
+        if (parentName == 'menu') {
+            const div = document.createElement('div');
+            const divp = document.createElement('div');
+            divp.style.display = 'flex';
+            divp.style.justifyContent = 'flex-end';
+            divp.style.borderBottom = '1px solid rgba(128,128,128,0.2)';
+            divp.style.padding = '10px 15px';
+
+            if (this.close_element) {
+                const close_btn = this.close_element.cloneNode(true) as HTMLElement;
+                close_btn.onclick = () => this.handleClose();
+                divp.appendChild(close_btn);
+            }
             div.appendChild(divp);
             saccordion.appendChild(div);
         }
+
         if (children)
-            children.forEach((child) => {
-                const div = document.createElement("div");
-                const attributes = this.anchorAttributes.get(child) || {};
-                const mod = attributes.mode || "saccordion";
-                const childName = attributes.nm;
-                const divp = document.createElement("div");
-                const divc = document.createElement("div");
+            children.forEach((child: HTMLElement) => {
+                const div = document.createElement('div');
+                const mod = this.getAttr(child, 'mode') || 'saccordion';
+                const child_name = this.getAttr(child, 'nm');
 
-                divp.className = "acc-title";
-                divc.className = "acc-body";
+                const hasChildren = child_name && this.parent_container[child_name] && this.parent_container[child_name].length > 0;
 
-                divp.appendChild(child);
+                if (hasChildren) {
+                    const divp = document.createElement('div');
+                    const divc = document.createElement('div');
 
-                if (this.parentContainer[childName]) {
-                    if (mod == "saccordion") {
-                        divc.appendChild(this.accordionCreator(childName));
-                    } else if (mod == "overlay") {
-                        divc.appendChild(this.overlayNode(childName));
+                    divp.className = 'acc-title';
+                    divc.className = 'acc-body';
+
+                    divp.appendChild(child);
+
+                    if (mod == 'saccordion') {
+                        divc.appendChild(this.accordionCreator(child_name));
+                    } else if (mod == 'overlay') {
+                        divc.appendChild(this.overlayNode(child_name));
                     } else {
-                        divc.appendChild(this.accordionCreator(childName, false));
+                        divc.appendChild(this.accordionCreator(child_name, false));
                     }
+
+                    // Append title and body as SIBLINGS inside the parent 'div'
+                    div.appendChild(divp);
+                    div.appendChild(divc);
+                } else {
+                    div.appendChild(child);
                 }
 
-                div.appendChild(divp);
-                div.appendChild(divc);
                 saccordion.appendChild(div);
             });
+
         return saccordion;
     }
 
+    refreshCutoffWidth() {
+        if (this.hasAttribute('cutoffwidth') && Number(this.getAttribute('cutoffwidth')) > 0) {
+            return;
+        }
+
+        const wasCollapsed = this.change;
+
+        if (wasCollapsed) {
+            this.anchor_elements.forEach((anchor) => {
+                anchor.style.display = '';
+            });
+        }
+
+        this.cutoffwidth = this.getNavbarLength();
+
+        if (wasCollapsed) {
+            this.anchor_elements.forEach((anchor) => {
+                anchor.style.display = 'none';
+            });
+        }
+    }
+
     updateNavbar() {
+        // Recalculate required space before checking the window width
+        if (!this.change) {
+            this.refreshCutoffWidth();
+        }
+
         if (window.innerWidth < this.cutoffwidth) {
             if (!this.change) {
-                this.originalElements.forEach((anchor) => {
-                    anchor.style.display = "none";
-                });
-                this.menuElement.style.display = "flex";
-                this.rightContainer.forEach((element) => {
-                    document.body.appendChild(element);
-                });
-
-                this.leftContainer.forEach((element) => {
-                    document.body.appendChild(element);
-                });
+                if (this.navbar) this.navbar.style.display = 'none';
             }
 
-            this.menuElement.style.display = "flex";
+            if (this.menu_element) this.menu_element.style.display = 'block';
             this.change = true;
-            this.anchorElements.forEach((anchor) => {
-                anchor.style.display = "block";
+            this.anchor_elements.forEach((anchor) => {
+                anchor.style.display = '';
             });
         } else {
             if (this.change) {
                 this.handleClose();
                 this.change = false;
-                if (!this.change) {
-                    this.originalElements.forEach((anchor) => {
-                        anchor.style.display = "";
-                    });
-                }
-                this.leftContainer.forEach(element => document.body.removeChild(element));
-                this.rightContainer.forEach(element => document.body.removeChild(element));
             }
-            this.menuElement.style.display = "none";
+            if (this.menu_element) this.menu_element.style.display = 'none';
+            if (this.navbar) this.navbar.style.display = 'block';
         }
     }
 
-    getAnchorElement(elementName: string): HTMLAnchorElement | null {
-        const anchorElement = Array.from(this.anchorElements).find(
-            (anchor) =>
-                this.anchorAttributes.get(anchor)?.nm ===
-                elementName
-        );
-        return anchorElement || null;
+    getAnchorElement(elementName: string): HTMLElement | null {
+        const anchor_element = Array.from(this.anchor_elements).find((anchor) => this.getAttr(anchor, 'nm') === elementName);
+        return anchor_element || null;
     }
 
-    handleMenu(event: Event) {
-        const clickedAnchor = event.currentTarget as HTMLAnchorElement;
-        clickedAnchor.style.display = "none";
-        if (this.mode == "overlay") this.menu.style.display = "block";
-        else if (this.mode == "saccordion") this.menu.style.display = "block";
-        else this.menu.style.display = "block";
-        if (this.activeClickOutsideListener) document.addEventListener('click', this.activeClickOutsideListener);
-        this.leftContainer.forEach(element => element.style.display = 'none');
-        this.rightContainer.forEach(element => element.style.display = 'none');
+    handleMenu() {
+        if (this.mode == 'overlay') this.menu.style.display = 'block';
+        else if (this.mode == 'saccordion') this.menu.style.display = 'block';
+        else this.menu.style.display = 'block';
+
+        const outside_click_listener = (e: MouseEvent) => {
+            if (this.menu && this.menu.style.display === 'block' && !this.menu.contains(e.target as Node)) {
+                this.handleClose();
+                document.removeEventListener('click', outside_click_listener);
+            }
+        };
+
+        setTimeout(() => {
+            document.addEventListener('click', outside_click_listener);
+        }, 0);
     }
 
     handleClose() {
-        this.menu.style.display = "none";
-        this.menuElement.style.display = "block";
-        const len = this.currentPath.length;
-        if (this.activeClickOutsideListener) {
-            document.removeEventListener("click", this.activeClickOutsideListener);
+        if (this.menu) this.menu.style.display = 'none';
+        if (this.menu_element) this.menu_element.style.display = 'block';
+        const len = this.current_path.length;
+        if (this.active_click_outside_listener) {
+            document.removeEventListener('click', this.active_click_outside_listener);
         }
         if (len) {
-            const anchor = this.currentPath[len - 1];
-            const attributes = this.anchorAttributes.get(anchor) || {};
-            this.overlayContainer[attributes.nm][0].style.display = "none";
+            const anchor = this.current_path[len - 1];
+            const nm = this.getAttr(anchor, 'nm');
+            if (this.overlay_container[nm]) {
+                this.overlay_container[nm][0].style.display = 'none';
+            }
         }
-        this.currentPath = [];
-        this.leftContainer.forEach(element => element.style.display = 'block');
-        this.rightContainer.forEach(element => element.style.display = 'block');
+        this.current_path = [];
     }
 
     handleBack() {
-        const currentAnchor = this.currentPath[this.currentPath.length - 1];
-        const currentAnchorName = (this.anchorAttributes.get(currentAnchor) || {}).nm;
-        this.overlayContainer[currentAnchorName][0].style.display = "none";
-        this.currentPath.pop();
+        if (this.current_path.length === 0) return;
 
-        const cAnchor = this.currentPath[this.currentPath.length - 1];
-        if (cAnchor) {
-            const cAnchorName = (this.anchorAttributes.get(cAnchor) || {}).nm;
-            this.overlayContainer[cAnchorName][0].style.display = "block";
+        const current_anchor = this.current_path[this.current_path.length - 1];
+        const current_anchor_name = this.getAttr(current_anchor, 'nm');
+
+        if (this.overlay_container[current_anchor_name]) {
+            this.overlay_container[current_anchor_name][0].style.display = 'none';
+        }
+
+        this.current_path.pop();
+
+        if (this.current_path.length > 0) {
+            const c_anchor = this.current_path[this.current_path.length - 1];
+            const c_anchor_name = this.getAttr(c_anchor, 'nm');
+
+            if (this.overlay_container[c_anchor_name]) {
+                this.overlay_container[c_anchor_name][0].style.display = 'flex';
+            }
         }
     }
 
+    // Accurate Width Calculation with Flex Gaps and Margins
     getNavbarLength(): number {
         let len = 0;
-        this.noParentContianer.forEach((anchor) => {
-            document.body.appendChild(anchor);
-            len = len + anchor.offsetWidth;
-            document.body.removeChild(anchor);
-        });
-        return len;
-    }
+        let top_level_count = 0;
+        const original = this.querySelectorAll(`[${this.attr}-nm]`);
+        const length_of_input = original.length;
 
-    handleClick(event: Event) {
-        const anchor = event.currentTarget as HTMLAnchorElement;
-        if (this.currentPath.length > 0) {
-            const previousAnchor = this.currentPath[this.currentPath.length - 1];
+        let i = 0;
+        while (i < length_of_input) {
+            const anchor = original[i] as HTMLElement;
+            const attr_name = this.getAttr(anchor, 'nm');
 
-            const attributes = this.anchorAttributes.get(previousAnchor) || {};
-            this.overlayContainer[attributes.nm][0].style.display = "none";
+            let attr_pnt = this.getAttr(anchor, 'pnt');
+            if (!attr_pnt) {
+                const parentEl = anchor.parentElement?.closest(`[${this.attr}-nm]`);
+                if (parentEl) attr_pnt = this.getAttr(parentEl, 'nm');
+            }
+
+            if (!attr_pnt) {
+                this.no_parent_anchors.push({ elementName: attr_name, children: [] });
+                if (attr_name !== 'menu' && attr_name !== 'back') {
+                    const style = window.getComputedStyle(anchor);
+                    const margins = (parseFloat(style.marginLeft) || 0) + (parseFloat(style.marginRight) || 0);
+
+                    len += anchor.offsetWidth + margins;
+                    top_level_count++;
+                }
+            }
+            i++;
         }
-        const anchorName = (this.anchorAttributes.get(anchor) || {}).nm;
-        this.overlayContainer[anchorName][0].style.display = "block";
-        this.currentPath.push(anchor);
+
+        const assumed_flex_gaps = top_level_count > 1 ? (top_level_count - 1) * 15 : 0;
+
+        return len + assumed_flex_gaps + 60;
     }
 }
 
 declare global {
     interface HTMLElementTagNameMap {
-        "aalam-navbar": AalamNavbar;
+        'aalam-navbar': AalamNavbar;
     }
 }
+
