@@ -74,9 +74,18 @@ class ModelCalendar {
             }
             witer.push(days);
         }
-        let dis_fr = (cls_map['disFr'] as number) || 99;
-        let dis_to = (cls_map['disTo'] as number) || 0;
-        const checkDis = (day:number) => (day > dis_fr || day < dis_to)?'item-oor':'';
+
+        let min_dt = cls_map['min_dt'] as Date | null;
+        let max_dt = cls_map['max_dt'] as Date | null;
+
+        const checkDis = (day: number) => {
+            if (!day) return '';
+            let cell_dt = new Date(this.year, this.month - 1, day, 23, 59, 59).getTime();
+
+            if (min_dt && cell_dt < min_dt.getTime()) return 'item-oor';
+            if (max_dt && new Date(this.year, this.month - 1, day, 0, 0, 0).getTime() > max_dt.getTime()) return 'item-oor';
+            return '';
+        };
 
         return html`
 ${witer.map((week:number[], ix:number) =>
@@ -384,10 +393,9 @@ export class AalamDatePicker extends LitElement {
             addClsMap(this.date2.getDate(), 'cal-selected');
             addClsMap(this.date2.getDate(), 'cal-selected-to')
         }
-        if (this._min_dt && isSameMonth(this._min_dt))
-            cls_map['disTo'] = this._min_dt.getDate();
-        if (this._max_dt && isSameMonth(this._max_dt))
-            cls_map['disFr'] = this._max_dt.getDate();
+
+        cls_map['min_dt'] = this._min_dt;
+        cls_map['max_dt'] = this._max_dt;
         return html`
 <div id="${cal.id()}"
     part="cal-title" class="cal-title ${cal.first.getDay() > 3?'wide-first-week':''}"
