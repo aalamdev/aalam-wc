@@ -369,6 +369,8 @@ export class AalamDatePicker extends LitElement {
         let cls_map:{[key:string|number]:any} = {};
         let isSameMonth = (d:Date) => cal.month == (d.getMonth() + 1) &&
                                  cal.year == d.getFullYear();
+        let isOlderMonth = (d:Date) => (cal.month < (d.getMonth() + 1) && cal.year == d.getFullYear()) ||
+                                cal.year < d.getFullYear();
         let addClsMap = (dt:number, val:string) => {
             if (!cls_map[dt])cls_map[dt] = {};
             cls_map[dt]['part'] = [cls_map[dt]['part'], val].join(" ")
@@ -384,10 +386,18 @@ export class AalamDatePicker extends LitElement {
             addClsMap(this.date2.getDate(), 'cal-selected');
             addClsMap(this.date2.getDate(), 'cal-selected-to')
         }
-        if (this._min_dt && isSameMonth(this._min_dt))
-            cls_map['disTo'] = this._min_dt.getDate();
-        if (this._max_dt && isSameMonth(this._max_dt))
-            cls_map['disFr'] = this._max_dt.getDate();
+        if (this._min_dt) {
+            if (isSameMonth(this._min_dt))
+                cls_map['disTo'] = this._min_dt.getDate();
+            else if (isOlderMonth(this._min_dt))
+                cls_map['disTo'] = 99;
+        }
+        if (this._max_dt) {
+            if (isSameMonth(this._max_dt))
+                cls_map['disFr'] = this._max_dt.getDate();
+            else if (isOlderMonth(this._max_dt))
+                cls_map['disFr'] = 0;
+        }
         return html`
 <div id="${cal.id()}"
     part="cal-title" class="cal-title ${cal.first.getDay() > 3?'wide-first-week':''}"
