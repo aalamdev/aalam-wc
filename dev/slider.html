@@ -29,6 +29,9 @@
         .guide-item[data-active-ix="0"] > rect {fill:#000;}
         .guide-item[data-active-ix="1"] > rect, .guide-item[data-active-ix="-1"] > rect {fill:#888;}
         .guide-item[data-active-ix="2"] > rect, .guide-item[data-active-ix="-2"] > rect {fill:#ccc;}
+        .__nav {position:absolute;font-weight:700;font-size:40px;color:var(--clr-txt, rgba(0,0,0,0.5));top:50%;transform:translateY(-50%);cursor:pointer;user-select:none}
+        .__nav.__prev {left: 0;margin-left:20px;}
+        .__nav.__next {right: 0;margin-right:20px;}
     </style>
   </head>
   <body>
@@ -200,6 +203,8 @@
                         <div class="position-center panel"><h1>5</h1></div>
                     </div>
                 </div>
+                <span class="__nav __next" slot="nav-next">&gt;</span>
+                <span class="__nav __prev" slot="nav-prev">&lt;</span>
                 <svg width="10" height="10" xmlns="http://www.w3.org/2000/svg" class="guide-item" slot="nav-guide-item">
                   <rect width="10" height="10" x="0" y="0" rx="10" ry="10" fill="none" stroke="currentColor"/>
                 </svg>
@@ -242,6 +247,8 @@
                         <div class="position-center panel"><h1>5</h1></div>
                     </div>
                 </div>
+                <span class="__nav __next" slot="nav-next">&gt;</span>
+                <span class="__nav __prev" slot="nav-prev">&lt;</span>
             </aalam-slider>
         </div>
         </slider-example>
@@ -281,6 +288,8 @@
                         <div class="position-center panel"><h1>5</h1></div>
                     </div>
                 </div>
+                <span class="__nav __next" slot="nav-next">&gt;</span>
+                <span class="__nav __prev" slot="nav-prev">&lt;</span>
             </aalam-slider>
         </div>
         </slider-example>
@@ -320,6 +329,8 @@
                         <div class="position-center panel"><h1>5</h1></div>
                     </div>
                 </div>
+                <span class="__nav __next" slot="nav-next">&gt;</span>
+                <span class="__nav __prev" slot="nav-prev">&lt;</span>
             </aalam-slider>
         </div>
         </slider-example>
@@ -359,6 +370,8 @@
                         <div class="position-center panel"><h1>5</h1></div>
                     </div>
                 </div>
+                <span class="__nav __next" slot="nav-next">&gt;</span>
+                <span class="__nav __prev" slot="nav-prev">&lt;</span>
             </aalam-slider>
         </div>
         </slider-example>
@@ -398,6 +411,8 @@
                         <div class="position-center panel"><h1>5</h1></div>
                     </div>
                 </div>
+                <span class="__nav __next" slot="nav-next">&gt;</span>
+                <span class="__nav __prev" slot="nav-prev">&lt;</span>
             </aalam-slider>
         </div>
         </slider-example>

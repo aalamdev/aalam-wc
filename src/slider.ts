@@ -187,9 +187,6 @@ export class AalamSliderElement extends LitElement {
 .__container {display:flex;flex-wrap:nowrap;will-change:transform;position:relative;touch-action:pan-y;}
 .__container.__trans {trasition-timing-function: ease;}
 .__container > ::slotted(*) {flex:none;box-sizing:border-box;}
-.__nav {position:absolute;font-weight:700;font-size:40px;color:var(--clr-txt, rgba(0,0,0,0.5));top:50%;transform:translateY(-50%);cursor:pointer;user-select:none}
-.__nav.__prev {left: 0;margin-left:20px;}
-.__nav.__next {right: 0;margin-right:20px;}
 .__def_guide {margin-right:12px;cursor:pointer}
 .__def_guide:last-child {margin-right:0px;}
 .__def_guide[data-active-ix="0"] > circle {fill:grey;}
@@ -227,8 +224,8 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
     tabindex="-1">
     <slot name="slide-item"></slot>
 </div>
-<span @click=${this.next} style="display:${this.no_next?"none":"inline-block"}"><slot name="nav-next"><span class="__nav __next">&gt;</span></slot></span>
-<span @click=${this.prev} style="display:${this.no_prev?"none":"inline-block"}"><slot name="nav-prev"><span class="__nav __prev">&lt;</span></slot></span>
+<span @click=${this.next} style="display:${this.no_next?"none":"inline-block"}"><slot name="nav-next"></slot></span>
+<span @click=${this.prev} style="display:${this.no_prev?"none":"inline-block"}"><slot name="nav-prev"></slot></span>
 <div part="nav-guide" style="display:${this.noguide?'none':'block'}" class="__guide" @click=${this._navGuideClickEvent}>
 <div style="display:none">
 <svg class="__def_guide" height="10px" width="10px" xmlns="http://www.w3.org/2000/svg"><circle r="4.5" cx="5" cy="5" fill="none" stroke="currentColor" /></svg>
@@ -1029,14 +1026,6 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
         if (index == this.anchorindex)
             return;
         return this._show(index, index > this.anchorindex?'L':'R')
-    }
-    /* Applies a small supplementary visual shift without touching anchorindex
-     * or re-running any boundary/gesture bookkeeping - for lightweight
-     * external nudges (e.g. hover-revealing a partially cut-off edge item)
-     * that the caller undoes later with an equal and opposite nudge(). */
-    public nudge(px:number) {
-        this.showing = true;
-        this.translatex += px;
     }
 }
 
