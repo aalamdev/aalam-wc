@@ -1,7 +1,7 @@
 {
   "name": "aalam-wc",
   "description": "aalam-wc is a Javascript library for building user interface.",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "keywords": [
     "aalam-wc",
     "aalam web components"
@@ -9,9 +9,22 @@
   "homepage": "https://www.aalam.io",
   "license": "MIT",
   "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "exports": {
+      ".": "./dist/index.js"
+  },
+  "files": [
+      "dist",
+      "README.md",
+      "LICENSE"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/aalamdev"
+    "url": "git+https://github.com/aalamdev/aalam-wc.git"
+  },
+  "bugs": {
+      "url": "https://github.com/aalamdev/aalam-wc/issues"
   },
   "scripts": {
     "dev": "vite",

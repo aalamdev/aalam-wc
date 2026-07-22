@@ -1,7 +1,7 @@
 <a aria-label="aalam logo" href="https://www.aalam.io">
  <img src="https://img.shields.io/badge/MADE%20BY%20AALAM-000000.svg?style=for-the-badge&logo=aalam&labelColor=000">
 </a>
-<a aria-label="NPM version" href="https://www.npmjs.com/package/next">
+<a aria-label="NPM version" href="https://www.npmjs.com/package/aalam-wc">
  <img alt="" src="https://img.shields.io/npm/v/aalam-wc.svg?style=for-the-badge&labelColor=000000">
 </a>
 <a aria-label="License" href="https://github.com/aalamdev/aalam-wc/blob/master/LICENSE">
@@ -36,4 +36,4 @@ npm run dev
 
 ## Documentation
 
-You can check the instructions on how to use these components [in here](doc/README.md)
+You can check the instructions on how to use these components [here](https://github.com/aalamdev/aalam-wc/blob/master/doc/README.md)
