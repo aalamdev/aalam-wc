@@ -116,6 +116,12 @@ export class AalamSliderElement extends LitElement {
     private _autoslide:{dur:number, onhover:string, timer:ReturnType<typeof setTimeout>|null} = {dur:0, onhover:'pause', timer:null};
     private _active_attr = "data-active-ix";
 
+    /* trackpad two-finger swipe / shift+wheel support */
+    private _wheel_accum_x:number = 0;
+    private _wheel_timer:ReturnType<typeof setTimeout>|null = null;
+    private _wheel_cooldown:boolean = false;
+    private _wheel_threshold:number = 50; /*px of accumulated delta before we trigger next()/prev()*/
+
     /* When nav-guide-item slot is not filled up by the application,
      * we use the default guide elements store in this*/
     private _guide_els:Array<HTMLElement> = [];
@@ -216,6 +222,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
     @mouseout=${(this._autoslide['dur'] && this._autoslide['onhover'] == 'pause' && !this._mouse_event_data)?this._startTimer:null}
     @touchstart=${this._touchStartEvent}
     @mousedown=${this._touchStartEvent}
+    @wheel=${this._wheelEvent}
     @transitionend=${this._animationEndEvent}
     tabindex="-1">
     <slot name="slide-item"></slot>
@@ -636,6 +643,65 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
         this.translatex += this._calcRightLeftIndices(
             this._coords.lt_ix, this._direction);
     }
+    @eventOptions({passive: false})
+    private _wheelEvent(event:WheelEvent) {
+        if (this._mouse_event_data)
+            return; /*a touch/mouse drag is already in progress*/
+
+        let dx = 0;
+        if (event.shiftKey) {
+            /*shift + wheel: most browsers report the vertical scroll as deltaY
+             * even while shift is held, some already flip it to deltaX - handle both*/
+            dx = event.deltaY != 0?event.deltaY:event.deltaX;
+        } else if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+            /*trackpad two-finger horizontal swipe - only treat it as ours
+             * when the horizontal component dominates, so plain vertical
+             * page-scrolling over the slider is left untouched*/
+            dx = event.deltaX;
+        }
+        if (!dx)
+            return;
+
+        event.preventDefault();
+
+        if (this._wheel_cooldown)
+            return; /*already navigating from an earlier tick of this same gesture*/
+
+        this._wheel_accum_x += dx;
+
+        if (this._wheel_timer)
+            clearTimeout(this._wheel_timer);
+        this._wheel_timer = setTimeout(() => {
+            this._wheel_accum_x = 0;
+            this._wheel_timer = null;
+        }, 150);
+
+        if (Math.abs(this._wheel_accum_x) < this._wheel_threshold)
+            return;
+
+        let dir = this._wheel_accum_x > 0?'L':'R';
+        this._wheel_accum_x = 0;
+        if (this._wheel_timer) {
+            clearTimeout(this._wheel_timer);
+            this._wheel_timer = null;
+        }
+
+        this._wheel_cooldown = true;
+        if (dir == 'L')
+            this.next();
+        else
+            this.prev();
+        /*_show()'s returned promise resolves after just 2 requestAnimationFrame
+         * ticks - long before the CSS transition (transition_dur) actually
+         * finishes moving the slide on screen. Releasing the cooldown that
+         * early lets a fast swipe/wheel burst fire next()/prev() again while
+         * the previous move is still mid-transition, which recalculates the
+         * left/right boundary indices off unsettled positions and lets the
+         * first/last slide overshoot past the container edge. So wait for the
+         * transition to actually settle before allowing the next trigger.*/
+        let cooldown_ms = ((this.transition_dur as number) || 0.3) * 1000 + 100;
+        setTimeout(() => { this._wheel_cooldown = false; }, cooldown_ms);
+    }
     private _getCenterItem(dir:string) {
         let center_x = this._getCenterX();
         let ix = this._coords.lt_ix;
@@ -963,6 +1029,14 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
         if (index == this.anchorindex)
             return;
         return this._show(index, index > this.anchorindex?'L':'R')
+    }
+    /* Applies a small supplementary visual shift without touching anchorindex
+     * or re-running any boundary/gesture bookkeeping - for lightweight
+     * external nudges (e.g. hover-revealing a partially cut-off edge item)
+     * that the caller undoes later with an equal and opposite nudge(). */
+    public nudge(px:number) {
+        this.showing = true;
+        this.translatex += px;
     }
 }
 
