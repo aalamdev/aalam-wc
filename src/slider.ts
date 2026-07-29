@@ -108,6 +108,8 @@ export class AalamSliderElement extends LitElement {
     @state()
     no_next:boolean = false;
 
+    private _click_event_listener = this._clickEvent.bind(this);
+
     private _mouse_event_data:MouseEventData|null = null;
     private _coords:ItemsCoords;
     private _animated_queue:Array<{direction:string}> = [];
@@ -115,6 +117,11 @@ export class AalamSliderElement extends LitElement {
     private _set_items:number[]|null = null;
     private _autoslide:{dur:number, onhover:string, timer:ReturnType<typeof setTimeout>|null} = {dur:0, onhover:'pause', timer:null};
     private _active_attr = "data-active-ix";
+
+    private _scroll_dir: 'V' | 'H' | null = null;
+    private _drag_start_x: number = 0;
+    private _drag_start_y: number = 0;
+    private _prevent_click: boolean = false;
 
     /* trackpad two-finger swipe / shift+wheel support */
     private _wheel_accum_x:number = 0;
@@ -180,6 +187,10 @@ export class AalamSliderElement extends LitElement {
     override connectedCallback() {
         super.connectedCallback();
         this.renderRoot.addEventListener("slotchange", (e) => {this.slotChangedEvent(e)});
+        this.addEventListener('click', this._click_event_listener, { capture: true });
+    }
+    override disconnectedCallback() {
+        this.removeEventListener('click', this._click_event_listener, {capture: true});
     }
     static override get styles() {
         return css`
@@ -234,6 +245,12 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
 </div>
 </div>
 `
+    }
+    private _clickEvent(e:Event) {
+        if (this._prevent_click) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        }
     }
     private _setupAutoSlide(val:string) {
         if (val) {
@@ -544,12 +561,25 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
             this.show(ix);
     }
     private _touchMoveEvent(event:MouseEvent|TouchEvent) {
-        if (!this._mouse_event_data) return
+        if (!this._mouse_event_data) return;
+
+        let e = (event as TouchEvent).touches ? (event as TouchEvent).touches[0] : (event as MouseEvent);
+        let clientX = e.clientX;
+
+        if (this._scroll_dir === null) {
+            let dx = Math.abs(clientX - this._drag_start_x);
+            let dy = Math.abs(e.clientY - this._drag_start_y);
+
+            if (dx > 3 || dy > 3) {
+                if (dy > dx) this._scroll_dir = 'V';
+                else this._scroll_dir = 'H';
+            }
+        }
+
+        if (this._scroll_dir !== 'H') return;
 
         let last_ix = this.slide_items.length - 1;
         let revamp_ix = null;
-        let clientX = ((event as TouchEvent).touches?
-            (event as TouchEvent).touches[0].clientX:(event as MouseEvent).clientX);
         let direction = this._mouse_event_data.prev_x > clientX?
             'L':((this._mouse_event_data.prev_x < clientX)?
                  'R':this._mouse_event_data.direction);
@@ -630,8 +660,10 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
     }
     @eventOptions({passive: true})
     private _touchStartEvent(event:MouseEvent|TouchEvent) {
-        let clientX = (event as TouchEvent).touches?
-            (event as TouchEvent).touches[0].clientX:(event as MouseEvent).clientX;
+        let e = (event as TouchEvent).touches ? (event as TouchEvent).touches[0] : (event as MouseEvent);
+        let clientX = this._drag_start_x = e.clientX;
+        this._drag_start_y = e.clientY;
+        this._scroll_dir = null;
         this._mouse_event_data = new MouseEventData(
             clientX - (this.translatex || 0), this,
             this._touchMoveEvent, this._touchEndEvent);
@@ -789,6 +821,12 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
     }
     private _touchEndEvent() {
         if (!this._mouse_event_data) return
+        if (this._scroll_dir !== null) {
+            this._prevent_click = true;
+            setTimeout(() => {
+                this._prevent_click = false;
+            }, 50);
+        }
         let last_ix = this.slide_items.length - 1;
         let tx = this.translatex;
         let dir = this._mouse_event_data.direction;
