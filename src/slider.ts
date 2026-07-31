@@ -7,9 +7,11 @@ import {getResponsiveValues, ResponsiveVal} from "./utils";
 class MouseEventData {
     prev_x:number;
     start_x:number;
-    move_handler:EventListenerOrEventListenerObject;
-    end_handler:EventListenerOrEventListenerObject;
-    moved_x:number;
+    move_handler:EventListenerOrEventListenerObject | null;
+    end_handler:EventListenerOrEventListenerObject | null;
+    init_client_x:number;
+    init_client_y:number;
+    start_ix:number;
     direction:string; /*L -> swipe towards left, R - swipe towards right*/
 
     constructor(x:number, el:HTMLElement, move_handler:Function, end_handler:Function) {
@@ -17,18 +19,18 @@ class MouseEventData {
         this.prev_x = x;
         this.move_handler = move_handler.bind(el);
         this.end_handler = end_handler.bind(el);
-        this.moved_x = 0;
         this.direction = "";
-        document.addEventListener("mouseup", this.end_handler);
-        document.addEventListener("touchend", this.end_handler);
-        document.addEventListener("mousemove", this.move_handler);
-        document.addEventListener("touchmove", this.move_handler);
+        document.addEventListener("mouseup", this.end_handler!);
+        document.addEventListener("touchend", this.end_handler!);
+        document.addEventListener("mousemove", this.move_handler!);
+        document.addEventListener("touchmove", this.move_handler!);
     }
     destroy() {
-        document.removeEventListener("mouseup", this.end_handler);
-        document.removeEventListener("touchend", this.end_handler);
-        document.removeEventListener("mousemove", this.move_handler);
-        document.removeEventListener("touchmove", this.move_handler);
+        document.removeEventListener("mouseup", this.end_handler!);
+        document.removeEventListener("touchend", this.end_handler!);
+        document.removeEventListener("mousemove", this.move_handler!);
+        document.removeEventListener("touchmove", this.move_handler!);
+        this.move_handler = this.end_handler = null;
     }
 };
 
@@ -50,7 +52,7 @@ interface ItemsCoords {
     no_next:boolean;
     no_prev:boolean;
 };
-const log = (..._args:any[]) => {}; //console.log
+const log = (..._args:any[]) => {}; // console.log
 
 @customElement('aalam-slider')
 export class AalamSliderElement extends LitElement {
@@ -201,7 +203,7 @@ export class AalamSliderElement extends LitElement {
             cont_style['transition-duration'] = `${this.transition_dur}s`;
             cont_style['transition-property'] = 'transform';
         }
-        if (this._mouse_event_data)
+        if (this._mouse_event_data?.end_handler)
             cont_style['user-select'] = 'none';
         let gap_styles = html`${this._itemgap.map(bp =>
 html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.ul != null?' and ':''} ${bp.ul != null?`(max-width:${bp.ul}px)`:''} {
@@ -213,14 +215,15 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
 <style>
     ${gap_styles}
 </style>
-<div class="__container ${this._mouse_event_data?'':'__trans'}" style="${styleMap(cont_style)}"
+<div class="__container ${(this._mouse_event_data?.end_handler)?'':'__trans'}" style="${styleMap(cont_style)}"
     @dragstart=${this._dragStartEvent}
     @mouseover=${(this._autoslide['dur'] && this._autoslide['onhover'] == 'pause')?this._stopTimer:null}
-    @mouseout=${(this._autoslide['dur'] && this._autoslide['onhover'] == 'pause' && !this._mouse_event_data)?this._startTimer:null}
+    @mouseout=${(this._autoslide['dur'] && this._autoslide['onhover'] == 'pause' && !(this._mouse_event_data?.end_handler))?this._startTimer:null}
     @touchstart=${this._touchStartEvent}
     @mousedown=${this._touchStartEvent}
     @wheel=${this._wheelEvent}
     @transitionend=${this._animationEndEvent}
+    @click=${this._clickEvent}
     tabindex="-1">
     <slot name="slide-item"></slot>
 </div>
@@ -415,7 +418,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
         let total_wd = (ir.left - pr.left) - (offset || 0)
         let center_x = this._getCenterX();
         let c_ix = show_ix;
-        if (this.center && !this._mouse_event_data) {
+        if (this.center && !(this._mouse_event_data?.end_handler)) {
             /*We dont want this to happen when the items are swiped*/
             let center_w = this._getContainerHalfWidth();
             let gap = this._getGap(); //parseInt(this._itemgap || '0px', 10);
@@ -491,11 +494,11 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
 
         let tx:number = (this.loop &&
                   prev_lt_ix != this._coords.lt_ix)?this._setupOrder(
-            direction, (!this.center || this._mouse_event_data)?
+            direction, (!this.center || (this._mouse_event_data?.end_handler))?
                         (direction == 'L'?
                          this._coords.lt_ix:this._coords.rt_ix):new_ix):0;
         if (tx)  {
-            if (this._mouse_event_data) {
+            if (this._mouse_event_data?.end_handler) {
                 this._mouse_event_data.start_x -= tx;
             }
         }
@@ -544,15 +547,22 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
             this.show(ix);
     }
     private _touchMoveEvent(event:MouseEvent|TouchEvent) {
-        if (!this._mouse_event_data) return
+        if (!(this._mouse_event_data?.end_handler)) return
 
         let last_ix = this.slide_items.length - 1;
         let revamp_ix = null;
         let clientX = ((event as TouchEvent).touches?
             (event as TouchEvent).touches[0].clientX:(event as MouseEvent).clientX);
+        let clientY = (event as TouchEvent).touches?
+            (event as TouchEvent).touches[0].clientY:(event as MouseEvent).clientY;
         let direction = this._mouse_event_data.prev_x > clientX?
             'L':((this._mouse_event_data.prev_x < clientX)?
                  'R':this._mouse_event_data.direction);
+
+        let ydiff = (clientY - this._mouse_event_data.init_client_y);
+        let xdiff = (clientX - this._mouse_event_data.init_client_x);
+        if (Math.abs(ydiff) > Math.abs(xdiff))
+            return;
 
         this.translatex = clientX - this._mouse_event_data.start_x;
         this._mouse_event_data.prev_x = clientX;
@@ -562,8 +572,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
             this._coords.lt_limit.tright,
             " ----- ", 
             this._coords.rt_limit.tleft, "(", this._coords.rt_ix, ")",
-            this._coords.rt_limit.tright, ", tx:", this.translatex,
-            ", moved x ", this._mouse_event_data.moved_x);
+            this._coords.rt_limit.tright, ", tx:", this.translatex);
 
         if (direction == 'L') { /* moving towards left */
             this._mouse_event_data.direction = 'L'
@@ -591,7 +600,7 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
         }
         if (revamp_ix != null) {
             let off = 0;
-            if (!this._mouse_event_data)
+            if (!(this._mouse_event_data?.end_handler))
                 return;
 
             if (this._mouse_event_data.direction == 'R') {
@@ -632,17 +641,33 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
     private _touchStartEvent(event:MouseEvent|TouchEvent) {
         let clientX = (event as TouchEvent).touches?
             (event as TouchEvent).touches[0].clientX:(event as MouseEvent).clientX;
+        let clientY = (event as TouchEvent).touches?
+            (event as TouchEvent).touches[0].clientY:(event as MouseEvent).clientY;
         this._mouse_event_data = new MouseEventData(
             clientX - (this.translatex || 0), this,
             this._touchMoveEvent, this._touchEndEvent);
-        this._mouse_event_data.moved_x = 0;
+        this._mouse_event_data.init_client_y = clientY;
+        this._mouse_event_data.init_client_x = clientX;
+        this._mouse_event_data.start_ix = this.anchorindex;
         this.showing = false;
         this.translatex += this._calcRightLeftIndices(
             this._coords.lt_ix, this._direction);
     }
+
+    @eventOptions({passive: false})
+    private _clickEvent(event:PointerEvent) {
+        if (!this._mouse_event_data)
+            return;
+        log(`  x: ${this._mouse_event_data.init_client_x} == ${event.clientX}, y: ${this._mouse_event_data.init_client_y} == ${event.clientY}`);
+        if (this._mouse_event_data.init_client_x != event.clientX || this._mouse_event_data.init_client_y != event.clientY) {
+            event.preventDefault();
+        }
+        this._mouse_event_data = null;
+    }
+
     @eventOptions({passive: false})
     private _wheelEvent(event:WheelEvent) {
-        if (this._mouse_event_data)
+        if (this._mouse_event_data?.end_handler)
             return; /*a touch/mouse drag is already in progress*/
 
         let dx = 0;
@@ -788,14 +813,13 @@ html`@media ${bp.ll != null?`(min-width:${bp.ll}px)`:''} ${bp.ll != null && bp.u
         }
     }
     private _touchEndEvent() {
-        if (!this._mouse_event_data) return
+        if (!(this._mouse_event_data?.end_handler)) return
         let last_ix = this.slide_items.length - 1;
         let tx = this.translatex;
         let dir = this._mouse_event_data.direction;
         let gap = this._getGap();
         this._mouse_event_data.destroy();
-        this._mouse_event_data = null;
-        log("touch end");
+        //this._mouse_event_data = null;
         if (!dir)
             return;
         if (!this.loop) {
